@@ -386,8 +386,8 @@ function start() {
       }, router)
     : http.createServer(router);
 
-  server.listen(config.port, () => {
-    console.log(`Certificate Portal listening on ${config.https.enabled ? 'https' : 'http'}://localhost:${config.port}`);
+  server.listen(config.port, config.bindHost, () => {
+    console.log(`Certificate Portal listening on ${config.https.enabled ? 'https' : 'http'}://${config.bindHost}:${config.port}`);
     console.log(`Shared folder: ${config.sharedFolderPath}`);
     console.log(`Employees loaded: ${employeeRepo.count()}`);
   });
