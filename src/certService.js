@@ -88,6 +88,9 @@ function resolveOwnedFile(nationalId, fileName) {
 
 const MIME_TYPES = {
   '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
 };
 
 function mimeTypeFor(ext) {
