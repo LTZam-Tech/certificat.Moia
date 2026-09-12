@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certificate Portal — Admin</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  .admin-wrap{max-width:860px;margin:40px auto;padding:0 20px}
+  .admin-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+  .admin-card h2{margin-top:0}
+  .admin-card .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600}
+  .msg{margin-top:10px;font-size:13.5px}
+  .msg.ok{color:var(--green-700)}
+  .msg.err{color:var(--danger)}
+  .rowbtn{background:transparent;border:1px solid var(--line-strong);color:var(--danger);border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer}
+  .rowbtn:hover{background:var(--danger-bg)}
+  .danger-btn{background:#fff;border:1px solid var(--danger);color:var(--danger);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer}
+  .danger-btn:hover{background:var(--danger-bg)}
+  .ghost-btn{background:transparent;border:1px solid var(--line-strong);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .ghost-btn:hover{background:var(--sand)}
+  .empty-note{color:var(--muted);font-size:13px;padding:14px 0}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="crest">MOIA</div>
+    <div class="titles"><span class="mname">Certificate Portal — Administration</span></div>
+    <button class="lang-toggle hidden" id="logoutBtn" style="margin-inline-start:auto">Sign out</button>
+  </div>
+</header>
+
+<div class="admin-wrap" id="loginPanel">
+  <div class="admin-card" style="max-width:380px;margin:0 auto">
+    <h2>Admin sign-in</h2>
+    <div class="field">
+      <label for="user">Username</label>
+      <div class="secure"><input id="user" type="text" autocomplete="username"></div>
+    </div>
+    <div class="field">
+      <label for="pass">Password</label>
+      <div class="secure"><input id="pass" type="password" autocomplete="current-password"></div>
+    </div>
+    <button class="btn" id="adminLoginBtn" style="width:auto;padding:10px 18px">Sign in</button>
+    <div class="msg err" id="loginMsg"></div>
+  </div>
+</div>
+
+<div class="admin-wrap hidden" id="adminPanel">
+  <div class="admin-card">
+    <div class="hd">
+      <h2>Employees</h2>
+      <div>
+        <input type="file" id="xlsxFile" accept=".xlsx" style="display:none">
+        <button class="ghost-btn" id="pickFileBtn">Import .xlsx sheet</button>
+        <button class="danger-btn" id="clearAllBtn">Remove all</button>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:13.5px">
+      Sheet must have a header row with a column containing "ID" and one containing "mobile"
+      (matches the ministry's export format — National ID + mobile number only, no names).
+      Re-importing an existing National ID updates its mobile number. Removing here only
+      deletes login records — certificate files in the shared folder are never touched.
+    </p>
+    <div class="msg" id="importMsg"></div>
+    <div style="overflow:auto;margin-top:14px">
+      <table id="empTable">
+        <thead><tr><th>National ID</th><th>Mobile</th><th>Updated</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty-note hidden" id="empEmptyNote">No employees loaded yet — import a sheet above.</div>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <div class="hd">
+      <h2>Recent audit log</h2>
+      <button class="ghost-btn" id="refreshLogBtn">Refresh</button>
+    </div>
+    <p style="color:var(--muted);font-size:13.5px">Every login attempt and certificate download, most recent first.</p>
+    <div style="overflow:auto">
+      <table id="auditTable">
+        <thead><tr><th>Time</th><th>Event</th><th>ID (last 4)</th><th>File</th><th>Source IP</th><th>Detail</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/admin.js"></script>
+</body>
+</html>

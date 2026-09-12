@@ -1,0 +1,15 @@
+{
+  "name": "moia-certificate-portal",
+  "version": "1.0.0",
+  "description": "Employee Certificate Distribution Portal - MOIA",
+  "private": true,
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "import": "node scripts/import-employees.js"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بوابة الشهادات — وزارة الشؤون الإسلامية والدعوة والإرشاد</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="crest">MOIA</div>
+    <div class="titles">
+      <span class="mname" data-ar="وزارة الشؤون الإسلامية والدعوة والإرشاد" data-en="Ministry of Islamic Affairs, Dawah and Guidance">وزارة الشؤون الإسلامية والدعوة والإرشاد</span>
+      <span class="dept" data-ar="الإدارة العامة لتقنية المعلومات" data-en="General Department of Information Technology">الإدارة العامة لتقنية المعلومات</span>
+    </div>
+    <button class="lang-toggle" id="langBtn" aria-label="Switch language">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span id="langLabel">English</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="stage wide" id="screen-landing">
+    <div class="id-bar">
+      <div class="who">
+        <div class="avatar" id="empAvatar" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="meta">
+            <span><span data-ar="رقم الهوية" data-en="National ID">رقم الهوية</span> <span id="empIdMasked">•••• ••••</span></span>
+          </div>
+        </div>
+      </div>
+      <button class="signout" id="signOutBtn" data-ar="تسجيل الخروج" data-en="Sign out">تسجيل الخروج</button>
+    </div>
+
+    <div class="section-label">
+      <h2 data-ar="شهاداتك" data-en="Your certificates">شهاداتك</h2>
+      <span class="count"></span>
+    </div>
+
+    <div class="cert-list" id="certList"></div>
+
+    <div class="stream-note" id="streamNote"></div>
+
+    <div class="empty hidden" id="emptyState">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <h3></h3>
+      <p></p>
+    </div>
+  </section>
+</main>
+
+<footer class="sig">
+  <div class="sig-inner">
+    <div class="lock">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.7"/></svg>
+      <span data-ar="تُقدَّم الشهادات مباشرةً من مجلد الوزارة المشترك الآمن ولا يتم تخزينها في هذه البوابة." data-en="Certificates are served directly from the ministry's secure shared folder and are not stored in this portal.">تُقدَّم الشهادات مباشرةً من مجلد الوزارة المشترك الآمن ولا يتم تخزينها في هذه البوابة.</span>
+    </div>
+    <div class="gov"><b data-ar="الإدارة العامة لتقنية المعلومات" data-en="General Department of Information Technology">الإدارة العامة لتقنية المعلومات</b> <span data-ar="· خدمة داخلية" data-en="· Internal service">· خدمة داخلية</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="verifiedToast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span data-ar="تم التحقق من الهوية" data-en="Identity verified">تم التحقق من الهوية</span>
+</div>
+
+<script src="/i18n.js"></script>
+<script src="/landing.js"></script>
+</body>
+</html>

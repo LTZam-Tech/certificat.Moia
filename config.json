@@ -1,0 +1,19 @@
+{
+  "port": 3000,
+  "https": {
+    "enabled": false,
+    "certPath": "",
+    "keyPath": ""
+  },
+  "sharedFolderPath": "./certs-demo",
+  "supportedExtensions": [".pdf"],
+  "acceptedIdPrefixes": ["1", "2"],
+  "lockout": {
+    "maxAttempts": 5,
+    "windowMinutes": 15,
+    "lockoutMinutes": 15
+  },
+  "sessionTimeoutMinutes": 15,
+  "sessionSecret": "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_BEFORE_DEPLOYMENT",
+  "dbPath": "./data/portal.db"
+}

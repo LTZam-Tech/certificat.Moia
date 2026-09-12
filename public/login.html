@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بوابة الشهادات — وزارة الشؤون الإسلامية والدعوة والإرشاد</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="crest">MOIA</div>
+    <div class="titles">
+      <span class="mname" data-ar="وزارة الشؤون الإسلامية والدعوة والإرشاد" data-en="Ministry of Islamic Affairs, Dawah and Guidance">وزارة الشؤون الإسلامية والدعوة والإرشاد</span>
+      <span class="dept" data-ar="الإدارة العامة لتقنية المعلومات" data-en="General Department of Information Technology">الإدارة العامة لتقنية المعلومات</span>
+    </div>
+    <button class="lang-toggle" id="langBtn" aria-label="Switch language">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span id="langLabel">English</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="stage" id="screen-login">
+    <div class="card">
+      <div class="card-head">
+        <span class="eyebrow"><span class="dot"></span><span data-ar="دخول الموظفين" data-en="Employee access">دخول الموظفين</span></span>
+        <h1 class="card-title" data-ar="بوابة الشهادات" data-en="Certificate Portal">بوابة الشهادات</h1>
+        <p class="lede" data-ar="أدخل رقم الهوية الوطنية ورقم الجوال المسجّل لعرض شهاداتك التدريبية وتنزيلها." data-en="Enter your National ID and registered mobile number to view and download your training certificates.">أدخل رقم الهوية الوطنية ورقم الجوال المسجّل لعرض شهاداتك التدريبية وتنزيلها.</p>
+      </div>
+      <div class="card-body">
+        <div class="alert" id="loginAlert" role="alert">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#9A3324" stroke-width="1.8"/><path d="M12 7.5v5.5M12 16.2v.2" stroke="#9A3324" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span data-ar="تعذّر التحقق من البيانات. تأكد من رقم الهوية الوطنية ورقم الجوال المسجّل ثم حاول مرة أخرى." data-en="We couldn't verify these details. Check your National ID and registered mobile number, then try again.">تعذّر التحقق من البيانات. تأكد من رقم الهوية الوطنية ورقم الجوال المسجّل ثم حاول مرة أخرى.</span>
+        </div>
+
+        <div class="field" id="f-id">
+          <label for="nid" data-ar="رقم الهوية الوطنية" data-en="National ID">رقم الهوية الوطنية</label>
+          <div class="secure" id="secureId">
+            <input id="nid" type="password" inputmode="numeric" autocomplete="off" maxlength="10" data-ar-ph="رقم الهوية (10 أرقام)" data-en-ph="10-digit ID number" placeholder="رقم الهوية (10 أرقام)">
+            <button type="button" class="eye" id="idEye" onclick="toggleId()" aria-label="Show or hide ID" title="Show / hide">
+              <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg>
+              <svg class="eye-closed hidden" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 5.2A9.9 9.9 0 0 1 12 5c6.4 0 10 7 10 7a15.9 15.9 0 0 1-3.1 3.9M6.2 7.3A15.8 15.8 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 3.2-.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="hint" data-ar="الرقم الصادر لك من الوزارة." data-en="The ID issued to you by the ministry.">الرقم الصادر لك من الوزارة.</div>
+        </div>
+
+        <div class="field" id="f-mob">
+          <label for="mob" data-ar="رقم الجوال" data-en="Mobile number">رقم الجوال</label>
+          <div class="phone" dir="ltr">
+            <span class="cc">+966</span>
+            <input id="mob" inputmode="numeric" autocomplete="off" maxlength="9" placeholder="5X XXX XXXX">
+          </div>
+          <div class="hint" data-ar="الرقم المسجّل على هويتك." data-en="The number registered against your ID.">الرقم المسجّل على هويتك.</div>
+        </div>
+
+        <button class="btn" id="verifyBtn" type="button">
+          <span class="spin"></span>
+          <span class="btn-label" data-ar="تحقّق ومتابعة" data-en="Verify and continue">تحقّق ومتابعة</span>
+        </button>
+
+        <div class="secnote">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-ar="نتحقق من هويتك بمطابقة رقم الهوية الوطنية مع رقم الجوال المسجّل. بعد عدة محاولات فاشلة، يُقفل الدخول مؤقتًا." data-en="We confirm it's you by matching your National ID with your registered mobile number. After several failed attempts, access is locked for a short time.">نتحقق من هويتك بمطابقة رقم الهوية الوطنية مع رقم الجوال المسجّل. بعد عدة محاولات فاشلة، يُقفل الدخول مؤقتًا.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="sig">
+  <div class="sig-inner">
+    <div class="lock">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.7"/></svg>
+      <span data-ar="تُقدَّم الشهادات مباشرةً من مجلد الوزارة المشترك الآمن ولا يتم تخزينها في هذه البوابة." data-en="Certificates are served directly from the ministry's secure shared folder and are not stored in this portal.">تُقدَّم الشهادات مباشرةً من مجلد الوزارة المشترك الآمن ولا يتم تخزينها في هذه البوابة.</span>
+    </div>
+    <div class="gov"><b data-ar="الإدارة العامة لتقنية المعلومات" data-en="General Department of Information Technology">الإدارة العامة لتقنية المعلومات</b> <span data-ar="· خدمة داخلية" data-en="· Internal service">· خدمة داخلية</span></div>
+  </div>
+</footer>
+
+<script src="/i18n.js"></script>
+<script src="/login.js"></script>
+</body>
+</html>
