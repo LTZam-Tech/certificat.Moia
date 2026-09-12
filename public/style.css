@@ -19,11 +19,24 @@
 html,body{margin:0}
 body{
   font-family:"Segoe UI","Tahoma","IBM Plex Sans Arabic",system-ui,-apple-system,Roboto,sans-serif;
-  color:var(--ink);background:var(--sand);
+  color:var(--ink);
   -webkit-font-smoothing:antialiased;line-height:1.55;
   min-height:100vh;display:flex;flex-direction:column;
+  background-color:var(--sand);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23C6A15B' stroke-width='1'%3E%3Cpath d='M60 6 L114 60 L60 114 L6 60 Z' opacity='.3'/%3E%3Cpath d='M60 30 L90 60 L60 90 L30 60 Z' opacity='.4'/%3E%3Ccircle cx='60' cy='60' r='3' opacity='.35'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:120px 120px;
+  background-attachment:fixed;
+  animation:bgDrift 90s linear infinite;
 }
 html[dir="rtl"] body{line-height:1.7}
+@keyframes bgDrift{
+  from{background-position:0 0}
+  to{background-position:240px 240px}
+}
+@media (prefers-reduced-motion: reduce){
+  body{animation:none}
+}
 .serif{font-family:Georgia,"Traditional Arabic",serif}
 
 header.masthead{background:linear-gradient(180deg,var(--green-700),var(--green-900));color:#fff}
