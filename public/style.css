@@ -29,7 +29,12 @@ html[dir="rtl"] body{line-height:1.7}
 header.masthead{background:linear-gradient(180deg,var(--green-700),var(--green-900));color:#fff}
 .masthead-inner{max-width:1040px;margin:0 auto;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
 .crest{flex:none;height:42px;display:flex;align-items:center;max-width:38vw}
-.crest img{height:100%;width:auto;max-width:100%;display:block}
+.crest img{height:100%;width:auto;max-width:100%;display:block;
+  filter:
+    drop-shadow(0 0 4px rgba(255,255,255,.85))
+    drop-shadow(0 0 10px rgba(255,255,255,.6))
+    drop-shadow(0 0 18px rgba(255,255,255,.35));
+}
 .titles{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
 .titles .mname{font-size:17px;font-weight:700;color:#fff;line-height:1.25}
 .titles .dept{font-size:12px;font-weight:500;color:#BFD8C7;margin-top:2px;display:flex;align-items:center;gap:8px}
