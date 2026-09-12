@@ -34,11 +34,11 @@ node --version   # confirm 22.x or later — node:sqlite needs 22.5+
 
 ## 3. [local] Package and upload the app
 
-From `D:\Claude\certificate-portal`, exclude local test artifacts
+From your local project folder, exclude local test artifacts
 (`data/`, `certs-demo/`) — you'll seed fresh directly on the server instead.
 
 ```bash
-cd "D:/Claude/certificate-portal"
+cd /path/to/certificate-portal
 rsync -avz --exclude 'data' --exclude 'certs-demo' --exclude '.git' \
   ./ youruser@209.38.213.186:/opt/certificate-portal/
 ```
@@ -47,7 +47,7 @@ If `rsync` isn't available in your shell, `scp` works too (slightly
 clunkier, no exclude support — clean the two folders locally first):
 
 ```bash
-scp -r "D:/Claude/certificate-portal" youruser@209.38.213.186:/opt/
+scp -r /path/to/certificate-portal youruser@209.38.213.186:/opt/
 ```
 
 ## 4. [server] Configure the app
