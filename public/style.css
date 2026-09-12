@@ -31,9 +31,12 @@ header.masthead{background:linear-gradient(180deg,var(--green-700),var(--green-9
 .crest{flex:none;height:42px;display:flex;align-items:center;max-width:38vw}
 .crest img{height:100%;width:auto;max-width:100%;display:block;
   filter:
-    drop-shadow(0 0 4px rgba(255,255,255,.85))
-    drop-shadow(0 0 10px rgba(255,255,255,.6))
-    drop-shadow(0 0 18px rgba(255,255,255,.35));
+    drop-shadow(0 0 1px #fff)
+    drop-shadow(0 0 2px #fff)
+    drop-shadow(0 0 4px rgba(255,255,255,.95))
+    drop-shadow(0 0 8px rgba(255,255,255,.9))
+    drop-shadow(0 0 14px rgba(255,255,255,.75))
+    drop-shadow(0 0 22px rgba(255,255,255,.5));
 }
 .titles{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
 .titles .mname{font-size:17px;font-weight:700;color:#fff;line-height:1.25}
