@@ -106,7 +106,7 @@ async function loadMe() {
     return;
   }
   CURRENT_ME = await resp.json();
-  document.getElementById('empIdMasked').textContent = `•••• ${CURRENT_ME.last4}`;
+  document.getElementById('empIdLast4').textContent = CURRENT_ME.last4;
 }
 
 async function loadCerts() {
