@@ -23,6 +23,7 @@ const STATIC_TYPES = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
 };
 
 function sourceIp(req) {
@@ -351,7 +352,7 @@ async function router(req, res) {
     if (method === 'GET' && p === '/') return void serveStatic(req, res, '/login.html');
     if (method === 'GET' && p === '/landing') return void serveStatic(req, res, '/landing.html');
     if (method === 'GET' && p === '/admin') return void serveStatic(req, res, '/admin.html');
-    if (method === 'GET' && ['/style.css', '/i18n.js', '/login.js', '/landing.js', '/admin.js'].includes(p)) {
+    if (method === 'GET' && ['/style.css', '/i18n.js', '/login.js', '/landing.js', '/admin.js', '/emblem.png'].includes(p)) {
       return void serveStatic(req, res, p);
     }
 
