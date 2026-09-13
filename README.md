@@ -131,7 +131,7 @@ node scripts/import-employees.js path\to\employees.xlsx
 node scripts/import-employees.js path\to\employees.csv   # header: national_id,mobile
 ```
 
-Invalid rows (bad ID checksum, bad mobile format) are skipped and
+Invalid rows (bad ID format, bad mobile format) are skipped and
 reported, not silently dropped, whichever way you import.
 
 ## Deploying on Windows Server 2022 Standard (4 vCPU / 8 GB / 100 GB)
@@ -208,16 +208,22 @@ architecture change.
   (Node's built-in `crypto`, no external dependency) with a random
   per-account salt. Admin login is throttled the same as employee login.
 
+## National ID validation (decision record)
+
+The BRD's Appendix A specified a Luhn-style checksum for National ID
+validation, which was implemented initially. During go-live testing,
+multiple sets of real employee IDs consistently failed that checksum,
+indicating the documented algorithm doesn't match the IDs actually in use.
+Per the ministry's explicit direction, the checksum was **removed** —
+National ID validation is now **format-only**: exactly 10 digits, first
+digit must be an accepted prefix (see `acceptedIdPrefixes` below). This is
+implemented in `src/validators.js` (`isValidSaudiId`) and mirrored
+client-side in `public/login.js`.
+
 ## Known open items to confirm with the ministry before go-live
 
-1. **The 3 National IDs in the sample `Certificate.xlsx`
-   (`1022334455`, `1122334455`, `1911334455`) all fail the Appendix A
-   checksum** and are correctly rejected by the importer. Confirm with the
-   ministry whether that file was placeholder/test data or is meant to
-   contain real employee IDs — if real, something upstream of this app is
-   producing IDs that don't pass the ministry's own validation rule.
-2. Whether `acceptedIdPrefixes` should include `"2"` (Iqama/resident) or
+1. Whether `acceptedIdPrefixes` should include `"2"` (Iqama/resident) or
    `["1"]` only.
-3. Confirm `supportedExtensions` — currently defaults to PDF only.
-4. Decide whether TLS should terminate at IIS (recommended, see above) or
+2. Confirm `supportedExtensions` — currently defaults to PDF only.
+3. Decide whether TLS should terminate at IIS (recommended, see above) or
    directly in Node via `config.json`'s `https` block.

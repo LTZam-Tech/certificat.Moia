@@ -3,26 +3,15 @@
 const config = require('./config');
 
 /**
- * Saudi National ID / Iqama checksum validation (Appendix A of the BRD).
- * Luhn-style check: double every digit at an even index (0-based, i.e. 1st,
- * 3rd, 5th... position), sum digits of the result, total must be a
- * multiple of 10.
+ * Saudi National ID / Iqama format validation: exactly 10 digits, first
+ * digit must be an accepted prefix (1 = national, 2 = resident/Iqama,
+ * per config.acceptedIdPrefixes). No checksum -- format only.
  */
 function isValidSaudiId(rawId) {
   const id = String(rawId || '').replace(/\D/g, '');
   if (id.length !== 10) return false;
   if (!config.acceptedIdPrefixes.includes(id[0])) return false;
-
-  let sum = 0;
-  for (let i = 0; i < 10; i++) {
-    let d = Number(id[i]);
-    if (i % 2 === 0) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-  }
-  return sum % 10 === 0;
+  return true;
 }
 
 /** Strip everything but digits (used for both ID and mobile raw entry). */

@@ -6,21 +6,12 @@ function digitsOnly(v) {
   return (v || '').replace(/\D/g, '');
 }
 
-// Same checksum as the server (Appendix A) -- client-side check is a UX
-// convenience only; the server is the sole authority.
+// Same format rule as the server -- client-side check is a UX convenience
+// only; the server is the sole authority.
 function isValidSaudiIdClient(id) {
   if (!/^\d{10}$/.test(id)) return false;
   if (id[0] !== '1' && id[0] !== '2') return false;
-  let sum = 0;
-  for (let i = 0; i < 10; i++) {
-    let d = Number(id[i]);
-    if (i % 2 === 0) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-  }
-  return sum % 10 === 0;
+  return true;
 }
 
 function isValidMobileClient(v) {
