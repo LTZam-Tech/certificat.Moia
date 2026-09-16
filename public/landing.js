@@ -20,26 +20,32 @@ function formatShortDate(iso) {
 
 function switchTab(name) {
   ACTIVE_TAB = name;
-  document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
-  document.getElementById(`tab${name.charAt(0).toUpperCase()}${name.slice(1)}`).classList.add('active');
+  document.querySelectorAll('.side-link').forEach((b) => b.classList.remove('on'));
+  document.getElementById(`tab${name.charAt(0).toUpperCase()}${name.slice(1)}`).classList.add('on');
   ['train', 'mine', 'certs'].forEach((n) => {
     document.getElementById(`panel-${n}`).classList.toggle('hidden', n !== name);
   });
+  document.getElementById('trainSearch').style.display = name === 'train' ? '' : 'none';
 }
 
 function renderTrainings() {
   const list = document.getElementById('trainList');
   const empty = document.getElementById('trainEmpty');
-  if (!CURRENT_TRAININGS.length) {
+  const lang = getLang();
+  const q = (document.getElementById('trainSearch').value || '').trim().toLowerCase();
+  const visible = q
+    ? CURRENT_TRAININGS.filter((tr) => `${tr.title_ar} ${tr.title_en}`.toLowerCase().includes(q))
+    : CURRENT_TRAININGS;
+
+  if (!visible.length) {
     list.classList.add('hidden');
     empty.classList.remove('hidden');
     return;
   }
   list.classList.remove('hidden');
   empty.classList.add('hidden');
-  const lang = getLang();
 
-  list.innerHTML = CURRENT_TRAININGS.map((tr) => {
+  list.innerHTML = visible.map((tr) => {
     const already = CURRENT_MINE.some((m) => m.training_id === tr.id && m.status === 'registered');
     return `
     <div class="tcard">
@@ -299,6 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('tabTrain').addEventListener('click', () => switchTab('train'));
   document.getElementById('tabMine').addEventListener('click', () => switchTab('mine'));
   document.getElementById('tabCerts').addEventListener('click', () => switchTab('certs'));
+  document.getElementById('trainSearch').addEventListener('input', renderTrainings);
   showVerifiedToastIfJustLoggedIn();
   await loadMe();
   await loadCerts();

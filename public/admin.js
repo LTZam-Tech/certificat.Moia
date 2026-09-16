@@ -9,20 +9,19 @@ async function api(path, opts) {
 
 function showLoggedOut() {
   el('loginPanel').classList.remove('hidden');
-  el('adminPanel').classList.add('hidden');
-  el('logoutBtn').classList.add('hidden');
+  el('adminApp').classList.add('hidden');
 }
 
-function showLoggedIn() {
+function showLoggedIn(username) {
   el('loginPanel').classList.add('hidden');
-  el('adminPanel').classList.remove('hidden');
-  el('logoutBtn').classList.remove('hidden');
+  el('adminApp').classList.remove('hidden');
+  el('adminUserLabel').textContent = username || 'Admin';
 }
 
 async function checkAuth() {
   const resp = await api('/admin/api/audit');
   if (resp.ok) {
-    showLoggedIn();
+    showLoggedIn(el('user').value || 'Admin');
     renderAudit(await resp.json());
     loadEmployees();
     loadTrainings();
@@ -49,6 +48,34 @@ async function login() {
   } else {
     msg.textContent = 'Invalid username or password.';
   }
+}
+
+// ---------------------------------------------------------------------
+// Sidebar navigation
+// ---------------------------------------------------------------------
+
+function showSection(name) {
+  ['employees', 'trainings', 'audit'].forEach((n) => {
+    el(`scr-${n}`).classList.toggle('hidden', n !== name);
+    el(`nav${n.charAt(0).toUpperCase()}${n.slice(1)}`).classList.toggle('on', n === name);
+  });
+}
+
+// ---------------------------------------------------------------------
+// Sign-in screen policy ticker (BRD 13.6)
+// ---------------------------------------------------------------------
+
+const POLICY_STATEMENTS = [
+  'The government entity is committed to the continuous development and training of its human resources, and to nurturing outstanding competencies and talents.',
+  "The government entity shall seek to provide its human resources with suitable development and training opportunities to build and strengthen their knowledge, skills, and abilities in their current roles, and to prepare them for future roles that support the government entity's strategy and objectives.",
+  'The government entity shall ensure its employees have full dedicated time for all forms of development and training in programs whose nature requires it.',
+  "Job development and training activities are directly linked to the government entity's strategic objectives.",
+];
+
+function renderLoginTicker() {
+  const track = el('loginTicker');
+  const items = POLICY_STATEMENTS.map((s) => `<span class="login-ticker-item">${s}</span><span class="ticker-palm-wrap"><span class="ticker-palm-dot"></span></span>`).join('');
+  track.innerHTML = items + items; // duplicated once for a seamless loop
 }
 
 async function logout() {
@@ -291,5 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
   el('markAllAttendedBtn').addEventListener('click', markAllAttended);
   el('saveOutcomesBtn').addEventListener('click', saveOutcomes);
 
+  el('navEmployees').addEventListener('click', () => showSection('employees'));
+  el('navTrainings').addEventListener('click', () => showSection('trainings'));
+  el('navAudit').addEventListener('click', () => showSection('audit'));
+
+  renderLoginTicker();
   checkAuth();
 });

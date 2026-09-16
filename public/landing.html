@@ -8,43 +8,50 @@
 </head>
 <body>
 
-<header class="masthead">
-  <div class="masthead-inner">
-    <div class="crest"><img src="/emblem.svg" alt="MOIA"></div>
-    <div class="titles">
-      <span class="mname" data-ar="وزارة الشؤون الإسلامية والدعوة والإرشاد" data-en="Ministry of Islamic Affairs, Dawah and Guidance">وزارة الشؤون الإسلامية والدعوة والإرشاد</span>
-      <span class="dept" data-ar="الإدارة العامة لتقنية المعلومات" data-en="General Department of Information Technology">الإدارة العامة لتقنية المعلومات</span>
-    </div>
-    <button class="lang-toggle" id="langBtn" aria-label="Switch language">
+<header class="masthead compact-header">
+  <div class="compact-brand"><span id="pageTitle" data-ar="بوابة التدريب والشهادات" data-en="Training &amp; Certificate Portal">بوابة التدريب والشهادات</span></div>
+  <input class="compact-search" type="search" id="trainSearch" data-ar-ph="ابحث في التدريبات" data-en-ph="Search trainings" aria-label="Search" placeholder="ابحث في التدريبات">
+  <div class="compact-tools">
+    <button class="compact-tool" type="button" id="langBtn" aria-label="Switch language">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
       <span id="langLabel">English</span>
     </button>
   </div>
 </header>
 
-<main>
-  <section class="stage wide" id="screen-landing">
-    <div class="id-bar">
-      <div class="who">
-        <div class="avatar" id="empAvatar" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <div class="meta">
-            <span><span data-ar="رقم الهوية" data-en="National ID">رقم الهوية</span> <span class="masked-id"><span class="dots">••••</span><span id="empIdLast4">••••</span></span></span>
-          </div>
-        </div>
+<div class="app-shell" id="empShell">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><img src="/emblem.svg" alt="MOIA"></div>
+    <nav class="sidebar-nav">
+      <button class="side-link on" id="tabTrain">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span data-ar="التدريبات المتاحة" data-en="Available Trainings">التدريبات المتاحة</span>
+      </button>
+      <button class="side-link" id="tabMine">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 14.5l1.8 1.8L15 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-ar="تدريباتي" data-en="My Trainings">تدريباتي</span>
+      </button>
+      <button class="side-link" id="tabCerts">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.7"/><path d="M9 13.5L7.5 21l4.5-2.4 4.5 2.4-1.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span data-ar="شهاداتي" data-en="My Certificates">شهاداتي</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="profile-chip">
+        <span class="profile-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="masked-id" style="color:#fff"><span class="dots">••••</span><span id="empIdLast4">••••</span></span>
       </div>
-      <button class="signout" id="signOutBtn" data-ar="تسجيل الخروج" data-en="Sign out">تسجيل الخروج</button>
+      <button class="side-signout" id="signOutBtn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 00-2 2v12a2 2 0 002 2h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-ar="تسجيل الخروج" data-en="Sign out">تسجيل الخروج</span>
+      </button>
     </div>
+  </aside>
 
-    <div class="tabbar" role="tablist">
-      <button class="tab active" id="tabTrain" data-ar="التدريبات المتاحة" data-en="Available Trainings">التدريبات المتاحة</button>
-      <button class="tab" id="tabMine" data-ar="تدريباتي" data-en="My Trainings">تدريباتي</button>
-      <button class="tab" id="tabCerts" data-ar="شهاداتي" data-en="My Certificates">شهاداتي</button>
-    </div>
+  <main class="content-area">
 
     <section id="panel-train">
+      <div class="section-label"><h2 data-ar="التدريبات المتاحة" data-en="Available Trainings">التدريبات المتاحة</h2></div>
       <div class="tgrid" id="trainList"></div>
       <div class="empty hidden" id="trainEmpty">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
@@ -54,7 +61,8 @@
     </section>
 
     <section id="panel-mine" class="hidden">
-      <div class="mine-list" id="mineList"></div>
+      <div class="section-label"><h2 data-ar="تدريباتي" data-en="My Trainings">تدريباتي</h2></div>
+      <div id="mineList"></div>
       <div class="empty hidden" id="mineEmpty">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg></div>
         <h3 data-ar="لم تسجّل في أي تدريب بعد" data-en="You haven't registered for any training yet">لم تسجّل في أي تدريب بعد</h3>
@@ -78,10 +86,10 @@
         <p></p>
       </div>
     </section>
-  </section>
-</main>
+  </main>
+</div>
 
-<footer class="sig">
+<footer class="sig admin-footer">
   <div class="sig-inner">
     <div class="lock">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.7"/></svg>
