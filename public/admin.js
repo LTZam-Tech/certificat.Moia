@@ -25,6 +25,7 @@ async function checkAuth() {
     showLoggedIn();
     renderAudit(await resp.json());
     loadEmployees();
+    loadTrainings();
   } else {
     showLoggedOut();
   }
@@ -120,6 +121,144 @@ async function importXlsx(file) {
   }
 }
 
+// ---------------------------------------------------------------------
+// Trainings
+// ---------------------------------------------------------------------
+
+function statusBadge(status) {
+  const label = { open: 'Open', closed: 'Closed', conducted: 'Conducted', cancelled: 'Cancelled' }[status] || status;
+  return `<span class="badge ${status}">${label}</span>`;
+}
+
+async function loadTrainings() {
+  const resp = await api('/admin/api/trainings');
+  if (!resp.ok) return;
+  const data = await resp.json();
+  const rows = data.trainings || [];
+  const tbody = document.querySelector('#trainingsTable tbody');
+  const emptyNote = el('trainingsEmptyNote');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    emptyNote.classList.remove('hidden');
+    return;
+  }
+  emptyNote.classList.add('hidden');
+
+  tbody.innerHTML = rows.map((tr) => `
+    <tr>
+      <td><span class="idpill">${tr.id}</span></td>
+      <td>${tr.title_en}</td>
+      <td>${tr.deadline}</td>
+      <td>${statusBadge(tr.effectiveStatus)}</td>
+      <td>${tr.registrantCount}</td>
+      <td><button class="ghost-btn" data-roster="${tr.id}">${tr.effectiveStatus === 'closed' ? 'Mark attendance' : 'View'}</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-roster]').forEach((btn) => {
+    btn.addEventListener('click', () => openRoster(btn.getAttribute('data-roster')));
+  });
+}
+
+async function saveTraining() {
+  const titleEn = el('ntTitleEn').value.trim();
+  const titleAr = el('ntTitleAr').value.trim();
+  const deadline = el('ntDeadline').value;
+  const msg = el('trainingMsg');
+  if (!titleEn || !titleAr || !deadline) {
+    msg.className = 'msg err';
+    msg.textContent = 'Title (both languages) and a deadline are required.';
+    return;
+  }
+  const resp = await api('/admin/api/trainings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ titleEn, titleAr, deadline }),
+  });
+  const data = await resp.json();
+  if (resp.ok) {
+    msg.className = 'msg ok';
+    msg.textContent = `Created ${data.training.id}.`;
+    el('ntTitleEn').value = '';
+    el('ntTitleAr').value = '';
+    el('ntDeadline').value = '';
+    loadTrainings();
+  } else {
+    msg.className = 'msg err';
+    msg.textContent = data.error || 'Could not create training.';
+  }
+}
+
+let ROSTER_TRAINING_ID = null;
+let ROSTER_OUTCOMES = {}; // nationalId -> 'attended' | 'absent'
+let ROSTER_REGISTRANTS = [];
+
+async function openRoster(trainingId) {
+  const resp = await api(`/admin/api/trainings/registrants?id=${encodeURIComponent(trainingId)}`);
+  if (!resp.ok) return;
+  const data = await resp.json();
+  ROSTER_TRAINING_ID = trainingId;
+  ROSTER_OUTCOMES = {};
+  ROSTER_REGISTRANTS = data.registrants;
+  data.registrants.forEach((r) => { if (r.outcome) ROSTER_OUTCOMES[r.national_id] = r.outcome; });
+
+  el('rosterTitle').textContent = data.training.title_en;
+  el('rosterId').textContent = trainingId;
+  el('rosterCard').classList.remove('hidden');
+  renderRoster(ROSTER_REGISTRANTS);
+  el('rosterCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderRoster(registrants) {
+  const tbody = document.querySelector('#rosterTable tbody');
+  const emptyNote = el('rosterEmptyNote');
+  if (!registrants.length) {
+    tbody.innerHTML = '';
+    emptyNote.classList.remove('hidden');
+    return;
+  }
+  emptyNote.classList.add('hidden');
+
+  tbody.innerHTML = registrants.map((r) => {
+    const outcome = ROSTER_OUTCOMES[r.national_id] || '';
+    return `
+    <tr>
+      <td>${r.national_id}</td>
+      <td>${r.mobile_e164 || ''}</td>
+      <td>${r.registered_at}</td>
+      <td><div class="seg">
+        <button class="${outcome === 'attended' ? 'a' : ''}" data-id="${r.national_id}" data-outcome="attended">Attended</button>
+        <button class="${outcome === 'absent' ? 'd' : ''}" data-id="${r.national_id}" data-outcome="absent">Absent</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('[data-outcome]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      ROSTER_OUTCOMES[btn.getAttribute('data-id')] = btn.getAttribute('data-outcome');
+      renderRoster(registrants);
+    });
+  });
+}
+
+function markAllAttended() {
+  ROSTER_REGISTRANTS.forEach((r) => { ROSTER_OUTCOMES[r.national_id] = 'attended'; });
+  renderRoster(ROSTER_REGISTRANTS);
+}
+
+async function saveOutcomes() {
+  const outcomes = Object.entries(ROSTER_OUTCOMES).map(([nationalId, outcome]) => ({ nationalId, outcome }));
+  if (!outcomes.length) return;
+  await api(`/admin/api/trainings/attendance?id=${encodeURIComponent(ROSTER_TRAINING_ID)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ outcomes }),
+  });
+  el('rosterCard').classList.add('hidden');
+  loadTrainings();
+}
+
 function renderAudit(rows) {
   const tbody = document.querySelector('#auditTable tbody');
   tbody.innerHTML = rows.map((r) => `<tr>
@@ -144,6 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const resp = await api('/admin/api/audit');
     if (resp.ok) renderAudit(await resp.json());
   });
+
+  el('newTrainingBtn').addEventListener('click', () => {
+    el('newTrainingForm').hidden = !el('newTrainingForm').hidden;
+  });
+  el('saveTrainingBtn').addEventListener('click', saveTraining);
+  el('markAllAttendedBtn').addEventListener('click', markAllAttended);
+  el('saveOutcomesBtn').addEventListener('click', saveOutcomes);
 
   checkAuth();
 });

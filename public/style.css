@@ -180,6 +180,33 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 .section-label h2{font-size:18px;margin:0}
 .count{color:var(--muted);font-size:13px}
 
+.tabbar{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{background:transparent;border:0;padding:10px 4px;margin-inline-end:18px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;position:relative;top:1px}
+.tab.active{color:var(--green-700);border-bottom:2px solid var(--green-700)}
+
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.tcard .tmeta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.tcard .idpill{background:var(--sand);border-radius:999px;padding:2px 9px;font-weight:600;font-size:11px;letter-spacing:.3px}
+.tcard .tt{font-weight:700;font-size:15.5px}
+.tcard .td{color:var(--muted);font-size:13px;flex:1}
+.tcard .btn{padding:9px 14px;font-size:13.5px}
+
+.badge{border-radius:999px;padding:3px 10px;font-weight:600;font-size:11.5px;display:inline-flex;align-items:center}
+.badge.open{background:var(--ok-bg);color:var(--green-700)}
+.badge.closed{background:#F1EEE3;color:#7A6B3F}
+.badge.reg{background:var(--ok-bg);color:var(--green-700)}
+.badge.wait{background:#FFF7E6;color:#8A6412}
+.badge.attend{background:var(--ok-bg);color:var(--green-700)}
+.badge.absent{background:var(--danger-bg);color:var(--danger)}
+
+.mine-list{display:flex;flex-direction:column;gap:10px}
+.mrow{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);flex-wrap:wrap}
+.mrow .mi{flex:1;min-width:180px}
+.mrow .mt{font-weight:700;margin-bottom:3px}
+.mrow .ms{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+.mrow .idpill{background:var(--sand);border-radius:999px;padding:2px 9px;font-weight:600;font-size:11px}
+
 .cert-list{display:flex;flex-direction:column;gap:10px}
 .cert{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .cert:nth-child(2){animation-delay:.25s}

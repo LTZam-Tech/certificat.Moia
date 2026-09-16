@@ -208,6 +208,44 @@ architecture change.
   (Node's built-in `crypto`, no external dependency) with a random
   per-account salt. Admin login is throttled the same as employee login.
 
+## Training registration & attendance (v1.2 BRD feature)
+
+Employees can browse Open trainings, self-register, and cancel their own
+registration up until its deadline. A Training Administrator creates
+trainings, views each training's registrant list, and marks every
+registrant Attended or Did Not Attend once it has been conducted. A
+certificate file tied to a training (`{ID}-{TrainingID}.ext`, e.g.
+`1012345678-TRN-2026-0001.pdf`) is only ever listed or served to an
+employee with an **Attended** outcome for that exact training — enforced
+server-side on every list and download request (`src/certService.js`,
+`src/trainingRepo.js`), never left to the UI. Legacy certificate files
+(`{ID}.ext`, `{ID}-1`, `{ID}-2`, …) are completely unaffected.
+
+Trainings and registrations are stored in the same SQLite database as
+everything else (`trainings`, `training_registrations` tables in
+`src/db.js`) — new tables are created automatically on first run after
+an update, no migration step needed.
+
+**Decision record — admin accounts are shared, not separate.** The BRD
+(Section 13.5) calls for Training Administrator accounts "entirely
+separate from employee accounts," which the existing System Administrator
+login already satisfies (it has never been reachable with an employee
+National ID/mobile). Rather than build a second, distinct admin role and
+login screen under a tight go-live deadline, the existing `/admin`
+account now also manages trainings and attendance alongside employees and
+the audit log. If the ministry later wants Training Administrators kept
+separate from whoever manages employee master data, that's a follow-up:
+add a `role` column to the `admins` table and gate each admin API route
+by role.
+
+**Not yet built** (BRD 13.6, filed as a fast-follow, not required for the
+core feature to work): the standalone full-viewport admin login screen
+with the ministry's scrolling bilingual policy banner. The admin login
+screen is currently unchanged from the existing plain form.
+
+New trainings are created and published in one step ("Save & publish") —
+the BRD's separate Draft state was skipped for the same reason.
+
 ## National ID validation (decision record)
 
 The BRD's Appendix A specified a Luhn-style checksum for National ID

@@ -38,20 +38,46 @@
       <button class="signout" id="signOutBtn" data-ar="تسجيل الخروج" data-en="Sign out">تسجيل الخروج</button>
     </div>
 
-    <div class="section-label">
-      <h2 data-ar="شهاداتك" data-en="Your certificates">شهاداتك</h2>
-      <span class="count"></span>
+    <div class="tabbar" role="tablist">
+      <button class="tab active" id="tabTrain" data-ar="التدريبات المتاحة" data-en="Available Trainings">التدريبات المتاحة</button>
+      <button class="tab" id="tabMine" data-ar="تدريباتي" data-en="My Trainings">تدريباتي</button>
+      <button class="tab" id="tabCerts" data-ar="شهاداتي" data-en="My Certificates">شهاداتي</button>
     </div>
 
-    <div class="cert-list" id="certList"></div>
+    <section id="panel-train">
+      <div class="tgrid" id="trainList"></div>
+      <div class="empty hidden" id="trainEmpty">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <h3 data-ar="لا توجد تدريبات مفتوحة حاليًا" data-en="No open trainings right now">لا توجد تدريبات مفتوحة حاليًا</h3>
+        <p></p>
+      </div>
+    </section>
 
-    <div class="stream-note" id="streamNote"></div>
+    <section id="panel-mine" class="hidden">
+      <div class="mine-list" id="mineList"></div>
+      <div class="empty hidden" id="mineEmpty">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg></div>
+        <h3 data-ar="لم تسجّل في أي تدريب بعد" data-en="You haven't registered for any training yet">لم تسجّل في أي تدريب بعد</h3>
+        <p></p>
+      </div>
+    </section>
 
-    <div class="empty hidden" id="emptyState">
-      <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
-      <h3></h3>
-      <p></p>
-    </div>
+    <section id="panel-certs" class="hidden">
+      <div class="section-label">
+        <h2 data-ar="شهاداتك" data-en="Your certificates">شهاداتك</h2>
+        <span class="count"></span>
+      </div>
+
+      <div class="cert-list" id="certList"></div>
+
+      <div class="stream-note" id="streamNote"></div>
+
+      <div class="empty hidden" id="emptyState">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+        <h3></h3>
+        <p></p>
+      </div>
+    </section>
   </section>
 </main>
 
@@ -68,6 +94,11 @@
 <div class="toast" id="verifiedToast" role="status" aria-live="polite">
   <svg viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <span data-ar="تم التحقق من الهوية" data-en="Identity verified">تم التحقق من الهوية</span>
+</div>
+
+<div class="toast" id="msgToast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5v5.5M12 16.2v.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <span id="msgToastText"></span>
 </div>
 
 <script src="/i18n.js"></script>

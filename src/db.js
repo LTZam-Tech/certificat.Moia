@@ -55,6 +55,31 @@ CREATE TABLE IF NOT EXISTS admins (
   salt          TEXT NOT NULL,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS trainings (
+  id            TEXT PRIMARY KEY,      -- TRN-YYYY-NNNN, system-generated
+  title_ar      TEXT NOT NULL,
+  title_en      TEXT NOT NULL,
+  desc_ar       TEXT,
+  desc_en       TEXT,
+  deadline      TEXT NOT NULL,         -- ISO date (yyyy-mm-dd)
+  status        TEXT NOT NULL DEFAULT 'open',  -- open | closed | conducted | cancelled
+  created_by    TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS training_registrations (
+  training_id   TEXT NOT NULL,
+  national_id   TEXT NOT NULL,
+  registered_at TEXT NOT NULL DEFAULT (datetime('now')),
+  status        TEXT NOT NULL DEFAULT 'registered', -- registered | cancelled
+  outcome       TEXT,                  -- NULL | attended | absent
+  marked_by     TEXT,
+  marked_at     TEXT,
+  PRIMARY KEY (training_id, national_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reg_national_id ON training_registrations(national_id);
 `);
 
 module.exports = db;

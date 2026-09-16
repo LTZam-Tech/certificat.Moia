@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const config = require('./config');
+const trainingRepo = require('./trainingRepo');
 
 class SharedFolderUnavailableError extends Error {}
 
@@ -14,18 +15,30 @@ function extPattern() {
   return config.supportedExtensions.map((e) => escapeRegExp(e)).join('|');
 }
 
+// A Training Unique ID always contains letters (TRN-YYYY-NNNN), while the
+// legacy multi-certificate suffix is always purely numeric -- the two never
+// collide (BRD 6.3, Appendix C).
+const TRAINING_SUFFIX = /^TRN-\d{4}-\d{4}$/i;
+
 /**
  * Builds the exact-match regex for a given employee's certificate files per
- * the BRD 6.1 naming convention: {ID}.{ext} for a single certificate, or
- * {ID}-1.{ext}, {ID}-2.{ext}, ... for multiple. Anchored on both ends so
- * "1012345678" never matches "10123456780" or "1012345678-x-1".
+ * the BRD 6.1 naming convention: {ID}.{ext} for a single certificate,
+ * {ID}-1.{ext}, {ID}-2.{ext}, ... for multiple legacy certificates, or
+ * {ID}-{TrainingID}.{ext} for a training-tied certificate (BRD 6.3).
+ * Anchored on both ends so "1012345678" never matches "10123456780" or
+ * "1012345678-x-1".
  */
 function certPatternForId(nationalId) {
   const idEsc = escapeRegExp(nationalId);
-  return new RegExp(`^${idEsc}(?:-([1-9][0-9]*))?(${extPattern()})$`, 'i');
+  return new RegExp(`^${idEsc}(?:-([1-9][0-9]*|TRN-[0-9]{4}-[0-9]{4}))?(${extPattern()})$`, 'i');
 }
 
-/** Lists this employee's certificates by scanning the shared folder. Never caches results. */
+/**
+ * Lists this employee's certificates by scanning the shared folder. Never
+ * caches results. Training-tied files ({ID}-{TrainingID}.ext) are only
+ * included if the employee has an Attended outcome for that exact training
+ * (BRD 6.3, 13.4) -- checked server-side here, not left to the UI.
+ */
 function listCertificatesForEmployee(nationalId) {
   let entries;
   try {
@@ -41,7 +54,11 @@ function listCertificatesForEmployee(nationalId) {
     if (!entry.isFile()) continue;
     const m = entry.name.match(pattern);
     if (!m) continue;
-    const index = m[1] ? Number(m[1]) : 1;
+    const suffix = m[1] || null;
+    const isTraining = suffix && TRAINING_SUFFIX.test(suffix);
+    if (isTraining && !trainingRepo.isAttended(suffix.toUpperCase(), nationalId)) continue;
+
+    const index = !suffix ? 1 : (isTraining ? null : Number(suffix));
     const ext = m[2].toLowerCase();
     let stat;
     try {
@@ -52,13 +69,14 @@ function listCertificatesForEmployee(nationalId) {
     matches.push({
       fileName: entry.name,
       index,
+      trainingId: isTraining ? suffix.toUpperCase() : null,
       ext,
       sizeBytes: stat.size,
       issuedAt: stat.mtime,
     });
   }
 
-  matches.sort((a, b) => a.index - b.index);
+  matches.sort((a, b) => (a.index || 0) - (b.index || 0));
   return matches;
 }
 
@@ -66,11 +84,18 @@ function listCertificatesForEmployee(nationalId) {
  * Server-side ownership re-verification (BRD 5.3): the requested file name
  * must match the naming pattern for the logged-in employee's own ID, and
  * must resolve to a real file physically inside the shared folder (no
- * traversal outside it).
+ * traversal outside it). A training-tied file additionally requires an
+ * Attended outcome, re-checked here on every download (BRD 13.4) -- the
+ * same defense-in-depth principle already used for legacy ownership checks.
  */
 function resolveOwnedFile(nationalId, fileName) {
   const pattern = certPatternForId(nationalId);
-  if (typeof fileName !== 'string' || !pattern.test(fileName)) return null;
+  const m = typeof fileName === 'string' ? fileName.match(pattern) : null;
+  if (!m) return null;
+  const suffix = m[1] || null;
+  if (suffix && TRAINING_SUFFIX.test(suffix) && !trainingRepo.isAttended(suffix.toUpperCase(), nationalId)) {
+    return null;
+  }
 
   const fullPath = path.resolve(config.sharedFolderPath, fileName);
   const root = path.resolve(config.sharedFolderPath) + path.sep;

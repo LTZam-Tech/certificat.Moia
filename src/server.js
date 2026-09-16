@@ -15,6 +15,7 @@ const session = require('./sessionService');
 const certService = require('./certService');
 const adminAuth = require('./adminAuth');
 const { importEmployeesXlsx } = require('./xlsxImport');
+const trainingRepo = require('./trainingRepo');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -232,6 +233,38 @@ function handleLogout(req, res) {
 }
 
 // ---------------------------------------------------------------------
+// Employee-facing training API (BRD Section 13)
+// ---------------------------------------------------------------------
+
+function handleTrainingsList(req, res) {
+  const nationalId = requireSession(req, res);
+  if (!nationalId) return;
+  sendJson(res, 200, { trainings: trainingRepo.listOpenForEmployee() });
+}
+
+function handleMyTrainings(req, res) {
+  const nationalId = requireSession(req, res);
+  if (!nationalId) return;
+  sendJson(res, 200, { trainings: trainingRepo.myTrainings(nationalId) });
+}
+
+function handleTrainingRegister(req, res, parsedUrl) {
+  const nationalId = requireSession(req, res);
+  if (!nationalId) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  const result = trainingRepo.register(id, nationalId);
+  sendJson(res, result.ok ? 200 : 400, result);
+}
+
+function handleTrainingCancel(req, res, parsedUrl) {
+  const nationalId = requireSession(req, res);
+  if (!nationalId) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  const result = trainingRepo.cancelRegistration(id, nationalId);
+  sendJson(res, result.ok ? 200 : 400, result);
+}
+
+// ---------------------------------------------------------------------
 // Admin API
 // ---------------------------------------------------------------------
 
@@ -340,6 +373,71 @@ function handleAdminAudit(req, res) {
 }
 
 // ---------------------------------------------------------------------
+// Admin training API (BRD Section 13) -- reuses the same admin account
+// system as employee-data management (Section 5.4); see README for why.
+// ---------------------------------------------------------------------
+
+function handleAdminTrainingsList(req, res) {
+  if (!requireAdmin(req, res)) return;
+  sendJson(res, 200, { trainings: trainingRepo.listAllForAdmin() });
+}
+
+async function handleAdminTrainingCreate(req, res) {
+  const username = requireAdmin(req, res);
+  if (!username) return;
+  let body;
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    return sendJson(res, 400, { error: 'bad_request' });
+  }
+  const titleAr = String(body.titleAr || '').trim();
+  const titleEn = String(body.titleEn || '').trim();
+  const deadline = String(body.deadline || '').trim();
+  if (!titleAr || !titleEn || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
+    return sendJson(res, 400, { error: 'invalid_input' });
+  }
+  const training = trainingRepo.create({
+    titleAr, titleEn,
+    descAr: body.descAr ? String(body.descAr).trim() : null,
+    descEn: body.descEn ? String(body.descEn).trim() : null,
+    deadline,
+    createdBy: username,
+  });
+  sendJson(res, 200, { training });
+}
+
+function handleAdminTrainingRegistrants(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  const training = trainingRepo.getById(id);
+  if (!training) return sendJson(res, 404, { error: 'not_found' });
+  sendJson(res, 200, { training, registrants: trainingRepo.listRegistrants(id) });
+}
+
+async function handleAdminTrainingAttendance(req, res, parsedUrl) {
+  const username = requireAdmin(req, res);
+  if (!username) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  let body;
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    return sendJson(res, 400, { error: 'bad_request' });
+  }
+  const outcomes = Array.isArray(body.outcomes) ? body.outcomes : [];
+  const result = trainingRepo.setOutcomes(id, outcomes, username);
+  sendJson(res, result.ok ? 200 : 400, result);
+}
+
+function handleAdminTrainingCancel(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  const result = trainingRepo.cancelTraining(id);
+  sendJson(res, result.ok ? 200 : 400, result);
+}
+
+// ---------------------------------------------------------------------
 // Routing
 // ---------------------------------------------------------------------
 
@@ -362,6 +460,11 @@ async function router(req, res) {
     if (method === 'GET' && p === '/api/download') return handleDownload(req, res, parsedUrl);
     if (method === 'POST' && p === '/api/logout') return handleLogout(req, res);
 
+    if (method === 'GET' && p === '/api/trainings') return handleTrainingsList(req, res);
+    if (method === 'GET' && p === '/api/my-trainings') return handleMyTrainings(req, res);
+    if (method === 'POST' && p === '/api/trainings/register') return handleTrainingRegister(req, res, parsedUrl);
+    if (method === 'POST' && p === '/api/trainings/cancel') return handleTrainingCancel(req, res, parsedUrl);
+
     if (method === 'POST' && p === '/admin/login') return await handleAdminLogin(req, res);
     if (method === 'POST' && p === '/admin/logout') return handleAdminLogout(req, res);
     if (method === 'GET' && p === '/admin/api/employees') return handleAdminEmployeesList(req, res);
@@ -369,6 +472,12 @@ async function router(req, res) {
     if (method === 'DELETE' && p === '/admin/api/employees') return handleAdminEmployeeDelete(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/employees/clear') return handleAdminEmployeesClear(req, res);
     if (method === 'GET' && p === '/admin/api/audit') return handleAdminAudit(req, res);
+
+    if (method === 'GET' && p === '/admin/api/trainings') return handleAdminTrainingsList(req, res);
+    if (method === 'POST' && p === '/admin/api/trainings') return await handleAdminTrainingCreate(req, res);
+    if (method === 'GET' && p === '/admin/api/trainings/registrants') return handleAdminTrainingRegistrants(req, res, parsedUrl);
+    if (method === 'POST' && p === '/admin/api/trainings/attendance') return await handleAdminTrainingAttendance(req, res, parsedUrl);
+    if (method === 'POST' && p === '/admin/api/trainings/cancel') return handleAdminTrainingCancel(req, res, parsedUrl);
 
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not found');
