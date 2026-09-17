@@ -35,6 +35,11 @@ const STRINGS = {
     registerFailed: 'تعذّر إتمام التسجيل. حاول مرة أخرى.',
     alreadyRegistered: 'أنت مسجَّل بالفعل في هذا التدريب.',
     cancelFailed: 'تعذّر إلغاء التسجيل — قد يكون أجل التسجيل قد انتهى.',
+    notifNewTraining: (title) => `تدريب جديد متاح: ${title}`,
+    notifAttended: (title) => `تم تسجيلك حاضرًا في: ${title}`,
+    notifAbsent: (title) => `تم تسجيلك غير حاضر في: ${title}`,
+    notifCertReady: (title) => `شهادتك جاهزة: ${title}`,
+    notifEmpty: 'لا توجد إشعارات حتى الآن.',
   },
   en: {
     retrieving: 'Retrieving from the ministry shared folder…',
@@ -70,6 +75,11 @@ const STRINGS = {
     registerFailed: 'Could not complete registration. Please try again.',
     alreadyRegistered: 'You are already registered for this training.',
     cancelFailed: 'Could not cancel — the registration deadline may have passed.',
+    notifNewTraining: (title) => `New training available: ${title}`,
+    notifAttended: (title) => `You were marked Attended for: ${title}`,
+    notifAbsent: (title) => `You were marked Did Not Attend for: ${title}`,
+    notifCertReady: (title) => `Your certificate is ready: ${title}`,
+    notifEmpty: 'No notifications yet.',
   },
 };
 

@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Certificate Portal — Admin</title>
 <link rel="stylesheet" href="/style.css">
+<script src="/theme.js"></script>
 <style>
   .admin-card .hd{
     display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     position:sticky;top:var(--header-total);z-index:5;
-    background:#fff;margin:-24px -24px 0;padding:24px 24px 14px;border-radius:var(--radius) var(--radius) 0 0;
+    background:var(--paper);margin:-24px -24px 0;padding:24px 24px 14px;border-radius:var(--radius) var(--radius) 0 0;
   }
   .msg{margin-top:10px;font-size:13.5px}
   .msg.ok{color:var(--green-700)}
@@ -61,7 +62,19 @@
       <button class="compact-tool" type="button" id="langBtn" title="Language" aria-label="Switch language">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
       </button>
-      <button class="compact-tool" type="button" title="Appearance" aria-label="Appearance">☼</button>
+      <div class="tool-wrap">
+        <button class="compact-tool" type="button" id="appearanceBtn" title="Appearance" aria-label="Appearance">☼</button>
+        <div class="tool-menu hidden" id="appearanceMenu">
+          <div class="appearance-row">
+            <span data-ar="الوضع الداكن" data-en="Dark mode">Dark mode</span>
+            <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="switch-track"></span></label>
+          </div>
+          <div class="appearance-row">
+            <span data-ar="ألوان مناسبة لعمى الألوان" data-en="Color-blind friendly">Color-blind friendly</span>
+            <label class="switch"><input type="checkbox" id="colorblindToggle"><span class="switch-track"></span></label>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>بوابة الشهادات — وزارة الشؤون الإسلامية والدعوة والإرشاد</title>
 <link rel="stylesheet" href="/style.css">
+<script src="/theme.js"></script>
 </head>
 <body>
 
@@ -12,11 +13,32 @@
   <div class="compact-brand"><span id="pageTitle" data-ar="بوابة التدريب والشهادات" data-en="Training &amp; Certificate Portal">بوابة التدريب والشهادات</span></div>
   <input class="compact-search" type="search" id="trainSearch" data-ar-ph="ابحث في التدريبات" data-en-ph="Search trainings" aria-label="Search" placeholder="ابحث في التدريبات">
   <div class="compact-tools" aria-label="System tools">
-    <button class="compact-tool" type="button" title="Notifications" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <div class="tool-wrap">
+      <button class="compact-tool" type="button" id="notifBtn" title="Notifications" aria-label="Notifications" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="notif-dot hidden" id="notifDot"></span>
+      </button>
+      <div class="tool-menu notif-menu hidden" id="notifMenu">
+        <div class="tool-menu-title" data-ar="الإشعارات" data-en="Notifications">Notifications</div>
+        <div class="notif-list" id="notifList"></div>
+      </div>
+    </div>
     <button class="compact-tool" type="button" id="langBtn" title="Language" aria-label="Switch language">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
-    <button class="compact-tool" type="button" title="Appearance" aria-label="Appearance">☼</button>
+    <div class="tool-wrap">
+      <button class="compact-tool" type="button" id="appearanceBtn" title="Appearance" aria-label="Appearance">☼</button>
+      <div class="tool-menu hidden" id="appearanceMenu">
+        <div class="appearance-row">
+          <span data-ar="الوضع الداكن" data-en="Dark mode">Dark mode</span>
+          <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="switch-track"></span></label>
+        </div>
+        <div class="appearance-row">
+          <span data-ar="ألوان مناسبة لعمى الألوان" data-en="Color-blind friendly">Color-blind friendly</span>
+          <label class="switch"><input type="checkbox" id="colorblindToggle"><span class="switch-track"></span></label>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 

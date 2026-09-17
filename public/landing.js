@@ -14,6 +14,7 @@ function onLangChanged() {
   renderCerts();
   renderTrainings();
   renderMine();
+  if (!document.getElementById('notifMenu').classList.contains('hidden')) renderNotifList();
 }
 
 function formatShortDate(iso) {
@@ -319,6 +320,96 @@ function showVerifiedToastIfJustLoggedIn() {
   setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
+// ---------------------------------------------------------------------
+// Notifications -- new trainings, attendance outcomes, certificates ready.
+// No server-side "read" state (BRD 13.7 keeps this in-app only); a
+// last-seen timestamp kept in localStorage drives the unread dot.
+// ---------------------------------------------------------------------
+
+let CURRENT_NOTIFS = [];
+
+function notifText(n) {
+  const lang = getLang();
+  const title = lang === 'ar' ? n.titleAr : n.titleEn;
+  if (n.type === 'new_training') return t('notifNewTraining')(title);
+  if (n.type === 'attendance') return n.outcome === 'attended' ? t('notifAttended')(title) : t('notifAbsent')(title);
+  if (n.type === 'cert_ready') return t('notifCertReady')(title);
+  return title || '';
+}
+
+function notifIconSvg(n) {
+  if (n.type === 'attendance' && n.outcome !== 'attended') {
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  }
+  if (n.type === 'cert_ready') {
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.7"/><path d="M9 13.5L7.5 21l4.5-2.4 4.5 2.4-1.5-7.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+  }
+  return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 7L10 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function getNotifSeenTs() {
+  return localStorage.getItem('portal_notif_seen') || '';
+}
+function setNotifSeenTs(ts) {
+  localStorage.setItem('portal_notif_seen', ts);
+}
+
+function renderNotifDot() {
+  const seen = getNotifSeenTs();
+  const hasUnread = CURRENT_NOTIFS.some((n) => n.ts > seen);
+  document.getElementById('notifDot').classList.toggle('hidden', !hasUnread);
+}
+
+function renderNotifList() {
+  const list = document.getElementById('notifList');
+  if (!CURRENT_NOTIFS.length) {
+    list.innerHTML = `<div class="notif-empty">${t('notifEmpty')}</div>`;
+    return;
+  }
+  list.innerHTML = CURRENT_NOTIFS.map((n) => `
+    <div class="notif-item">
+      <div class="notif-ico${n.type === 'attendance' && n.outcome !== 'attended' ? ' absent' : ''}">${notifIconSvg(n)}</div>
+      <div class="notif-body">
+        <div class="notif-text">${notifText(n)}</div>
+        <div class="notif-time">${formatShortDate(n.ts)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadNotifications() {
+  try {
+    const resp = await fetch('/api/notifications', { credentials: 'same-origin' });
+    if (resp.status === 401) return;
+    const data = await resp.json();
+    CURRENT_NOTIFS = data.notifications || [];
+    renderNotifDot();
+  } catch {
+    // Non-critical -- just leave any previously loaded notifications in place.
+  }
+}
+
+function toggleToolMenu(menuId, otherMenuId) {
+  const menu = document.getElementById(menuId);
+  const wasHidden = menu.classList.contains('hidden');
+  document.getElementById(otherMenuId).classList.add('hidden');
+  menu.classList.toggle('hidden', !wasHidden);
+  if (menuId === 'notifMenu' && wasHidden) {
+    renderNotifList();
+    if (CURRENT_NOTIFS.length) setNotifSeenTs(CURRENT_NOTIFS[0].ts);
+    renderNotifDot();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#notifBtn') && !e.target.closest('#notifMenu')) {
+    document.getElementById('notifMenu').classList.add('hidden');
+  }
+  if (!e.target.closest('#appearanceBtn') && !e.target.closest('#appearanceMenu')) {
+    document.getElementById('appearanceMenu').classList.add('hidden');
+  }
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
   applyStaticLang();
   document.getElementById('langBtn').addEventListener('click', toggleLang);
@@ -327,9 +418,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('tabMine').addEventListener('click', () => switchTab('mine'));
   document.getElementById('tabCerts').addEventListener('click', () => switchTab('certs'));
   document.getElementById('trainSearch').addEventListener('input', renderTrainings);
+
+  document.getElementById('notifBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleToolMenu('notifMenu', 'appearanceMenu');
+  });
+  document.getElementById('appearanceBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleToolMenu('appearanceMenu', 'notifMenu');
+  });
+  const darkToggle = document.getElementById('darkModeToggle');
+  const cbToggle = document.getElementById('colorblindToggle');
+  darkToggle.checked = getTheme() === 'dark';
+  cbToggle.checked = getColorblind();
+  darkToggle.addEventListener('change', () => setTheme(darkToggle.checked ? 'dark' : 'light'));
+  cbToggle.addEventListener('change', () => setColorblind(cbToggle.checked));
+
   showVerifiedToastIfJustLoggedIn();
   await loadMe();
   await loadCerts();
   await loadTrainings();
   await loadMine();
+  await loadNotifications();
 });

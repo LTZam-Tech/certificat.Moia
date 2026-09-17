@@ -496,6 +496,23 @@ document.addEventListener('DOMContentLoaded', () => {
   onLangChanged();
   el('loginLangBtn').addEventListener('click', toggleLang);
   el('langBtn').addEventListener('click', toggleLang);
+
+  el('appearanceBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    el('appearanceMenu').classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#appearanceBtn') && !e.target.closest('#appearanceMenu')) {
+      el('appearanceMenu').classList.add('hidden');
+    }
+  });
+  const darkToggle = el('darkModeToggle');
+  const cbToggle = el('colorblindToggle');
+  darkToggle.checked = getTheme() === 'dark';
+  cbToggle.checked = getColorblind();
+  darkToggle.addEventListener('change', () => setTheme(darkToggle.checked ? 'dark' : 'light'));
+  cbToggle.addEventListener('change', () => setColorblind(cbToggle.checked));
+
   el('adminLoginBtn').addEventListener('click', login);
   ['user', 'pass'].forEach((id) => {
     el(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });

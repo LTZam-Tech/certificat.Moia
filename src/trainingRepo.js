@@ -40,7 +40,7 @@ const listRegistrantsStmt = db.prepare(`
 `);
 
 const myTrainingsStmt = db.prepare(`
-  SELECT r.training_id, r.registered_at, r.status, r.outcome, t.title_ar, t.title_en, t.status AS training_status, t.deadline
+  SELECT r.training_id, r.registered_at, r.status, r.outcome, r.marked_at, t.title_ar, t.title_en, t.status AS training_status, t.deadline
   FROM training_registrations r
   JOIN trainings t ON t.id = r.training_id
   WHERE r.national_id = ? AND r.status = 'registered'

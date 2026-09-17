@@ -264,6 +264,70 @@ function handleTrainingCancel(req, res, parsedUrl) {
   sendJson(res, result.ok ? 200 : 400, result);
 }
 
+// SQLite's datetime('now') yields "YYYY-MM-DD HH:MM:SS" (UTC, no timezone
+// marker) -- Date.parse treats that as local time in Node, so normalise it
+// to an unambiguous ISO string first.
+function sqliteTsToEpoch(ts) {
+  if (!ts) return 0;
+  const ms = Date.parse(`${ts.replace(' ', 'T')}Z`);
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+/**
+ * Computed, read-only notification feed for the logged-in employee (no
+ * SMS/email per BRD 13.7 -- in-app only): newly published trainings they
+ * haven't registered for yet, attendance outcomes recorded against their
+ * own registrations, and certificates that became available as a result.
+ * There's no persisted "read" state server-side; the client tracks a
+ * last-seen timestamp locally and only asks for what's new since then.
+ */
+function handleNotifications(req, res) {
+  const nationalId = requireSession(req, res);
+  if (!nationalId) return;
+
+  const mine = trainingRepo.myTrainings(nationalId);
+  const myTrainingIds = new Set(mine.map((m) => m.training_id));
+  const notifications = [];
+
+  const newTrainingCutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  for (const tr of trainingRepo.listOpenForEmployee()) {
+    if (myTrainingIds.has(tr.id)) continue;
+    const epoch = sqliteTsToEpoch(tr.created_at);
+    if (epoch >= newTrainingCutoff) {
+      notifications.push({
+        type: 'new_training', id: `nt-${tr.id}`, epoch,
+        trainingId: tr.id, titleAr: tr.title_ar, titleEn: tr.title_en,
+      });
+    }
+  }
+
+  for (const m of mine) {
+    if (m.outcome) {
+      notifications.push({
+        type: 'attendance', id: `att-${m.training_id}`, epoch: sqliteTsToEpoch(m.marked_at || m.registered_at),
+        trainingId: m.training_id, titleAr: m.title_ar, titleEn: m.title_en, outcome: m.outcome,
+      });
+    }
+  }
+
+  try {
+    for (const cert of certService.listCertificatesForEmployee(nationalId)) {
+      if (!cert.trainingId) continue;
+      const match = mine.find((m) => m.training_id === cert.trainingId) || {};
+      notifications.push({
+        type: 'cert_ready', id: `cert-${cert.trainingId}`, epoch: new Date(cert.issuedAt).getTime(),
+        trainingId: cert.trainingId, titleAr: match.title_ar, titleEn: match.title_en,
+      });
+    }
+  } catch {
+    // Shared folder unreachable -- notifications degrade gracefully, no cert_ready entries.
+  }
+
+  notifications.sort((a, b) => b.epoch - a.epoch);
+  notifications.forEach((n) => { n.ts = new Date(n.epoch).toISOString(); delete n.epoch; });
+  sendJson(res, 200, { notifications: notifications.slice(0, 30) });
+}
+
 // ---------------------------------------------------------------------
 // Admin API
 // ---------------------------------------------------------------------
@@ -450,7 +514,7 @@ async function router(req, res) {
     if (method === 'GET' && p === '/') return void serveStatic(req, res, '/login.html');
     if (method === 'GET' && p === '/landing') return void serveStatic(req, res, '/landing.html');
     if (method === 'GET' && p === '/admin') return void serveStatic(req, res, '/admin.html');
-    if (method === 'GET' && ['/style.css', '/i18n.js', '/pagination.js', '/login.js', '/landing.js', '/admin.js', '/emblem.svg', '/emblem-full.png'].includes(p)) {
+    if (method === 'GET' && ['/style.css', '/theme.js', '/i18n.js', '/pagination.js', '/login.js', '/landing.js', '/admin.js', '/emblem.svg', '/emblem-full.png'].includes(p)) {
       return void serveStatic(req, res, p);
     }
 
@@ -464,6 +528,7 @@ async function router(req, res) {
     if (method === 'GET' && p === '/api/my-trainings') return handleMyTrainings(req, res);
     if (method === 'POST' && p === '/api/trainings/register') return handleTrainingRegister(req, res, parsedUrl);
     if (method === 'POST' && p === '/api/trainings/cancel') return handleTrainingCancel(req, res, parsedUrl);
+    if (method === 'GET' && p === '/api/notifications') return handleNotifications(req, res);
 
     if (method === 'POST' && p === '/admin/login') return await handleAdminLogin(req, res);
     if (method === 'POST' && p === '/admin/logout') return handleAdminLogout(req, res);
