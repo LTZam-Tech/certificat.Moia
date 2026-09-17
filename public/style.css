@@ -2,6 +2,9 @@
   --green-900:#003D23;
   --green-700:#005430;
   --green-500:#0B7A4B;
+  /* ~2.4:1 against white -- fine as a border/accent or mixed with --ink/
+     --paper first (see .pill.fmt), but never use it as plain body text on
+     --paper/--sand, it won't clear WCAG AA. */
   --gold:#C6A15B;
   --sand:#F2F4EF;
   --paper:#FFFFFF;
@@ -192,6 +195,10 @@ header.masthead.compact-header::after{
 .crest img{height:100%;width:auto;max-width:100%;display:block;
   animation:logoGlow 4s ease-in-out infinite;
 }
+/* Standalone/static use (the employee login screen's own crest, centered
+   above the card, no glow animation) instead of a one-off inline style="". */
+.crest.static{height:52px;margin:0 auto 18px;justify-content:center}
+.crest.static img{filter:none;animation:none}
 @keyframes logoGlow{
   0%,100%{
     filter:
@@ -246,7 +253,11 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .field.invalid input, .field.invalid .secure, .field.invalid .phone{border-color:var(--danger) !important}
 .field.invalid .field-error{display:block}
 .field-error{display:none;font-size:12.5px;color:var(--danger);margin-top:6px}
-.field-error::before{content:"! ";font-weight:700}
+/* Gated behind Color Blind Mode like every other icon-prefix redundancy
+   (.msg, .alert, badges) instead of being the one always-on exception --
+   the field-error text itself is already always shown regardless, so
+   nothing is lost by keeping this consistent with the rest. */
+[data-colorblind] .field-error::before{content:"! ";font-weight:700}
 /* Color Blind Mode: a thicker border on invalid fields adds a shape cue
    on top of the color change, and the field-error text (already always
    shown) carries the meaning regardless of color perception. */
@@ -260,7 +271,8 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 :focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 .secure input, .phone input{border:0;outline:0;padding:var(--space-3) var(--space-4);font-size:15px;width:100%;background:transparent;letter-spacing:2px}
 .phone .cc{padding:12px 10px;color:var(--muted);border-inline-end:1px solid var(--line);font-weight:600}
-.secure .eye{border:0;background:transparent;cursor:pointer;padding:0 12px;color:var(--muted);display:flex;align-items:center}
+.secure .eye{border:0;background:transparent;cursor:pointer;padding:0 12px;color:var(--muted);display:flex;align-items:center;transition:color .12s ease}
+.secure .eye:hover,.secure .eye:focus-visible{color:var(--ink)}
 .hidden{display:none !important}
 
 .btn{width:100%;background:var(--green-700);color:#fff;border:0;border-radius:10px;padding:13px 16px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;position:relative}
@@ -279,7 +291,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--green-700);color:#fff;display:grid;place-items:center;font-weight:700}
 .name{font-weight:700}
 .meta{display:flex;gap:14px;color:var(--muted);font-size:12.5px;margin-top:2px;flex-wrap:wrap}
-.masked-id{display:inline-flex;gap:4px;direction:ltr}
+.masked-id{display:inline-flex;gap:4px;direction:ltr;color:#fff}
 html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 .verified{display:flex;align-items:center;gap:5px;color:var(--green-500)}
 
@@ -306,7 +318,7 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 .signout.sm{height:28px;padding:0 12px;font-size:12.5px}
 
 .section-label{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 12px}
-.section-label h2{font-size:18px;margin:0}
+.section-label h2{font-size:18px;font-weight:700;margin:0}
 .count{color:var(--muted);font-size:13px}
 
 /* =====================================================================
@@ -502,7 +514,7 @@ html.sidebar-expanded .profile-avatar{width:40px;height:40px;background:transpar
   mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);
 }
 .login-ticker-track{position:absolute;left:0;top:0;display:flex;align-items:center;white-space:nowrap;width:max-content;animation:loginTickerScroll 55s linear infinite}
-.login-ticker-item{display:inline-block;padding:0 10px;color:#EFE2C2;font-size:14px;font-weight:600;letter-spacing:.2px}
+.login-ticker-item{display:inline-block;padding:0 10px;color:color-mix(in srgb, var(--gold) 60%, #fff);font-size:14px;font-weight:600;letter-spacing:.2px}
 .ticker-palm-wrap{display:inline-flex;align-items:center;flex:none;color:var(--gold)}
 .ticker-palm-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold)}
 @keyframes loginTickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -511,7 +523,7 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 @media(prefers-reduced-motion:reduce){.login-ticker-track{animation:none}}
 
 .admin-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-7);margin-bottom:var(--space-6)}
-.admin-card h2{margin-top:0;font-size:18px}
+.admin-card h2{margin-top:0;font-size:18px;font-weight:700}
 .admin-card .hd{
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   position:sticky;top:var(--header-total);z-index:5;
@@ -523,6 +535,16 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 }
 .admin-note{color:var(--muted);font-size:13.5px}
 .empty-note{color:var(--muted);font-size:13px;padding:14px 0}
+/* Small structural modifiers/utilities, replacing one-off inline style=""
+   attributes that duplicated what a class could express once. */
+.admin-card.narrow{max-width:380px;margin:0 auto}
+.admin-card.dashed{max-width:560px;box-shadow:none;border-style:dashed}
+.scroll-x{overflow:auto}
+.scroll-x.mt{margin-top:var(--space-4)}
+.btn-row{display:flex;gap:8px}
+.btn.auto{width:auto}
+#rosterTitle{margin-bottom:2px}
+#auditTabs{margin-bottom:var(--space-4)}
 /* Inline form-result messages now share the .alert structure (box, border,
    icon-ready) instead of being bare colored text -- one "feedback message"
    component instead of two. :not(:empty) keeps the box invisible until a
@@ -634,6 +656,10 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .notif-time{font-size:11.5px;color:var(--muted);margin-top:3px}
 .notif-empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:13px}
 .notif-dot{position:absolute;top:-2px;inset-inline-end:-2px;width:9px;height:9px;border-radius:50%;background:var(--danger);border:2px solid var(--shell-dark)}
+/* The notification bell is the only .compact-tool with an absolutely
+   positioned badge inside it, so it (not .compact-tool generally) needs
+   to be the positioning context for .notif-dot. */
+#notifBtn{position:relative}
 @media(max-width:1199px){
   header.masthead.compact-header{margin:0 62px 0 0;padding:0 12px;border-radius:0;overflow:hidden}
   html[dir="ltr"] header.masthead.compact-header{margin:0 0 0 62px}

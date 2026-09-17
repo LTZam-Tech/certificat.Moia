@@ -31,7 +31,7 @@ function switchTab(name) {
   ['train', 'mine', 'certs'].forEach((n) => {
     document.getElementById(`panel-${n}`).classList.toggle('hidden', n !== name);
   });
-  document.getElementById('trainSearch').style.display = name === 'train' ? '' : 'none';
+  document.getElementById('trainSearch').classList.toggle('hidden', name !== 'train');
 }
 
 function renderTrainings() {

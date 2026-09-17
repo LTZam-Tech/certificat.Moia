@@ -20,7 +20,7 @@
       <span id="loginLangLabel">العربية</span>
     </button>
   </div>
-  <div class="admin-card" style="max-width:380px;margin:0 auto">
+  <div class="admin-card narrow">
     <h2 data-ar="دخول مسؤول التدريب" data-en="Training Admin sign-in">Training Admin sign-in</h2>
     <p class="admin-note" data-ar="حساب مستقل عن حسابات الموظفين — لا يمكن الوصول إليه برقم الهوية الوطنية أو الجوال." data-en="Separate account from employee logins — cannot be reached with a National ID or mobile number.">Separate account from employee logins — cannot be reached with a National ID or mobile number.</p>
     <div class="field">
@@ -107,7 +107,7 @@
           <div class="hd">
             <h2 data-ar="الموظفون" data-en="Employees">Employees</h2>
             <div>
-              <input type="file" id="xlsxFile" accept=".xlsx" style="display:none">
+              <input type="file" id="xlsxFile" accept=".xlsx" class="hidden">
               <button class="ghost-btn" id="pickFileBtn" data-ar="استيراد ملف Excel" data-en="Import .xlsx sheet">Import .xlsx sheet</button>
               <button class="danger-btn" id="clearAllBtn" data-ar="إزالة الكل" data-en="Remove all">Remove all</button>
             </div>
@@ -119,7 +119,7 @@
             deletes login records — certificate files in the shared folder are never touched.
           </p>
           <div class="msg" id="importMsg"></div>
-          <div style="overflow:auto;margin-top:14px">
+          <div class="scroll-x mt">
             <table class="plain" id="empTable">
               <thead><tr>
                 <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
@@ -147,17 +147,17 @@
             can ever be served a certificate tied to that training (file named {ID}-{TrainingID}.ext).
           </p>
 
-          <div class="admin-card" id="newTrainingForm" style="max-width:560px;box-shadow:none;border-style:dashed" hidden>
+          <div class="admin-card dashed" id="newTrainingForm" hidden>
             <div class="two">
               <div class="field"><label data-ar="العنوان (إنجليزي)" data-en="Title (English)">Title (English)</label><div class="secure"><input id="ntTitleEn" data-ar-ph="e.g. Presentation Skills" data-en-ph="e.g. Presentation Skills" placeholder="e.g. Presentation Skills"></div></div>
               <div class="field"><label data-ar="العنوان (عربي)" data-en="Title (Arabic)">Title (Arabic)</label><div class="secure"><input id="ntTitleAr" dir="rtl" placeholder="مثال: مهارات العرض"></div></div>
             </div>
             <div class="field"><label data-ar="آخر أجل للتسجيل" data-en="Registration deadline">Registration deadline</label><div class="secure"><input id="ntDeadline" type="date"></div></div>
-            <button class="btn" id="saveTrainingBtn" style="width:auto" data-ar="حفظ ونشر" data-en="Save &amp; publish">Save &amp; publish</button>
+            <button class="btn auto" id="saveTrainingBtn" data-ar="حفظ ونشر" data-en="Save &amp; publish">Save &amp; publish</button>
             <div class="msg" id="trainingMsg"></div>
           </div>
 
-          <div style="overflow:auto;margin-top:14px">
+          <div class="scroll-x mt">
             <table class="plain" id="trainingsTable">
               <thead><tr>
                 <th data-ar="الرمز" data-en="ID">ID</th>
@@ -176,14 +176,14 @@
 
         <div class="admin-card hidden" id="rosterCard">
           <div class="hd">
-            <div><h2 id="rosterTitle" style="margin-bottom:2px"></h2><span class="idpill" id="rosterId"></span></div>
-            <div style="display:flex;gap:8px">
+            <div><h2 id="rosterTitle"></h2><span class="idpill" id="rosterId"></span></div>
+            <div class="btn-row">
               <button class="ghost-btn" id="markAllAttendedBtn" data-ar="تعليم الكل: حضر" data-en="Mark all: Attended">Mark all: Attended</button>
               <button class="solid-btn" id="saveOutcomesBtn" data-ar="حفظ النتائج" data-en="Save outcomes">Save outcomes</button>
             </div>
           </div>
           <p class="admin-note" data-ar="رقم الهوية الوطنية فقط — لا يوجد حقل اسم في هذا النظام، فلا يوجد ما يُعرض غيره." data-en="National ID only — this system has no name field, so there is nothing else to display.">National ID only — this system has no name field, so there is nothing else to display.</p>
-          <div style="overflow:auto">
+          <div class="scroll-x">
             <table class="plain" id="rosterTable">
               <thead><tr>
                 <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
@@ -207,12 +207,12 @@
           </div>
           <p class="admin-note" data-ar="كل محاولة دخول وكل تنزيل شهادة، الأحدث أولًا." data-en="Every login attempt and certificate download, most recent first.">Every login attempt and certificate download, most recent first.</p>
 
-          <div class="seg" id="auditTabs" style="margin-bottom:14px">
+          <div class="seg" id="auditTabs">
             <button class="on" data-audit-tab="logins" data-ar="محاولات الدخول" data-en="Logins">Logins</button>
             <button data-audit-tab="downloads" data-ar="التنزيلات" data-en="Downloads">Downloads</button>
           </div>
 
-          <div style="overflow:auto">
+          <div class="scroll-x">
             <table class="plain" id="auditTable">
               <thead><tr>
                 <th data-ar="الوقت" data-en="Time">Time</th>
