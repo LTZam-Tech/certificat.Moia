@@ -277,7 +277,8 @@ html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 .login-header{position:absolute;z-index:1;top:0;left:0;right:0;width:100%;display:flex;align-items:center;justify-content:center;height:110px;background:var(--green-900);border-bottom:1px solid rgba(198,161,91,.5);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .login-header-logo{height:82px;display:flex;align-items:center;justify-content:center}
 .login-header-logo img{height:100%;width:auto;display:block}
-.admin-wrap .lang-toggle-corner .ghost-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff}
+.admin-wrap .lang-toggle-corner .ghost-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding-inline:18px}
+.admin-wrap .lang-toggle-corner .ghost-btn:hover{background:rgba(255,255,255,.22)}
 .admin-wrap .admin-card{position:relative;z-index:1;width:100%}
 .login-ticker{
   position:absolute;z-index:1;left:0;right:0;bottom:0;width:100%;
