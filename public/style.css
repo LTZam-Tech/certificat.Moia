@@ -387,18 +387,20 @@ header.masthead.compact-header::after{
 
 .tool-wrap{position:relative}
 .tool-menu{
-  position:absolute;top:calc(100% + 10px);inset-inline-end:0;z-index:50;
+  /* Positioned via JS (top/left set from the trigger button's own
+     getBoundingClientRect, clamped to stay on-screen) rather than CSS
+     anchoring -- position:fixed with a high z-index guarantees it paints
+     above page content regardless of any stacking context created
+     elsewhere on the page, which a nested position:absolute + z-index
+     could lose to. */
+  position:fixed;z-index:1000;top:0;left:0;
   background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
-  min-width:220px;padding:8px;color:var(--ink);
+  width:260px;max-width:92vw;padding:8px;color:var(--ink);
+  opacity:0;visibility:hidden;transform:translateY(-6px) scale(.97);
+  transition:opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
 }
-.tool-menu.notif-menu{width:340px;max-width:88vw;padding:0}
-.tool-menu.hidden{display:none}
-@media(max-width:520px){
-  /* On narrow screens the menu can be wider than the space between its
-     small trigger icon and the screen edge, overflowing off-screen --
-     pin it to the viewport instead of anchoring to the button. */
-  .tool-menu{position:fixed;top:56px;left:12px;right:12px;inset-inline-end:auto;width:auto;max-width:none}
-}
+.tool-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);transition:opacity .16s ease, transform .16s ease}
+.tool-menu.notif-menu{width:340px;padding:0}
 .tool-menu-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 14px 6px}
 .appearance-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border-radius:8px;font-size:13.5px}
 .appearance-row:hover{background:var(--sand)}

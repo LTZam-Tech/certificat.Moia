@@ -14,7 +14,7 @@ function onLangChanged() {
   renderCerts();
   renderTrainings();
   renderMine();
-  if (!document.getElementById('notifMenu').classList.contains('hidden')) renderNotifList();
+  if (document.getElementById('notifMenu').classList.contains('open')) renderNotifList();
 }
 
 function formatShortDate(iso) {
@@ -389,25 +389,46 @@ async function loadNotifications() {
   }
 }
 
-function toggleToolMenu(menuId, otherMenuId) {
+/** Positions a fixed-position popover against its trigger button, clamped
+ * so it never runs off either edge of the viewport. */
+function positionToolMenu(menu, anchorBtn) {
+  const rect = anchorBtn.getBoundingClientRect();
+  const menuWidth = menu.offsetWidth;
+  const margin = 12;
+  let left = rect.right - menuWidth;
+  left = Math.max(margin, Math.min(left, window.innerWidth - menuWidth - margin));
+  menu.style.left = `${left}px`;
+  menu.style.top = `${rect.bottom + 10}px`;
+}
+
+function toggleToolMenu(menuId, otherMenuId, anchorBtn) {
   const menu = document.getElementById(menuId);
-  const wasHidden = menu.classList.contains('hidden');
-  document.getElementById(otherMenuId).classList.add('hidden');
-  menu.classList.toggle('hidden', !wasHidden);
-  if (menuId === 'notifMenu' && wasHidden) {
-    renderNotifList();
-    if (CURRENT_NOTIFS.length) setNotifSeenTs(CURRENT_NOTIFS[0].ts);
-    renderNotifDot();
+  const wasOpen = menu.classList.contains('open');
+  document.getElementById(otherMenuId).classList.remove('open');
+  if (!wasOpen) {
+    positionToolMenu(menu, anchorBtn);
+    menu.classList.add('open');
+    if (menuId === 'notifMenu') {
+      renderNotifList();
+      if (CURRENT_NOTIFS.length) setNotifSeenTs(CURRENT_NOTIFS[0].ts);
+      renderNotifDot();
+    }
+  } else {
+    menu.classList.remove('open');
   }
 }
 
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#notifBtn') && !e.target.closest('#notifMenu')) {
-    document.getElementById('notifMenu').classList.add('hidden');
+    document.getElementById('notifMenu').classList.remove('open');
   }
   if (!e.target.closest('#appearanceBtn') && !e.target.closest('#appearanceMenu')) {
-    document.getElementById('appearanceMenu').classList.add('hidden');
+    document.getElementById('appearanceMenu').classList.remove('open');
   }
+});
+window.addEventListener('resize', () => {
+  document.getElementById('notifMenu').classList.remove('open');
+  document.getElementById('appearanceMenu').classList.remove('open');
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -421,11 +442,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('notifBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleToolMenu('notifMenu', 'appearanceMenu');
+    toggleToolMenu('notifMenu', 'appearanceMenu', e.currentTarget);
   });
   document.getElementById('appearanceBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    toggleToolMenu('appearanceMenu', 'notifMenu');
+    toggleToolMenu('appearanceMenu', 'notifMenu', e.currentTarget);
   });
   const darkToggle = document.getElementById('darkModeToggle');
   const cbToggle = document.getElementById('colorblindToggle');

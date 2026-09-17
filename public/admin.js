@@ -497,15 +497,31 @@ document.addEventListener('DOMContentLoaded', () => {
   el('loginLangBtn').addEventListener('click', toggleLang);
   el('langBtn').addEventListener('click', toggleLang);
 
+  function positionToolMenu(menu, anchorBtn) {
+    const rect = anchorBtn.getBoundingClientRect();
+    const menuWidth = menu.offsetWidth;
+    const margin = 12;
+    let left = rect.right - menuWidth;
+    left = Math.max(margin, Math.min(left, window.innerWidth - menuWidth - margin));
+    menu.style.left = `${left}px`;
+    menu.style.top = `${rect.bottom + 10}px`;
+  }
   el('appearanceBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    el('appearanceMenu').classList.toggle('hidden');
+    const menu = el('appearanceMenu');
+    if (menu.classList.contains('open')) {
+      menu.classList.remove('open');
+    } else {
+      positionToolMenu(menu, e.currentTarget);
+      menu.classList.add('open');
+    }
   });
   document.addEventListener('click', (e) => {
     if (!e.target.closest('#appearanceBtn') && !e.target.closest('#appearanceMenu')) {
-      el('appearanceMenu').classList.add('hidden');
+      el('appearanceMenu').classList.remove('open');
     }
   });
+  window.addEventListener('resize', () => el('appearanceMenu').classList.remove('open'));
   const darkToggle = el('darkModeToggle');
   const cbToggle = el('colorblindToggle');
   darkToggle.checked = getTheme() === 'dark';
