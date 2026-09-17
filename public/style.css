@@ -13,7 +13,15 @@
   --danger-bg:#FBEEEB;
   --ok-bg:#EAF3EC;
   --shadow:0 1px 2px rgba(0,45,24,.05), 0 12px 34px rgba(0,45,24,.09);
+  --shadow-soft:0 2px 8px rgba(0,0,0,.12);
   --radius:14px;
+  /* Shared corner-radius scale. Every rounded rectangle in the app should
+     take its radius from here instead of a one-off pixel value, so "same
+     component type = same visual language" per the design-system audit. */
+  --radius-lg: var(--radius);
+  --radius-md:12px;
+  --radius-sm:9px;
+  --radius-pill:999px;
 
   /* Semantic status tokens (source of truth referenced by badges, alerts,
      toasts, and form validation). Aliased to the existing brand tokens in
@@ -127,15 +135,20 @@ html[dir="rtl"] body{line-height:1.7}
 .serif{font-family:Georgia,"Traditional Arabic",serif}
 
 header.masthead{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--green-700),var(--green-900));color:#fff}
-header.masthead::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
+/* Shared masthead "brand texture" (diamond pattern drift + light sweep),
+   also used by the compact header variant below -- one definition instead
+   of a copy-pasted pair per header variant. */
+header.masthead::before,
+header.masthead.compact-header::before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;overflow:hidden;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cpath d='M50 4 L96 50 L50 96 L4 50 Z' opacity='.5'/%3E%3Cpath d='M50 26 L74 50 L50 74 L26 50 Z' opacity='.6'/%3E%3C/g%3E%3C/svg%3E");
   background-repeat:repeat;background-size:100px 100px;
   opacity:.16;
   animation:headerDrift 22s linear infinite;
 }
-header.masthead::after{
-  content:"";position:absolute;top:0;bottom:0;left:0;width:45%;pointer-events:none;
+header.masthead::after,
+header.masthead.compact-header::after{
+  content:"";position:absolute;top:0;bottom:0;left:0;width:45%;pointer-events:none;border-radius:inherit;overflow:hidden;
   background:linear-gradient(100deg,
     transparent 0%,
     rgba(255,255,255,.5) 50%,
@@ -220,7 +233,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 
 .secure, .phone{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:10px;background:var(--paper);overflow:hidden;transition:box-shadow .12s ease, border-color .12s ease}
 .secure:focus-within, .phone:focus-within{border-color:var(--focus-ring);box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 30%, transparent)}
-.compact-search:focus{box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 45%, transparent);outline:0}
+.compact-search:focus{box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 30%, transparent);outline:0}
 :focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 .secure input, .phone input{border:0;outline:0;padding:12px 14px;font-size:15px;width:100%;background:transparent;letter-spacing:2px}
 .phone .cc{padding:12px 10px;color:var(--muted);border-inline-end:1px solid var(--line);font-weight:600}
@@ -263,8 +276,11 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 .toast.error{background:var(--danger-bg);border-color:color-mix(in srgb, var(--danger) 30%, transparent);color:var(--danger)}
 .toast.error svg{color:var(--danger)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
-.signout{background:transparent;border:1px solid var(--line-strong);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer;color:var(--ink)}
+.signout{background:transparent;border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:9px 14px;font-weight:600;font-size:13.5px;cursor:pointer;color:var(--ink)}
 .signout:hover{background:var(--sand)}
+/* Compact variant for use inline within a row (e.g. "Cancel" next to a
+   training's status), instead of a one-off inline style="" override. */
+.signout.sm{padding:8px 12px;font-size:12.5px}
 
 .section-label{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 12px}
 .section-label h2{font-size:18px;margin:0}
@@ -326,7 +342,7 @@ html[dir="ltr"] .content-area table.plain td{text-align:left}
 html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
-.tcard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .tcard:nth-child(2){animation-delay:.25s}
 .tcard:nth-child(3){animation-delay:.5s}
 .tcard:nth-child(4){animation-delay:.75s}
@@ -337,8 +353,8 @@ html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 .tcard .tmeta{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:12px;gap:8px}
 .tcard .tmeta b{color:var(--ink)}
 
-.idpill{display:inline-flex;align-items:center;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;font-weight:700;color:var(--green-700);background:var(--ok-bg);border:1px solid color-mix(in srgb, var(--green-700) 20%, transparent);padding:3px 9px;border-radius:7px;direction:ltr}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-weight:600;font-size:11px;white-space:nowrap}
+.idpill{display:inline-flex;align-items:center;font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;color:var(--green-700);background:var(--ok-bg);border:1px solid color-mix(in srgb, var(--green-700) 20%, transparent);padding:3px 10px;border-radius:var(--radius-pill);direction:ltr}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--radius-pill);font-weight:600;font-size:11px;white-space:nowrap}
 .badge.open{background:var(--ok-bg);color:var(--green-700)}
 .badge.closed{background:var(--line);color:var(--muted)}
 .badge.conducted{background:var(--warning-bg);color:var(--warning)}
@@ -360,7 +376,7 @@ html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 [data-colorblind] .badge.conducted::before{content:"!"}
 [data-colorblind] .badge.closed::before{content:"\25CF";font-size:8px}
 
-.mrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.mrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
 .mrow .mi{flex:1;min-width:0}
 .mrow .mt{font-weight:700;font-size:14px}
 .mrow .ms{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -406,22 +422,47 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 @media(prefers-reduced-motion:reduce){.login-ticker-track{animation:none}}
 
 .admin-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
-.admin-card h2{margin-top:0}
+.admin-card h2{margin-top:0;font-size:18px}
+.admin-card .hd{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  position:sticky;top:var(--header-total);z-index:5;
+  background:var(--paper);margin:-24px -24px 0;padding:24px 24px 14px;border-radius:var(--radius) var(--radius) 0 0;
+}
 .admin-note{color:var(--muted);font-size:13.5px}
+.empty-note{color:var(--muted);font-size:13px;padding:14px 0}
+/* Inline form-result messages now share the .alert structure (box, border,
+   icon-ready) instead of being bare colored text -- one "feedback message"
+   component instead of two. :not(:empty) keeps the box invisible until a
+   message is actually set, matching the old behavior for freshly-rendered,
+   still-empty message slots (e.g. the login screen on first paint). */
+.msg{margin-top:10px}
+.msg:not(:empty){display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 12px;border-radius:10px;background:var(--sand);color:var(--muted);border:1px solid var(--line)}
+.msg.ok:not(:empty){background:var(--success-bg);color:var(--success);border-color:color-mix(in srgb, var(--success) 30%, transparent)}
+.msg.err:not(:empty){background:var(--danger-bg);color:var(--danger);border-color:color-mix(in srgb, var(--danger) 30%, transparent)}
+[data-colorblind] .msg.ok:not(:empty)::before{content:"\2713";font-weight:700}
+[data-colorblind] .msg.err:not(:empty)::before{content:"!";font-weight:700}
 table.plain{width:100%;border-collapse:collapse;font-size:13px}
 table.plain th,table.plain td{text-align:start;padding:8px 8px;border-bottom:1px solid var(--line)}
 table.plain th{color:var(--muted);font-weight:600}
 .solid-btn,.ghost-btn,.danger-btn{
-  height:40px;padding:0 18px;border-radius:999px;font-size:13.5px;font-weight:700;
+  height:40px;padding:0 18px;border-radius:var(--radius-pill);font-size:13.5px;font-weight:700;
   cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;
   box-sizing:border-box;white-space:nowrap;
 }
 .solid-btn{background:var(--green-700);color:#fff;border:0}
 .solid-btn:hover{background:var(--green-500)}
+.solid-btn:disabled,.ghost-btn:disabled,.danger-btn:disabled{opacity:.7;cursor:not-allowed}
 .ghost-btn{background:transparent;border:1px solid var(--line-strong);color:var(--ink)}
 .ghost-btn:hover{background:var(--sand)}
 .danger-btn{background:var(--paper);border:1px solid var(--danger);color:var(--danger)}
 .danger-btn:hover{background:var(--danger-bg)}
+/* Row-scoped danger action (e.g. "Remove" in a table row) -- same color
+   language as .danger-btn, compact sizing for inline use in a table cell.
+   Lives here (not admin.html's own <style>) so it's part of the one shared
+   component sheet instead of a page-local shadow copy. */
+.rowbtn{background:transparent;border:1px solid var(--line-strong);color:var(--danger);border-radius:var(--radius-pill);padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer}
+.rowbtn:hover{background:var(--danger-bg)}
+.rowbtn:disabled{opacity:.7;cursor:not-allowed}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;height:40px}
 .seg button{font:inherit;border:0;background:var(--paper);color:var(--muted);cursor:pointer;height:100%;padding:0 16px;display:inline-flex;align-items:center;justify-content:center}
 .seg button+button{border-inline-start:1px solid var(--line-strong)}
@@ -447,25 +488,13 @@ header.masthead.compact-header{
   border-radius:0 0 14px 14px;box-shadow:0 2px 7px rgba(13,49,50,.12);position:sticky;top:0;z-index:30;
 }
 html[dir="ltr"] header.masthead.compact-header{margin:0 8px 0 70px}
-header.masthead.compact-header::before{
-  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;overflow:hidden;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cpath d='M50 4 L96 50 L50 96 L4 50 Z' opacity='.5'/%3E%3Cpath d='M50 26 L74 50 L50 74 L26 50 Z' opacity='.6'/%3E%3C/g%3E%3C/svg%3E");
-  background-repeat:repeat;background-size:100px 100px;
-  opacity:.16;
-  animation:headerDrift 22s linear infinite;
-}
-header.masthead.compact-header::after{
-  content:"";position:absolute;top:0;bottom:0;left:0;width:45%;pointer-events:none;border-radius:inherit;overflow:hidden;
-  background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.5) 50%,transparent 100%);
-  animation:headerShine 5s ease-in-out infinite;
-}
 .compact-brand,.compact-search,.compact-tools{position:relative;z-index:1}
 .compact-brand{height:44px;min-width:220px;padding:0;display:flex;align-items:center;gap:10px;background:transparent;color:#fff;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .compact-tools{display:flex;gap:8px;align-items:center;direction:ltr}
 .compact-tool{width:32px;height:32px;border:0;border-radius:50%;background:var(--sand);color:var(--shell-dark);display:grid;place-items:center;cursor:pointer;font:700 13px/1 system-ui}
 .compact-tool:hover{background:var(--ok-bg)}
 .compact-tool svg{width:17px;height:17px}
-.compact-search{width:min(320px,30vw);height:38px;border:0;border-radius:11px;background:rgba(255,255,255,.95);color:var(--ink);padding:0 13px;font:14px "Segoe UI",Tahoma,sans-serif;outline:0}
+.compact-search{width:min(320px,30vw);height:38px;border:0;border-radius:11px;background:rgba(255,255,255,.95);color:var(--ink);padding:0 13px;font-family:inherit;font-size:14px;outline:0}
 .compact-search::placeholder{color:var(--muted)}
 
 .tool-wrap{position:relative}
@@ -553,7 +582,7 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 }
 
 .cert-list{display:flex;flex-direction:column;gap:10px}
-.cert{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
+.cert{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .cert:nth-child(2){animation-delay:.25s}
 .cert:nth-child(3){animation-delay:.5s}
 .cert:nth-child(4){animation-delay:.75s}
@@ -567,13 +596,19 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .info{flex:1;min-width:0}
 .t{font-weight:700;margin-bottom:3px}
 .s{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
-.pill{border-radius:999px;padding:2px 9px;font-weight:600;font-size:11.5px}
+/* Same chip visual language as .badge (padding/radius/font-size/weight) --
+   only the semantic color pairing differs by use case. */
+.pill{border-radius:var(--radius-pill);padding:3px 10px;font-weight:600;font-size:11px}
 .pill.done{background:var(--ok-bg);color:var(--green-700)}
 .pill.fmt{background:color-mix(in srgb, var(--gold) 25%, var(--paper));color:color-mix(in srgb, var(--gold) 70%, var(--ink))}
 [data-colorblind] .pill.done::before{content:"\2713 "}
-.dl{flex:none;background:var(--green-700);color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.dl{flex:none;background:var(--green-700);color:#fff;border:0;border-radius:var(--radius-sm);padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:7px}
 .dl:hover{background:var(--green-500)}
 .dl.busy{opacity:.85;cursor:progress}
+/* Single disabled affordance app-wide: any button/control using the native
+   `disabled` attribute gets the same dimmed treatment, so JS never needs to
+   inject one-off inline opacity values. */
+.dl:disabled{opacity:.7;cursor:not-allowed}
 .dl .spin{display:none;width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite}
 .dl.busy .spin{display:inline-block}
 

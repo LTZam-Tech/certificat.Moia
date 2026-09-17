@@ -64,7 +64,7 @@ function renderTrainingsPage(pageItems) {
       <div class="tt">${lang === 'ar' ? tr.title_ar : tr.title_en}</div>
       <div class="td">${lang === 'ar' ? (tr.desc_ar || '') : (tr.desc_en || '')}</div>
       <div class="tmeta"><span>${t('deadline')}</span><b dir="ltr">${formatShortDate(tr.deadline)}</b></div>
-      <button class="btn" data-id="${tr.id}" ${already ? 'disabled style="opacity:.65;cursor:not-allowed"' : ''}>${already ? t('registered') : t('register')}</button>
+      <button class="btn" data-id="${tr.id}" ${already ? 'disabled' : ''}>${already ? t('registered') : t('register')}</button>
     </div>`;
   }).join('');
 
@@ -132,8 +132,8 @@ function renderMinePage(pageItems) {
         <div class="ms"><span class="idpill">${m.training_id}</span><span>${t('regDate')(formatShortDate(m.registered_at))}</span></div>
       </div>
       ${mineStatusBadge(m)}
-      ${canCancel ? `<button class="signout" data-cancel="${m.training_id}" style="padding:8px 12px;font-size:12.5px">${t('cancelReg')}</button>` : ''}
-      <button class="dl" ${canDownload ? `data-file="${encodeURIComponent(cert.fileName)}"` : 'disabled style="opacity:.55;cursor:not-allowed"'}>${dlLabel}</button>
+      ${canCancel ? `<button class="signout sm" data-cancel="${m.training_id}">${t('cancelReg')}</button>` : ''}
+      <button class="dl" ${canDownload ? `data-file="${encodeURIComponent(cert.fileName)}"` : 'disabled'}>${dlLabel}</button>
     </div>`;
   }).join('');
 
@@ -183,7 +183,10 @@ function formatDate(iso) {
 }
 
 function sealSvg() {
-  return `<svg viewBox="0 0 46 46" fill="none"><circle cx="23" cy="20" r="13" fill="#EAF2EC" stroke="#C6A15B" stroke-width="1.3"/><path d="M23 12l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.7-2-3.7 2 .7-4.3-3.1-3 4.3-.6z" fill="#005430"/><path d="M18 31l-2 8 7-3 7 3-2-8" stroke="#C6A15B" stroke-width="1.3" stroke-linejoin="round" fill="#fff"/></svg>`;
+  // Colors are set via inline style="" (not fill=/stroke= attributes) so
+  // they resolve through var() and stay theme-aware across dark mode and
+  // Color Blind Mode, instead of being frozen to the light-mode hex values.
+  return `<svg viewBox="0 0 46 46" fill="none"><circle cx="23" cy="20" r="13" style="fill:var(--success-bg);stroke:var(--gold)" stroke-width="1.3"/><path d="M23 12l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.7-2-3.7 2 .7-4.3-3.1-3 4.3-.6z" style="fill:var(--green-700)"/><path d="M18 31l-2 8 7-3 7 3-2-8" style="stroke:var(--gold);fill:var(--paper)" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
 }
 
 function trainingCertLabel(c) {
