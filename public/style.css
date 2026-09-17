@@ -228,37 +228,6 @@ html[dir="ltr"] .content-area table.plain td{text-align:left}
 .admin-footer{margin-right:62px}
 html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 
-@media(min-width:1200px){
-  header.masthead.compact-header{height:100px;min-height:100px;margin:8px 158px 0 29px;padding:0 32px;border-radius:20px}
-  html[dir="ltr"] header.masthead.compact-header{margin:8px 29px 0 158px}
-  .compact-brand{height:100px;font-size:24px;gap:0}
-  .compact-tools{gap:16px}
-  .compact-tool{width:46px;height:46px;font-size:18px}
-  .compact-tool svg{width:22px;height:22px}
-  .compact-search{position:absolute;left:50%;transform:translateX(-50%);width:420px;max-width:32vw;height:50px;border-radius:18px;padding:0 20px;font-size:16px}
-  .app-shell{min-height:calc(100vh - 108px);padding-right:270px}
-  html[dir="ltr"] .app-shell{padding-right:0;padding-left:270px}
-  .sidebar{flex:0 0 0;width:270px;height:calc(100vh - 153px);padding:38px 12px 14px;top:153px;right:0;bottom:auto;border-radius:20px 0 0 0;box-shadow:none}
-  html[dir="ltr"] .sidebar{right:auto;left:0;top:153px;border-radius:0 20px 0 0}
-  .sidebar-logo{display:block;position:absolute;top:-145px;right:0;width:140px;height:145px;padding:16px 12px;background:var(--shell-dark);border-radius:20px 0 0 0;z-index:20}
-  html[dir="ltr"] .sidebar-logo{right:auto;left:0;border-radius:0 20px 0 0}
-  .sidebar-logo img{display:block;width:100%;height:100%;object-fit:contain;background:transparent;padding:0;border-radius:0;animation:logoGlow 4s ease-in-out infinite}
-  .sidebar-nav{gap:7px;width:100%;border-inline-start:4px solid rgba(0,0,0,.18);padding-inline-start:0}
-  .side-link{width:100%;height:62px;padding:0 18px;margin:0;gap:15px;justify-content:flex-start;border-radius:14px;color:#fff;font-size:17px;font-weight:700}
-  .side-link svg{width:27px;height:27px}
-  .side-link span{display:inline!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .side-link.on{color:var(--shell-dark);border-radius:14px;background:#fff}
-  .sidebar-footer{width:100%;padding:0;gap:10px}
-  .profile-chip{width:100%;height:72px;padding:0 14px;border-radius:14px;background:#fff;justify-content:flex-start}
-  .profile-chip span:not(.profile-avatar){display:inline!important;color:var(--shell-dark)!important;font-size:16px;font-weight:700}
-  .profile-avatar{width:40px;height:40px;background:transparent;color:var(--shell-dark)}
-  .side-signout{width:100%;height:50px;padding:0 18px;gap:15px;justify-content:flex-start;color:#fff;font-size:16px}
-  .side-signout span{display:inline!important}
-  .content-area{padding:48px 20px 30px}
-  .admin-footer{margin-right:270px}
-  html[dir="ltr"] .admin-footer{margin-right:0;margin-left:270px}
-}
-
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
 .tcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .tcard:nth-child(2){animation-delay:.25s}
@@ -377,6 +346,41 @@ header.masthead.compact-header::after{
   .compact-brand{min-width:0;padding:0 14px;font-size:14px}
   .compact-search{display:none}
   .content-area{padding:22px 16px}
+}
+
+/* Expanded shell state at 1200px+: taller rounded header, search bar fills the
+   middle, and the sidebar expands into a labeled 270px panel with its own
+   overhanging logo tab -- this block must stay LAST so it wins the cascade
+   over the unconditional base rules above. */
+@media(min-width:1200px){
+  header.masthead.compact-header{height:100px;min-height:100px;margin:8px 158px 0 29px;padding:0 32px;border-radius:20px}
+  html[dir="ltr"] header.masthead.compact-header{margin:8px 29px 0 158px}
+  .compact-brand{height:100px;font-size:24px;gap:0}
+  .compact-search{display:block;flex:1;min-width:0;width:auto;height:50px;border-radius:18px;padding:0 20px;font-size:16px;margin:0 24px}
+  .compact-tools{gap:16px}
+  .compact-tool{width:46px;height:46px;font-size:18px}
+  .compact-tool svg{width:22px;height:22px}
+  .app-shell{min-height:calc(100vh - 108px);padding-right:270px}
+  html[dir="ltr"] .app-shell{padding-right:0;padding-left:270px}
+  .sidebar{flex:0 0 0;width:270px;height:calc(100vh - 153px);padding:38px 12px 14px;top:153px;right:0;bottom:auto;border-radius:20px 0 0 0;box-shadow:none}
+  html[dir="ltr"] .sidebar{right:auto;left:0;top:153px;border-radius:0 20px 0 0}
+  .sidebar-logo{display:block;position:absolute;top:-145px;right:0;width:140px;height:145px;padding:16px 12px;background:var(--shell-dark);border-radius:20px 0 0 0;z-index:20}
+  html[dir="ltr"] .sidebar-logo{right:auto;left:0;border-radius:0 20px 0 0}
+  .sidebar-logo img{display:block;width:100%;height:100%;object-fit:contain;background:transparent;padding:0;border-radius:0;animation:logoGlow 4s ease-in-out infinite}
+  .sidebar-nav{gap:7px;width:100%;border-inline-start:4px solid rgba(0,0,0,.18);padding-inline-start:0}
+  .side-link{width:100%;height:62px;padding:0 18px;margin:0;gap:15px;justify-content:flex-start;border-radius:14px;color:#fff;font-size:17px;font-weight:700}
+  .side-link svg{width:27px;height:27px}
+  .side-link span{display:inline!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side-link.on{color:var(--shell-dark);border-radius:14px;background:#fff}
+  .sidebar-footer{width:100%;padding:0;gap:10px}
+  .profile-chip{width:100%;height:72px;padding:0 14px;border-radius:14px;background:#fff;justify-content:flex-start}
+  .profile-chip span:not(.profile-avatar){display:inline!important;color:var(--shell-dark)!important;font-size:16px;font-weight:700}
+  .profile-avatar{width:40px;height:40px;background:transparent;color:var(--shell-dark)}
+  .side-signout{width:100%;height:50px;padding:0 18px;gap:15px;justify-content:flex-start;color:#fff;font-size:16px}
+  .side-signout span{display:inline!important}
+  .content-area{padding:48px 20px 30px}
+  .admin-footer{margin-right:270px}
+  html[dir="ltr"] .admin-footer{margin-right:0;margin-left:270px}
 }
 
 .cert-list{display:flex;flex-direction:column;gap:10px}
