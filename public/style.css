@@ -22,6 +22,27 @@
   --radius-md:12px;
   --radius-sm:9px;
   --radius-pill:999px;
+  /* Two secondary/utility button height tiers (the large primary .btn is
+     its own, intentionally bigger, tier and stays padding-driven). Icon-only
+     circular controls (.compact-tool, .page-btn) are a different component
+     family -- an icon toggle, not a labeled action -- and aren't part of
+     this scale. */
+  --btn-h-md:40px;
+  --btn-h-sm:32px;
+  /* Spacing scale. New and touched components should take padding/gap
+     values from here; existing values that already land exactly on a step
+     are being migrated onto the token as those components are touched
+     (zero visual change), same approach used for the radius scale above.
+     This is a starting point, not a claim that every spacing value in the
+     file has been swept onto it yet. */
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:14px;
+  --space-5:16px;
+  --space-6:20px;
+  --space-7:24px;
+  --space-8:30px;
 
   /* Semantic status tokens (source of truth referenced by badges, alerts,
      toasts, and form validation). Aliased to the existing brand tokens in
@@ -81,19 +102,23 @@
         scoped under [data-colorblind]. Hex values alone are never the
         fix; pairing color with a second channel is. */
 :root[data-colorblind]{
-  --danger:#B54708;
-  --danger-bg:#FDF0E4;
-  --warning:#8A6B00;
-  --warning-bg:#FBF3D2;
+  /* Danger pushed toward true red (~hue 16) and warning pushed toward a
+     more golden yellow (~hue 54) -- roughly a 38 degree gap, versus ~25
+     before, so the two stay clearly distinct for protanopia/deuteranopia
+     instead of both reading as similar oranges. */
+  --danger:#B33C12;
+  --danger-bg:#FBEAE0;
+  --warning:#8A7C00;
+  --warning-bg:#FBF2CE;
   --info:#0B5FA5;
   --info-bg:#E4F0FB;
   --focus-ring:#0B5FA5;
 }
 :root[data-theme="dark"][data-colorblind]{
-  --danger:#F0A059;
-  --danger-bg:#3A2810;
-  --warning:#E8D25E;
-  --warning-bg:#352C0E;
+  --danger:#F17552;
+  --danger-bg:#3A2412;
+  --warning:#E8DA5A;
+  --warning-bg:#34300C;
   --info:#6FB6F0;
   --info-bg:#122C40;
   --focus-ring:#6FB6F0;
@@ -155,7 +180,6 @@ header.masthead.compact-header::after{
     transparent 100%);
   animation:headerShine 5s ease-in-out infinite;
 }
-.masthead-inner{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:14px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
 @keyframes headerDrift{
   from{background-position:0 0}
   to{background-position:-400px 400px}
@@ -188,17 +212,9 @@ header.masthead.compact-header::after{
       drop-shadow(0 0 34px rgba(255,255,255,.65));
   }
 }
-.titles{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
-.titles .mname{font-size:17px;font-weight:700;color:#fff;line-height:1.25}
-.titles .dept{font-size:12px;font-weight:500;color:#BFD8C7;margin-top:2px;display:flex;align-items:center;gap:8px}
-.titles .dept::before{content:"";width:16px;height:1px;background:var(--gold);display:inline-block;flex:none}
-.lang-toggle{margin-inline-start:auto;font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
 @media (max-width:560px){
   .crest{height:32px}
-  .titles .mname{font-size:14.5px}
-  .titles .dept{font-size:10.5px}
 }
-.lang-toggle:hover{background:rgba(255,255,255,.22)}
 
 main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:44px 20px 40px}
 .stage{width:100%;max-width:460px}
@@ -212,7 +228,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .lede{margin:0 0 6px;color:var(--muted);font-size:14.5px}
 .card-body{padding:14px 30px 30px}
 
-.alert{display:none;gap:10px;align-items:flex-start;background:var(--danger-bg);border:1px solid color-mix(in srgb, var(--danger) 35%, transparent);color:var(--danger);border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;margin-bottom:16px}
+.alert{display:none;gap:10px;align-items:flex-start;background:var(--danger-bg);border:1px solid color-mix(in srgb, var(--danger) 35%, transparent);color:var(--danger);border-radius:var(--radius-sm);padding:var(--space-3) var(--space-4);font-size:13.5px;margin-bottom:var(--space-5)}
 .alert.show{display:flex}
 .alert.info{background:var(--info-bg);border-color:color-mix(in srgb, var(--info) 35%, transparent);color:var(--info)}
 .alert.info.show{display:flex}
@@ -224,7 +240,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 [data-colorblind] .alert.show::before{content:"!";font-weight:800;flex:none;line-height:1.3}
 [data-colorblind] .alert.info.show::before{content:"i";font-style:italic;font-weight:800}
 
-.field{margin-bottom:16px}
+.field{margin-bottom:var(--space-5)}
 .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
 .field .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
 .field.invalid input, .field.invalid .secure, .field.invalid .phone{border-color:var(--danger) !important}
@@ -242,7 +258,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .secure:focus-within, .phone:focus-within{border-color:var(--focus-ring);box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 30%, transparent)}
 .compact-search:focus{box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 30%, transparent);outline:0}
 :focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
-.secure input, .phone input{border:0;outline:0;padding:12px 14px;font-size:15px;width:100%;background:transparent;letter-spacing:2px}
+.secure input, .phone input{border:0;outline:0;padding:var(--space-3) var(--space-4);font-size:15px;width:100%;background:transparent;letter-spacing:2px}
 .phone .cc{padding:12px 10px;color:var(--muted);border-inline-end:1px solid var(--line);font-weight:600}
 .secure .eye{border:0;background:transparent;cursor:pointer;padding:0 12px;color:var(--muted);display:flex;align-items:center}
 .hidden{display:none !important}
@@ -258,7 +274,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .secnote{display:flex;gap:9px;align-items:flex-start;margin-top:18px;font-size:12.5px;color:var(--muted)}
 .secnote svg{flex:none;color:var(--green-500);margin-top:1px}
 
-.id-bar{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:var(--shadow)}
+.id-bar{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin-bottom:18px;box-shadow:var(--shadow)}
 .who{display:flex;align-items:center;gap:12px}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--green-700);color:#fff;display:grid;place-items:center;font-weight:700}
 .name{font-weight:700}
@@ -283,11 +299,11 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 .toast.error{background:var(--danger-bg);border-color:color-mix(in srgb, var(--danger) 30%, transparent);color:var(--danger)}
 .toast.error svg{color:var(--danger)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
-.signout{background:transparent;border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:9px 14px;font-weight:600;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.signout{height:var(--btn-h-sm);display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;background:transparent;border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:0 14px;font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink)}
 .signout:hover{background:var(--sand)}
 /* Compact variant for use inline within a row (e.g. "Cancel" next to a
    training's status), instead of a one-off inline style="" override. */
-.signout.sm{padding:8px 12px;font-size:12.5px}
+.signout.sm{height:28px;padding:0 12px;font-size:12.5px}
 
 .section-label{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 12px}
 .section-label h2{font-size:18px;margin:0}
@@ -398,7 +414,7 @@ html.sidebar-expanded .side-signout span{display:inline!important}
 html.sidebar-expanded .profile-avatar{width:40px;height:40px;background:transparent;color:var(--shell-dark)}
 
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
-.tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-5) 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .tcard:nth-child(2){animation-delay:.25s}
 .tcard:nth-child(3){animation-delay:.5s}
 .tcard:nth-child(4){animation-delay:.75s}
@@ -432,7 +448,7 @@ html.sidebar-expanded .profile-avatar{width:40px;height:40px;background:transpar
 [data-colorblind] .badge.conducted::before{content:"!"}
 [data-colorblind] .badge.closed::before{content:"\25CF";font-size:8px}
 
-.mrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.mrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px var(--space-4);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);margin-bottom:10px;box-shadow:var(--shadow)}
 .mrow .mi{flex:1;min-width:0}
 .mrow .mt{font-weight:700;font-size:14px}
 .mrow .ms{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -494,12 +510,16 @@ html.sidebar-expanded .profile-avatar{width:40px;height:40px;background:transpar
 html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 @media(prefers-reduced-motion:reduce){.login-ticker-track{animation:none}}
 
-.admin-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.admin-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-7);margin-bottom:var(--space-6)}
 .admin-card h2{margin-top:0;font-size:18px}
 .admin-card .hd{
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   position:sticky;top:var(--header-total);z-index:5;
-  background:var(--paper);margin:-24px -24px 0;padding:24px 24px 14px;border-radius:var(--radius) var(--radius) 0 0;
+  /* Negative margin exactly cancels .admin-card's own padding (--space-7)
+     so this header can stretch edge-to-edge and stick above the rest of
+     the card's content -- expressed via the same token so the two can't
+     silently drift apart. */
+  background:var(--paper);margin:calc(var(--space-7) * -1) calc(var(--space-7) * -1) 0;padding:var(--space-7) var(--space-7) var(--space-4);border-radius:var(--radius) var(--radius) 0 0;
 }
 .admin-note{color:var(--muted);font-size:13.5px}
 .empty-note{color:var(--muted);font-size:13px;padding:14px 0}
@@ -518,7 +538,7 @@ table.plain{width:100%;border-collapse:collapse;font-size:13px}
 table.plain th,table.plain td{text-align:start;padding:8px 8px;border-bottom:1px solid var(--line)}
 table.plain th{color:var(--muted);font-weight:600}
 .solid-btn,.ghost-btn,.danger-btn{
-  height:40px;padding:0 18px;border-radius:var(--radius-pill);font-size:13.5px;font-weight:700;
+  height:var(--btn-h-md);padding:0 18px;border-radius:var(--radius-pill);font-size:13.5px;font-weight:700;
   cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;
   box-sizing:border-box;white-space:nowrap;
 }
@@ -605,7 +625,7 @@ html[dir="ltr"] .tool-menu{direction:ltr}
 html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translateX(-16px)}
 
 .notif-menu .notif-list{max-height:360px;overflow-y:auto}
-.notif-item{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--line)}
+.notif-item{display:flex;gap:10px;align-items:flex-start;padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--line)}
 .notif-item:last-child{border-bottom:0}
 .notif-ico{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--success-bg);color:var(--success)}
 .notif-ico.absent{background:var(--danger-bg);color:var(--danger)}
@@ -656,7 +676,7 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 }
 
 .cert-list{display:flex;flex-direction:column;gap:10px}
-.cert{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
+.cert{display:flex;align-items:center;gap:var(--space-4);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
 .cert:nth-child(2){animation-delay:.25s}
 .cert:nth-child(3){animation-delay:.5s}
 .cert:nth-child(4){animation-delay:.75s}
@@ -676,7 +696,7 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .pill.done{background:var(--success-bg);color:var(--success)}
 .pill.fmt{background:color-mix(in srgb, var(--gold) 25%, var(--paper));color:color-mix(in srgb, var(--gold) 70%, var(--ink))}
 [data-colorblind] .pill.done::before{content:"\2713 "}
-.dl{flex:none;background:var(--green-700);color:#fff;border:0;border-radius:var(--radius-sm);padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.dl{flex:none;height:var(--btn-h-sm);box-sizing:border-box;background:var(--green-700);color:#fff;border:0;border-radius:var(--radius-sm);padding:0 14px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
 .dl:hover{background:var(--green-500)}
 .dl.busy{opacity:.85;cursor:progress}
 /* Single disabled affordance app-wide: any button/control using the native
