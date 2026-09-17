@@ -43,8 +43,17 @@
   </div>
 </div>
 
-<!-- ============ post-login shell (no shared header -- sidebar only, per the approved design) ============ -->
+<!-- ============ post-login shell (same compact header as the employee shell) ============ -->
 <div class="hidden" id="adminApp">
+  <header class="masthead compact-header">
+    <div class="compact-brand"><span>Certificate Portal — Administration</span></div>
+    <input class="compact-search" type="search" id="adminSearch" aria-label="Search" placeholder="Search">
+    <div class="compact-tools" aria-label="System tools">
+      <button class="compact-tool" type="button" title="Notifications" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="compact-tool" type="button" title="Appearance" aria-label="Appearance">☼</button>
+    </div>
+  </header>
+
   <div class="app-shell">
     <aside class="sidebar">
       <div class="sidebar-logo"><img src="/emblem-full.png" alt="MOIA"></div>

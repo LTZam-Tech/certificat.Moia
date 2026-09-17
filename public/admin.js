@@ -59,6 +59,7 @@ function showSection(name) {
     el(`scr-${n}`).classList.toggle('hidden', n !== name);
     el(`nav${n.charAt(0).toUpperCase()}${n.slice(1)}`).classList.toggle('on', n === name);
   });
+  el('adminSearch').value = '';
 }
 
 // ---------------------------------------------------------------------
@@ -294,6 +295,19 @@ function renderAudit(rows) {
   </tr>`).join('');
 }
 
+// ---------------------------------------------------------------------
+// Header search -- filters the rows of whichever section is currently open
+// ---------------------------------------------------------------------
+
+function filterVisibleTable(query) {
+  const q = query.trim().toLowerCase();
+  const activeSection = document.querySelector('main.content-area > div:not(.hidden)');
+  if (!activeSection) return;
+  activeSection.querySelectorAll('table.plain tbody tr').forEach((tr) => {
+    tr.style.display = !q || tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   el('adminLoginBtn').addEventListener('click', login);
   ['user', 'pass'].forEach((id) => {
@@ -321,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el('navEmployees').addEventListener('click', () => showSection('employees'));
   el('navTrainings').addEventListener('click', () => showSection('trainings'));
   el('navAudit').addEventListener('click', () => showSection('audit'));
+  el('adminSearch').addEventListener('input', (e) => filterVisibleTable(e.target.value));
 
   renderLoginTicker();
   checkAuth();
