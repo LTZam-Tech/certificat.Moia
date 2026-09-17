@@ -187,7 +187,7 @@ function sealSvg() {
   // Colors are set via inline style="" (not fill=/stroke= attributes) so
   // they resolve through var() and stay theme-aware across dark mode and
   // Color Blind Mode, instead of being frozen to the light-mode hex values.
-  return `<svg viewBox="0 0 46 46" fill="none"><circle cx="23" cy="20" r="13" style="fill:var(--success-bg);stroke:var(--gold)" stroke-width="1.3"/><path d="M23 12l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.7-2-3.7 2 .7-4.3-3.1-3 4.3-.6z" style="fill:var(--green-700)"/><path d="M18 31l-2 8 7-3 7 3-2-8" style="stroke:var(--gold);fill:var(--paper)" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
+  return `<svg viewBox="0 0 46 46" fill="none"><circle cx="23" cy="20" r="13" style="fill:var(--success-bg);stroke:var(--gold)" stroke-width="1.3"/><path d="M23 12l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.7-2-3.7 2 .7-4.3-3.1-3 4.3-.6z" style="fill:var(--success)"/><path d="M18 31l-2 8 7-3 7 3-2-8" style="stroke:var(--gold);fill:var(--paper)" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
 }
 
 function trainingCertLabel(c) {
