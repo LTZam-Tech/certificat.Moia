@@ -166,9 +166,10 @@ async function loadMine() {
   renderCerts();
 }
 
-function showToast(msg) {
+function showToast(msg, kind) {
   const toast = document.getElementById('msgToast');
   document.getElementById('msgToastText').textContent = msg;
+  toast.classList.toggle('error', kind !== 'success');
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2600);
 }

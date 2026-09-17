@@ -370,8 +370,8 @@ function renderRosterPage(pageItems) {
       <td>${r.mobile_e164 || ''}</td>
       <td>${r.registered_at}</td>
       <td><div class="seg">
-        <button class="${outcome === 'attended' ? 'a' : ''}" data-id="${r.national_id}" data-outcome="attended">${at('attended')}</button>
-        <button class="${outcome === 'absent' ? 'd' : ''}" data-id="${r.national_id}" data-outcome="absent">${at('absent')}</button>
+        <button class="${outcome === 'attended' ? 'on a' : ''}" data-id="${r.national_id}" data-outcome="attended">${at('attended')}</button>
+        <button class="${outcome === 'absent' ? 'on d' : ''}" data-id="${r.national_id}" data-outcome="absent">${at('absent')}</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -383,8 +383,10 @@ function renderRosterPage(pageItems) {
       // Update just this row's buttons in place -- re-rendering the page
       // through the paginator would reset it back to page 1.
       const seg = btn.closest('.seg');
-      seg.querySelector('[data-outcome="attended"]').classList.toggle('a', outcome === 'attended');
-      seg.querySelector('[data-outcome="absent"]').classList.toggle('d', outcome === 'absent');
+      const attendedBtn = seg.querySelector('[data-outcome="attended"]');
+      const absentBtn = seg.querySelector('[data-outcome="absent"]');
+      attendedBtn.className = outcome === 'attended' ? 'on a' : '';
+      absentBtn.className = outcome === 'absent' ? 'on d' : '';
     });
   });
 }

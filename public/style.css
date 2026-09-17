@@ -14,6 +14,18 @@
   --ok-bg:#EAF3EC;
   --shadow:0 1px 2px rgba(0,45,24,.05), 0 12px 34px rgba(0,45,24,.09);
   --radius:14px;
+
+  /* Semantic status tokens (source of truth referenced by badges, alerts,
+     toasts, and form validation). Aliased to the existing brand tokens in
+     the default look so nothing here changes visually until either Dark
+     mode or Color Blind Mode is turned on. */
+  --success: var(--green-700);
+  --success-bg: var(--ok-bg);
+  --warning: #8A6412;
+  --warning-bg: #FFF7E6;
+  --info: #1D4ED8;
+  --info-bg: #EAF1FE;
+  --focus-ring: var(--green-700);
 }
 
 /* ===== Dark mode (Appearance menu) ===== */
@@ -32,20 +44,51 @@
   --danger-bg:#3A2620;
   --ok-bg:#173322;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px rgba(0,0,0,.4);
+  --warning:#E8C86A;
+  --warning-bg:#3A3016;
+  --info:#6EA8F5;
+  --info-bg:#152A42;
+  --focus-ring: var(--green-500);
 }
 
-/* ===== Color-blind-friendly palette (Appearance menu) =====
-   Red vs green is the classic confusable pair for red-green color
-   blindness (the most common form); this swaps the "danger/negative"
-   color for amber so it stays clearly distinct from the brand green
-   used for "success/positive" everywhere (badges, alerts, outcomes). */
+/* =====================================================================
+   Color Blind Mode (Settings -> Accessibility -> Color Blind Mode)
+   =====================================================================
+   Principle: this is an ACCESSIBILITY MODE, not a new theme. The brand
+   green, gold, layout, typography and components are all unchanged --
+   only two things happen when this is on:
+     1. The "error" and "warning" hues move to values that stay clearly
+        distinct from the brand green and from each other for the common
+        forms of color vision deficiency (protanopia, deuteranopia and
+        their -anomaly variants, plus tritanopia). Modelled on the
+        Okabe-Ito colorblind-safe qualitative palette: green stays as-is
+        for success, error moves to a vermillion/orange, warning moves to
+        a gold that reads as clearly lighter/warmer than the error hue,
+        and info uses a blue that is far from all three in hue and
+        lightness.
+     2. Every place that used color as the ONLY signal (status badges,
+        alerts, toasts, form errors, the active nav item, segmented
+        toggles) gets an icon, border, weight or text change added on
+        top -- see the component rules further down this file, all
+        scoped under [data-colorblind]. Hex values alone are never the
+        fix; pairing color with a second channel is. */
 :root[data-colorblind]{
-  --danger:#B45309;
-  --danger-bg:#FDF0DC;
+  --danger:#B54708;
+  --danger-bg:#FDF0E4;
+  --warning:#8A6B00;
+  --warning-bg:#FBF3D2;
+  --info:#0B5FA5;
+  --info-bg:#E4F0FB;
+  --focus-ring:#0B5FA5;
 }
 :root[data-theme="dark"][data-colorblind]{
-  --danger:#F0A94E;
-  --danger-bg:#3A2C12;
+  --danger:#F0A059;
+  --danger-bg:#3A2810;
+  --warning:#E8D25E;
+  --warning-bg:#352C0E;
+  --info:#6FB6F0;
+  --info-bg:#122C40;
+  --focus-ring:#6FB6F0;
 }
 
 *{box-sizing:border-box}
@@ -158,8 +201,7 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 
 .alert{display:none;gap:10px;align-items:flex-start;background:var(--danger-bg);border:1px solid color-mix(in srgb, var(--danger) 35%, transparent);color:var(--danger);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:16px}
 .alert.show{display:flex}
-.alert.info{background:#FFF7E6;border-color:#F0DFB0;color:#8A6412}
-:root[data-theme="dark"] .alert.info{background:#3A3016;border-color:#5A4A1E;color:#E8C86A}
+.alert.info{background:var(--info-bg);border-color:color-mix(in srgb, var(--info) 35%, transparent);color:var(--info)}
 .alert.info.show{display:flex}
 
 .field{margin-bottom:16px}
@@ -168,8 +210,18 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .field.invalid input, .field.invalid .secure, .field.invalid .phone{border-color:var(--danger) !important}
 .field.invalid .field-error{display:block}
 .field-error{display:none;font-size:12.5px;color:var(--danger);margin-top:6px}
+.field-error::before{content:"! ";font-weight:700}
+/* Color Blind Mode: a thicker border on invalid fields adds a shape cue
+   on top of the color change, and the field-error text (already always
+   shown) carries the meaning regardless of color perception. */
+[data-colorblind] .field.invalid input,
+[data-colorblind] .field.invalid .secure,
+[data-colorblind] .field.invalid .phone{border-width:2px !important}
 
-.secure, .phone{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:10px;background:var(--paper);overflow:hidden}
+.secure, .phone{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:10px;background:var(--paper);overflow:hidden;transition:box-shadow .12s ease, border-color .12s ease}
+.secure:focus-within, .phone:focus-within{border-color:var(--focus-ring);box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 30%, transparent)}
+.compact-search:focus{box-shadow:0 0 0 3px color-mix(in srgb, var(--focus-ring) 45%, transparent);outline:0}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 .secure input, .phone input{border:0;outline:0;padding:12px 14px;font-size:15px;width:100%;background:transparent;letter-spacing:2px}
 .phone .cc{padding:12px 10px;color:var(--muted);border-inline-end:1px solid var(--line);font-weight:600}
 .secure .eye{border:0;background:transparent;cursor:pointer;padding:0 12px;color:var(--muted);display:flex;align-items:center}
@@ -197,8 +249,8 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 
 .toast{
   position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-8px);
-  display:flex;align-items:center;gap:8px;white-space:nowrap;
-  background:var(--ok-bg);border:1px solid #D5E7D9;color:var(--green-700);
+  display:flex;align-items:center;gap:8px;max-width:min(90vw,420px);
+  background:var(--ok-bg);border:1px solid color-mix(in srgb, var(--green-700) 25%, transparent);color:var(--green-700);
   font-size:13.5px;font-weight:600;padding:10px 16px;border-radius:999px;
   box-shadow:var(--shadow);
   opacity:0;pointer-events:none;z-index:1000;
@@ -206,6 +258,10 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 }
 .toast svg{flex:none;width:16px;height:16px;color:var(--green-500)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Failure/attention messages (registration errors etc.) must never look
+   like a success toast -- same shape and motion, different color+icon. */
+.toast.error{background:var(--danger-bg);border-color:color-mix(in srgb, var(--danger) 30%, transparent);color:var(--danger)}
+.toast.error svg{color:var(--danger)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 .signout{background:transparent;border:1px solid var(--line-strong);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer;color:var(--ink)}
 .signout:hover{background:var(--sand)}
@@ -243,6 +299,13 @@ html[dir="ltr"] .sidebar{right:auto;left:0;box-shadow:2px 0 9px rgba(0,0,0,.12)}
 }
 .side-link:hover{background:rgba(255,255,255,.12)}
 .side-link.on{background:#fff;color:var(--shell-dark);border-radius:13px}
+/* The active nav item is already distinguished by a fill change (white
+   pill vs. transparent), which is a lightness/shape difference, not a
+   hue one -- already fine for color vision deficiency. Color Blind Mode
+   adds an explicit accent bar too, for a fully unambiguous "you are
+   here" marker per WCAG's don't-rely-on-color-alone guidance. */
+[data-colorblind] .side-link.on{box-shadow:inset 3px 0 0 var(--gold)}
+html[dir="ltr"] [data-colorblind] .side-link.on{box-shadow:inset -3px 0 0 var(--gold)}
 .side-link svg{flex:none;width:24px;height:24px}
 .side-link span,.profile-chip span:not(.profile-avatar),.side-signout span{display:none}
 .sidebar-footer{margin-top:auto;padding-bottom:0;display:flex;flex-direction:column;align-items:center;gap:5px}
@@ -278,12 +341,24 @@ html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-weight:600;font-size:11px;white-space:nowrap}
 .badge.open{background:var(--ok-bg);color:var(--green-700)}
 .badge.closed{background:var(--line);color:var(--muted)}
-.badge.conducted{background:color-mix(in srgb, var(--gold) 25%, var(--paper));color:color-mix(in srgb, var(--gold) 70%, var(--ink))}
+.badge.conducted{background:var(--warning-bg);color:var(--warning)}
 .badge.cancelled{background:var(--danger-bg);color:var(--danger)}
 .badge.reg{background:var(--ok-bg);color:var(--green-700)}
-.badge.wait{background:color-mix(in srgb, var(--gold) 25%, var(--paper));color:color-mix(in srgb, var(--gold) 70%, var(--ink))}
+.badge.wait{background:var(--warning-bg);color:var(--warning)}
 .badge.attend{background:var(--ok-bg);color:var(--green-700)}
 .badge.absent{background:var(--danger-bg);color:var(--danger)}
+
+/* Color Blind Mode: pair every status badge's color with an icon so the
+   status is legible even when the color itself can't be distinguished. */
+[data-colorblind] .badge{gap:4px}
+[data-colorblind] .badge.open::before,
+[data-colorblind] .badge.reg::before,
+[data-colorblind] .badge.attend::before{content:"\2713"}
+[data-colorblind] .badge.cancelled::before,
+[data-colorblind] .badge.absent::before{content:"\2715"}
+[data-colorblind] .badge.wait::before,
+[data-colorblind] .badge.conducted::before{content:"!"}
+[data-colorblind] .badge.closed::before{content:"\25CF";font-size:8px}
 
 .mrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
 .mrow .mi{flex:1;min-width:0}
@@ -353,6 +428,14 @@ table.plain th{color:var(--muted);font-weight:600}
 .seg button.on{background:var(--sand);color:var(--ink);font-weight:700}
 .seg button.on.a{background:var(--ok-bg);color:var(--green-700)}
 .seg button.on.d{background:var(--danger-bg);color:var(--danger)}
+/* Segmented toggles (Attended/Absent, Logins/Downloads) already carry the
+   label text itself, so the state never depended on color alone -- Color
+   Blind Mode adds an icon + underline for a faster-to-scan confirmation. */
+[data-colorblind] .seg button.on{box-shadow:inset 0 -3px 0 var(--ink)}
+[data-colorblind] .seg button.on.a::before{content:"\2713 "}
+[data-colorblind] .seg button.on.a{box-shadow:inset 0 -3px 0 var(--green-700)}
+[data-colorblind] .seg button.on.d::before{content:"\2715 "}
+[data-colorblind] .seg button.on.d{box-shadow:inset 0 -3px 0 var(--danger)}
 .audit-hide-file .audit-col-file{display:none}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.two{grid-template-columns:1fr}}
@@ -403,6 +486,7 @@ header.masthead.compact-header::after{
 .tool-menu.notif-menu{width:340px;padding:0}
 .tool-menu-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 14px 6px}
 .appearance-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border-radius:8px;font-size:13.5px}
+.appearance-hint{margin:6px 10px 4px;font-size:11.5px;color:var(--muted);line-height:1.4}
 .appearance-row:hover{background:var(--sand)}
 .switch{position:relative;display:inline-block;width:38px;height:22px;flex:none}
 .switch input{opacity:0;width:0;height:0}
@@ -486,6 +570,7 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .pill{border-radius:999px;padding:2px 9px;font-weight:600;font-size:11.5px}
 .pill.done{background:var(--ok-bg);color:var(--green-700)}
 .pill.fmt{background:color-mix(in srgb, var(--gold) 25%, var(--paper));color:color-mix(in srgb, var(--gold) 70%, var(--ink))}
+[data-colorblind] .pill.done::before{content:"\2713 "}
 .dl{flex:none;background:var(--green-700);color:#fff;border:0;border-radius:9px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px}
 .dl:hover{background:var(--green-500)}
 .dl.busy{opacity:.85;cursor:progress}
