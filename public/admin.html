@@ -43,15 +43,8 @@
   </div>
 </div>
 
-<!-- ============ post-login shell ============ -->
+<!-- ============ post-login shell (no shared header -- sidebar only, per the approved design) ============ -->
 <div class="hidden" id="adminApp">
-  <header class="masthead compact-header">
-    <div class="compact-brand"><span>Certificate Portal — Administration</span></div>
-    <div class="compact-tools">
-      <button class="compact-tool" type="button" id="logoutBtn">Sign out</button>
-    </div>
-  </header>
-
   <div class="app-shell">
     <aside class="sidebar">
       <div class="sidebar-logo"><img src="/emblem.svg" alt="MOIA"></div>
@@ -72,8 +65,12 @@
       <div class="sidebar-footer">
         <div class="profile-chip">
           <span class="profile-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-          <span style="color:#fff;font-size:15px;font-weight:600" id="adminUserLabel">Admin</span>
+          <span id="adminUserLabel">Admin</span>
         </div>
+        <button class="side-signout" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 00-2 2v12a2 2 0 002 2h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Sign out</span>
+        </button>
       </div>
     </aside>
 
