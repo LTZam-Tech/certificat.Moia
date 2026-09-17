@@ -302,8 +302,17 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 table.plain{width:100%;border-collapse:collapse;font-size:13px}
 table.plain th,table.plain td{text-align:start;padding:8px 8px;border-bottom:1px solid var(--line)}
 table.plain th{color:var(--muted);font-weight:600}
-.solid-btn{background:var(--green-700);color:#fff;border:0;cursor:pointer}
+.solid-btn,.ghost-btn,.danger-btn{
+  height:40px;padding:0 18px;border-radius:999px;font-size:13.5px;font-weight:700;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  box-sizing:border-box;white-space:nowrap;
+}
+.solid-btn{background:var(--green-700);color:#fff;border:0}
 .solid-btn:hover{background:var(--green-500)}
+.ghost-btn{background:transparent;border:1px solid var(--line-strong);color:var(--ink)}
+.ghost-btn:hover{background:var(--sand)}
+.danger-btn{background:#fff;border:1px solid var(--danger);color:var(--danger)}
+.danger-btn:hover{background:var(--danger-bg)}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;height:40px}
 .seg button{font:inherit;border:0;background:#fff;color:var(--muted);cursor:pointer;height:100%;padding:0 16px;display:inline-flex;align-items:center;justify-content:center}
 .seg button+button{border-inline-start:1px solid var(--line-strong)}
@@ -422,7 +431,7 @@ header.masthead.compact-header::after{
 .lockout-box, .service-down{text-align:center;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:32px 24px;color:var(--ink)}
 
 .pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
-.page-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.page-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:#fff;color:var(--ink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .page-btn:hover:not(:disabled){background:var(--sand)}
 .page-btn:disabled{opacity:.4;cursor:not-allowed}
 .page-info{font-size:12.5px;color:var(--muted);min-width:70px;text-align:center}
