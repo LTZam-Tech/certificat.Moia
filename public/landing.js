@@ -6,6 +6,10 @@ let CURRENT_TRAININGS = [];
 let CURRENT_MINE = [];
 let ACTIVE_TAB = 'train';
 
+const TRAIN_PAGER = createPaginator({ containerId: 'trainPager', pageSize: 6, renderPage: renderTrainingsPage });
+const MINE_PAGER = createPaginator({ containerId: 'minePager', pageSize: 6, renderPage: renderMinePage });
+const CERT_PAGER = createPaginator({ containerId: 'certPager', pageSize: 6, renderPage: renderCertsPage });
+
 function onLangChanged() {
   renderCerts();
   renderTrainings();
@@ -31,7 +35,6 @@ function switchTab(name) {
 function renderTrainings() {
   const list = document.getElementById('trainList');
   const empty = document.getElementById('trainEmpty');
-  const lang = getLang();
   const q = (document.getElementById('trainSearch').value || '').trim().toLowerCase();
   const visible = q
     ? CURRENT_TRAININGS.filter((tr) => `${tr.title_ar} ${tr.title_en}`.toLowerCase().includes(q))
@@ -39,13 +42,20 @@ function renderTrainings() {
 
   if (!visible.length) {
     list.classList.add('hidden');
+    document.getElementById('trainPager').classList.add('hidden');
     empty.classList.remove('hidden');
     return;
   }
   list.classList.remove('hidden');
   empty.classList.add('hidden');
+  TRAIN_PAGER.setItems(visible);
+}
 
-  list.innerHTML = visible.map((tr) => {
+function renderTrainingsPage(pageItems) {
+  const list = document.getElementById('trainList');
+  const lang = getLang();
+
+  list.innerHTML = pageItems.map((tr) => {
     const already = CURRENT_MINE.some((m) => m.training_id === tr.id && m.status === 'registered');
     return `
     <div class="tcard">
@@ -96,14 +106,20 @@ function renderMine() {
   const empty = document.getElementById('mineEmpty');
   if (!CURRENT_MINE.length) {
     list.classList.add('hidden');
+    document.getElementById('minePager').classList.add('hidden');
     empty.classList.remove('hidden');
     return;
   }
   list.classList.remove('hidden');
   empty.classList.add('hidden');
+  MINE_PAGER.setItems(CURRENT_MINE);
+}
+
+function renderMinePage(pageItems) {
+  const list = document.getElementById('mineList');
   const lang = getLang();
 
-  list.innerHTML = CURRENT_MINE.map((m) => {
+  list.innerHTML = pageItems.map((m) => {
     const cert = CURRENT_CERTS.find((c) => c.trainingId === m.training_id);
     const canDownload = m.outcome === 'attended' && cert;
     const canCancel = !m.outcome && m.trainingEffectiveStatus === 'open';
@@ -183,6 +199,7 @@ function renderCerts() {
 
   if (!CURRENT_CERTS.length) {
     list.classList.add('hidden');
+    document.getElementById('certPager').classList.add('hidden');
     label.classList.add('hidden');
     empty.classList.remove('hidden');
     empty.querySelector('h3').textContent = t('noCerts');
@@ -195,8 +212,12 @@ function renderCerts() {
   empty.classList.add('hidden');
   countEl.textContent = t('certAvailable')(CURRENT_CERTS.length);
   document.querySelector('.section-label h2').textContent = t('yourCerts');
+  CERT_PAGER.setItems(CURRENT_CERTS);
+}
 
-  list.innerHTML = CURRENT_CERTS.map((c) => `
+function renderCertsPage(pageItems) {
+  const list = document.getElementById('certList');
+  list.innerHTML = pageItems.map((c) => `
     <div class="cert">
       <div class="seal" aria-hidden="true">${sealSvg()}</div>
       <div class="info">

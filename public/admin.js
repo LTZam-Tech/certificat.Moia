@@ -108,12 +108,20 @@ async function login() {
 // Sidebar navigation
 // ---------------------------------------------------------------------
 
+let ACTIVE_SECTION = 'employees';
+let CURRENT_SEARCH = '';
+
 function showSection(name) {
+  ACTIVE_SECTION = name;
+  CURRENT_SEARCH = '';
+  el('adminSearch').value = '';
   ['employees', 'trainings', 'audit'].forEach((n) => {
     el(`scr-${n}`).classList.toggle('hidden', n !== name);
     el(`nav${n.charAt(0).toUpperCase()}${n.slice(1)}`).classList.toggle('on', n === name);
   });
-  el('adminSearch').value = '';
+  if (name === 'employees') renderEmployeesFiltered();
+  if (name === 'trainings') renderTrainingsFiltered();
+  if (name === 'audit') renderAudit();
 }
 
 // ---------------------------------------------------------------------
@@ -146,21 +154,36 @@ async function logout() {
   showLoggedOut();
 }
 
+const EMP_PAGER = createPaginator({ containerId: 'empPager', pageSize: 10, renderPage: renderEmployeesPage });
+let LAST_EMPLOYEES = [];
+
 async function loadEmployees() {
   const resp = await api('/admin/api/employees');
   if (!resp.ok) return;
-  const rows = await resp.json();
-  const tbody = document.querySelector('#empTable tbody');
-  const emptyNote = el('empEmptyNote');
+  LAST_EMPLOYEES = await resp.json();
+  renderEmployeesFiltered();
+}
 
-  if (!rows.length) {
-    tbody.innerHTML = '';
+function renderEmployeesFiltered() {
+  const q = ACTIVE_SECTION === 'employees' ? CURRENT_SEARCH : '';
+  const filtered = q
+    ? LAST_EMPLOYEES.filter((r) => `${r.national_id} ${r.mobile_e164}`.toLowerCase().includes(q))
+    : LAST_EMPLOYEES;
+
+  const emptyNote = el('empEmptyNote');
+  if (!filtered.length) {
+    document.querySelector('#empTable tbody').innerHTML = '';
+    el('empPager').classList.add('hidden');
     emptyNote.classList.remove('hidden');
     return;
   }
   emptyNote.classList.add('hidden');
+  EMP_PAGER.setItems(filtered);
+}
 
-  tbody.innerHTML = rows.map((r) => `
+function renderEmployeesPage(pageItems) {
+  const tbody = document.querySelector('#empTable tbody');
+  tbody.innerHTML = pageItems.map((r) => `
     <tr>
       <td>${r.national_id}</td>
       <td dir="ltr">${r.mobile_e164}</td>
@@ -220,6 +243,7 @@ function statusBadge(status) {
   return `<span class="badge ${status}">${key ? at(key) : status}</span>`;
 }
 
+const TRAININGS_PAGER = createPaginator({ containerId: 'trainingsPager', pageSize: 8, renderPage: renderTrainingsPage });
 let LAST_TRAININGS = [];
 
 async function loadTrainings() {
@@ -227,23 +251,30 @@ async function loadTrainings() {
   if (!resp.ok) return;
   const data = await resp.json();
   LAST_TRAININGS = data.trainings || [];
-  renderTrainingsTable();
+  renderTrainingsFiltered();
 }
 
-function renderTrainingsTable() {
-  const rows = LAST_TRAININGS;
-  const tbody = document.querySelector('#trainingsTable tbody');
-  const emptyNote = el('trainingsEmptyNote');
+function renderTrainingsFiltered() {
+  const q = ACTIVE_SECTION === 'trainings' ? CURRENT_SEARCH : '';
+  const filtered = q
+    ? LAST_TRAININGS.filter((tr) => `${tr.id} ${tr.title_en} ${tr.title_ar}`.toLowerCase().includes(q))
+    : LAST_TRAININGS;
 
-  if (!rows.length) {
-    tbody.innerHTML = '';
+  const emptyNote = el('trainingsEmptyNote');
+  if (!filtered.length) {
+    document.querySelector('#trainingsTable tbody').innerHTML = '';
+    el('trainingsPager').classList.add('hidden');
     emptyNote.classList.remove('hidden');
     return;
   }
   emptyNote.classList.add('hidden');
+  TRAININGS_PAGER.setItems(filtered);
+}
 
+function renderTrainingsPage(pageItems) {
+  const tbody = document.querySelector('#trainingsTable tbody');
   const lang = getLang();
-  tbody.innerHTML = rows.map((tr) => `
+  tbody.innerHTML = pageItems.map((tr) => `
     <tr>
       <td><span class="idpill">${tr.id}</span></td>
       <td>${lang === 'ar' ? tr.title_ar : tr.title_en}</td>
@@ -315,17 +346,23 @@ function renderRosterHeader() {
   el('rosterId').textContent = ROSTER_TRAINING_ID;
 }
 
+const ROSTER_PAGER = createPaginator({ containerId: 'rosterPager', pageSize: 10, renderPage: renderRosterPage });
+
 function renderRoster(registrants) {
-  const tbody = document.querySelector('#rosterTable tbody');
   const emptyNote = el('rosterEmptyNote');
   if (!registrants.length) {
-    tbody.innerHTML = '';
+    document.querySelector('#rosterTable tbody').innerHTML = '';
+    el('rosterPager').classList.add('hidden');
     emptyNote.classList.remove('hidden');
     return;
   }
   emptyNote.classList.add('hidden');
+  ROSTER_PAGER.setItems(registrants);
+}
 
-  tbody.innerHTML = registrants.map((r) => {
+function renderRosterPage(pageItems) {
+  const tbody = document.querySelector('#rosterTable tbody');
+  tbody.innerHTML = pageItems.map((r) => {
     const outcome = ROSTER_OUTCOMES[r.national_id] || '';
     return `
     <tr>
@@ -341,8 +378,13 @@ function renderRoster(registrants) {
 
   tbody.querySelectorAll('[data-outcome]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      ROSTER_OUTCOMES[btn.getAttribute('data-id')] = btn.getAttribute('data-outcome');
-      renderRoster(registrants);
+      const outcome = btn.getAttribute('data-outcome');
+      ROSTER_OUTCOMES[btn.getAttribute('data-id')] = outcome;
+      // Update just this row's buttons in place -- re-rendering the page
+      // through the paginator would reset it back to page 1.
+      const seg = btn.closest('.seg');
+      seg.querySelector('[data-outcome="attended"]').classList.toggle('a', outcome === 'attended');
+      seg.querySelector('[data-outcome="absent"]').classList.toggle('d', outcome === 'absent');
     });
   });
 }
@@ -365,6 +407,7 @@ async function saveOutcomes() {
 }
 
 const LOGIN_EVENT_TYPES = ['login_success', 'login_failure', 'lockout'];
+const AUDIT_PAGER = createPaginator({ containerId: 'auditPager', pageSize: 10, renderPage: renderAuditPage });
 
 let LAST_AUDIT = [];
 let ACTIVE_AUDIT_TAB = 'logins';
@@ -384,20 +427,29 @@ function renderAudit(rows) {
   const wantDownloads = ACTIVE_AUDIT_TAB === 'downloads';
   table.classList.toggle('audit-hide-file', !wantDownloads);
 
-  const filtered = LAST_AUDIT.filter((r) => wantDownloads
+  let filtered = LAST_AUDIT.filter((r) => wantDownloads
     ? r.event_type === 'download'
     : LOGIN_EVENT_TYPES.includes(r.event_type));
 
-  const tbody = table.querySelector('tbody');
+  const q = ACTIVE_SECTION === 'audit' ? CURRENT_SEARCH : '';
+  if (q) {
+    filtered = filtered.filter((r) => `${r.ts} ${eventLabel(r.event_type)} ${r.national_id_last4 || ''} ${r.file_ref || ''} ${r.source_ip || ''} ${r.detail || ''}`.toLowerCase().includes(q));
+  }
+
   if (!filtered.length) {
-    tbody.innerHTML = '';
+    table.querySelector('tbody').innerHTML = '';
+    el('auditPager').classList.add('hidden');
     emptyNote.textContent = wantDownloads ? at('noDownloads') : at('noLogins');
     emptyNote.classList.remove('hidden');
     return;
   }
   emptyNote.classList.add('hidden');
+  AUDIT_PAGER.setItems(filtered);
+}
 
-  tbody.innerHTML = filtered.map((r) => `<tr>
+function renderAuditPage(pageItems) {
+  const tbody = el('auditTable').querySelector('tbody');
+  tbody.innerHTML = pageItems.map((r) => `<tr>
     <td>${r.ts}</td><td>${eventLabel(r.event_type)}</td><td>${r.national_id_last4 || ''}</td>
     <td class="audit-col-file">${r.file_ref || ''}</td><td>${r.source_ip || ''}</td><td>${r.detail || ''}</td>
   </tr>`).join('');
@@ -412,16 +464,16 @@ function setAuditTab(tab) {
 }
 
 // ---------------------------------------------------------------------
-// Header search -- filters the rows of whichever section is currently open
+// Header search -- filters the full dataset behind whichever section is
+// currently open, then re-paginates from page 1 (not just the rows on
+// the currently rendered page).
 // ---------------------------------------------------------------------
 
-function filterVisibleTable(query) {
-  const q = query.trim().toLowerCase();
-  const activeSection = document.querySelector('main.content-area > div:not(.hidden)');
-  if (!activeSection) return;
-  activeSection.querySelectorAll('table.plain tbody tr').forEach((tr) => {
-    tr.style.display = !q || tr.textContent.toLowerCase().includes(q) ? '' : 'none';
-  });
+function handleSearchInput(query) {
+  CURRENT_SEARCH = query.trim().toLowerCase();
+  if (ACTIVE_SECTION === 'employees') renderEmployeesFiltered();
+  if (ACTIVE_SECTION === 'trainings') renderTrainingsFiltered();
+  if (ACTIVE_SECTION === 'audit') renderAudit();
 }
 
 function onLangChanged() {
@@ -429,8 +481,8 @@ function onLangChanged() {
   if (label) label.textContent = getLang() === 'ar' ? 'English' : 'العربية';
   renderLoginTicker();
   if (!el('adminApp').classList.contains('hidden')) {
-    loadEmployees();
-    renderTrainingsTable();
+    renderEmployeesFiltered();
+    renderTrainingsFiltered();
     if (!el('rosterCard').classList.contains('hidden')) {
       renderRosterHeader();
       renderRoster(ROSTER_REGISTRANTS);
@@ -473,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#auditTabs button').forEach((btn) => {
     btn.addEventListener('click', () => setAuditTab(btn.getAttribute('data-audit-tab')));
   });
-  el('adminSearch').addEventListener('input', (e) => filterVisibleTable(e.target.value));
+  el('adminSearch').addEventListener('input', (e) => handleSearchInput(e.target.value));
 
   checkAuth();
 });
