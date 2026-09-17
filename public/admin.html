@@ -193,18 +193,25 @@
             <button class="ghost-btn" id="refreshLogBtn" data-ar="تحديث" data-en="Refresh">Refresh</button>
           </div>
           <p class="admin-note" data-ar="كل محاولة دخول وكل تنزيل شهادة، الأحدث أولًا." data-en="Every login attempt and certificate download, most recent first.">Every login attempt and certificate download, most recent first.</p>
+
+          <div class="seg" id="auditTabs" style="margin-bottom:14px">
+            <button class="on" data-audit-tab="logins" data-ar="محاولات الدخول" data-en="Logins">Logins</button>
+            <button data-audit-tab="downloads" data-ar="التنزيلات" data-en="Downloads">Downloads</button>
+          </div>
+
           <div style="overflow:auto">
             <table class="plain" id="auditTable">
               <thead><tr>
                 <th data-ar="الوقت" data-en="Time">Time</th>
                 <th data-ar="الحدث" data-en="Event">Event</th>
                 <th data-ar="آخر 4 أرقام" data-en="ID (last 4)">ID (last 4)</th>
-                <th data-ar="الملف" data-en="File">File</th>
+                <th class="audit-col-file" data-ar="الملف" data-en="File">File</th>
                 <th data-ar="عنوان IP" data-en="Source IP">Source IP</th>
                 <th data-ar="التفاصيل" data-en="Detail">Detail</th>
               </tr></thead>
               <tbody></tbody>
             </table>
+            <div class="empty-note hidden" id="auditEmptyNote"></div>
           </div>
         </div>
       </div>

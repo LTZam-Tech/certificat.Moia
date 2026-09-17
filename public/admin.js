@@ -29,6 +29,10 @@ const ADMIN_STRINGS = {
     titleRequired: 'Title (both languages) and a deadline are required.',
     created: (id) => `Created ${id}.`,
     createFailed: 'Could not create training.',
+    eventLoginSuccess: 'Login succeeded', eventLoginFailure: 'Login failed',
+    eventLockout: 'Locked out', eventDownload: 'Certificate download',
+    noLogins: 'No login attempts recorded yet.',
+    noDownloads: 'No certificate downloads recorded yet.',
   },
   ar: {
     statusOpen: 'مفتوح', statusClosed: 'مُغلق', statusConducted: 'مُنعقد', statusCancelled: 'مُلغى',
@@ -46,6 +50,10 @@ const ADMIN_STRINGS = {
     titleRequired: 'العنوان بكلا اللغتين وآخر أجل مطلوبان.',
     created: (id) => `تم إنشاء ${id}.`,
     createFailed: 'تعذّر إنشاء التدريب.',
+    eventLoginSuccess: 'دخول ناجح', eventLoginFailure: 'دخول فاشل',
+    eventLockout: 'تم القفل', eventDownload: 'تنزيل شهادة',
+    noLogins: 'لا توجد محاولات دخول مسجَّلة بعد.',
+    noDownloads: 'لا توجد تنزيلات شهادات مسجَّلة بعد.',
   },
 };
 
@@ -356,12 +364,51 @@ async function saveOutcomes() {
   loadTrainings();
 }
 
+const LOGIN_EVENT_TYPES = ['login_success', 'login_failure', 'lockout'];
+
+let LAST_AUDIT = [];
+let ACTIVE_AUDIT_TAB = 'logins';
+
+function eventLabel(eventType) {
+  const key = {
+    login_success: 'eventLoginSuccess', login_failure: 'eventLoginFailure',
+    lockout: 'eventLockout', download: 'eventDownload',
+  }[eventType];
+  return key ? at(key) : eventType;
+}
+
 function renderAudit(rows) {
-  const tbody = document.querySelector('#auditTable tbody');
-  tbody.innerHTML = rows.map((r) => `<tr>
-    <td>${r.ts}</td><td>${r.event_type}</td><td>${r.national_id_last4 || ''}</td>
-    <td>${r.file_ref || ''}</td><td>${r.source_ip || ''}</td><td>${r.detail || ''}</td>
+  if (rows) LAST_AUDIT = rows;
+  const table = el('auditTable');
+  const emptyNote = el('auditEmptyNote');
+  const wantDownloads = ACTIVE_AUDIT_TAB === 'downloads';
+  table.classList.toggle('audit-hide-file', !wantDownloads);
+
+  const filtered = LAST_AUDIT.filter((r) => wantDownloads
+    ? r.event_type === 'download'
+    : LOGIN_EVENT_TYPES.includes(r.event_type));
+
+  const tbody = table.querySelector('tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    emptyNote.textContent = wantDownloads ? at('noDownloads') : at('noLogins');
+    emptyNote.classList.remove('hidden');
+    return;
+  }
+  emptyNote.classList.add('hidden');
+
+  tbody.innerHTML = filtered.map((r) => `<tr>
+    <td>${r.ts}</td><td>${eventLabel(r.event_type)}</td><td>${r.national_id_last4 || ''}</td>
+    <td class="audit-col-file">${r.file_ref || ''}</td><td>${r.source_ip || ''}</td><td>${r.detail || ''}</td>
   </tr>`).join('');
+}
+
+function setAuditTab(tab) {
+  ACTIVE_AUDIT_TAB = tab;
+  document.querySelectorAll('#auditTabs button').forEach((btn) => {
+    btn.classList.toggle('on', btn.getAttribute('data-audit-tab') === tab);
+  });
+  renderAudit();
 }
 
 // ---------------------------------------------------------------------
@@ -388,6 +435,7 @@ function onLangChanged() {
       renderRosterHeader();
       renderRoster(ROSTER_REGISTRANTS);
     }
+    renderAudit();
   }
 }
 
@@ -422,6 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
   el('navEmployees').addEventListener('click', () => showSection('employees'));
   el('navTrainings').addEventListener('click', () => showSection('trainings'));
   el('navAudit').addEventListener('click', () => showSection('audit'));
+  document.querySelectorAll('#auditTabs button').forEach((btn) => {
+    btn.addEventListener('click', () => setAuditTab(btn.getAttribute('data-audit-tab')));
+  });
   el('adminSearch').addEventListener('input', (e) => filterVisibleTable(e.target.value));
 
   checkAuth();

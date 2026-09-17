@@ -306,8 +306,10 @@ table.plain th{color:var(--muted);font-weight:600}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;height:40px}
 .seg button{font:inherit;border:0;background:#fff;color:var(--muted);cursor:pointer;height:100%;padding:0 16px;display:inline-flex;align-items:center;justify-content:center}
 .seg button+button{border-inline-start:1px solid var(--line-strong)}
+.seg button.on{background:var(--sand);color:var(--ink);font-weight:700}
 .seg button.on.a{background:var(--ok-bg);color:var(--green-700)}
 .seg button.on.d{background:var(--danger-bg);color:var(--danger)}
+.audit-hide-file .audit-col-file{display:none}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.two{grid-template-columns:1fr}}
 
