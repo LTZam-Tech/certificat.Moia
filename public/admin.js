@@ -7,6 +7,52 @@ async function api(path, opts) {
   return resp;
 }
 
+// ---------------------------------------------------------------------
+// Bilingual strings for text generated in JS (static markup uses
+// data-ar/data-en directly, handled by i18n.js's applyStaticLang()).
+// ---------------------------------------------------------------------
+
+const ADMIN_STRINGS = {
+  en: {
+    statusOpen: 'Open', statusClosed: 'Closed', statusConducted: 'Conducted', statusCancelled: 'Cancelled',
+    view: 'View', markAttendance: 'Mark attendance',
+    attended: 'Attended', absent: 'Absent',
+    remove: 'Remove',
+    tooManyAttempts: 'Too many failed attempts. Try again later.',
+    invalidCredentials: 'Invalid username or password.',
+    confirmRemoveEmployee: (id) => `Remove employee ${id}? They will no longer be able to sign in.`,
+    confirmRemoveAll: 'Remove ALL employees from the system? This cannot be undone — you will need to re-import the sheet.',
+    removedCount: (n) => `Removed ${n} employee(s).`,
+    importing: 'Importing…',
+    importedCount: (n, skipped, firstIssue) => `Imported ${n} record(s). Skipped ${skipped}.` + (firstIssue ? ` First issue: ${firstIssue}` : ''),
+    importFailed: 'Import failed.',
+    titleRequired: 'Title (both languages) and a deadline are required.',
+    created: (id) => `Created ${id}.`,
+    createFailed: 'Could not create training.',
+  },
+  ar: {
+    statusOpen: 'مفتوح', statusClosed: 'مُغلق', statusConducted: 'مُنعقد', statusCancelled: 'مُلغى',
+    view: 'عرض', markAttendance: 'تسجيل الحضور',
+    attended: 'حضر', absent: 'لم يحضر',
+    remove: 'إزالة',
+    tooManyAttempts: 'محاولات فاشلة كثيرة. حاول مرة أخرى لاحقًا.',
+    invalidCredentials: 'اسم المستخدم أو كلمة المرور غير صحيحة.',
+    confirmRemoveEmployee: (id) => `إزالة الموظف ${id}؟ لن يتمكن بعدها من تسجيل الدخول.`,
+    confirmRemoveAll: 'إزالة جميع الموظفين من النظام؟ لا يمكن التراجع عن هذا — ستحتاج لإعادة استيراد الملف.',
+    removedCount: (n) => `تمت إزالة ${n} موظف(ين).`,
+    importing: 'جارٍ الاستيراد…',
+    importedCount: (n, skipped, firstIssue) => `تم استيراد ${n} سجل(ات). تم تخطي ${skipped}.` + (firstIssue ? ` أول مشكلة: ${firstIssue}` : ''),
+    importFailed: 'فشل الاستيراد.',
+    titleRequired: 'العنوان بكلا اللغتين وآخر أجل مطلوبان.',
+    created: (id) => `تم إنشاء ${id}.`,
+    createFailed: 'تعذّر إنشاء التدريب.',
+  },
+};
+
+function at(key) {
+  return ADMIN_STRINGS[getLang()][key];
+}
+
 function showLoggedOut() {
   el('loginPanel').classList.remove('hidden');
   el('adminApp').classList.add('hidden');
@@ -44,9 +90,9 @@ async function login() {
     el('pass').value = '';
     checkAuth();
   } else if (resp.status === 429) {
-    msg.textContent = 'Too many failed attempts. Try again later.';
+    msg.textContent = at('tooManyAttempts');
   } else {
-    msg.textContent = 'Invalid username or password.';
+    msg.textContent = at('invalidCredentials');
   }
 }
 
@@ -66,16 +112,24 @@ function showSection(name) {
 // Sign-in screen policy ticker (BRD 13.6)
 // ---------------------------------------------------------------------
 
-const POLICY_STATEMENTS = [
-  'The government entity is committed to the continuous development and training of its human resources, and to nurturing outstanding competencies and talents.',
-  "The government entity shall seek to provide its human resources with suitable development and training opportunities to build and strengthen their knowledge, skills, and abilities in their current roles, and to prepare them for future roles that support the government entity's strategy and objectives.",
-  'The government entity shall ensure its employees have full dedicated time for all forms of development and training in programs whose nature requires it.',
-  "Job development and training activities are directly linked to the government entity's strategic objectives.",
-];
+const POLICY_STATEMENTS = {
+  en: [
+    'The government entity is committed to the continuous development and training of its human resources, and to nurturing outstanding competencies and talents.',
+    "The government entity shall seek to provide its human resources with suitable development and training opportunities to build and strengthen their knowledge, skills, and abilities in their current roles, and to prepare them for future roles that support the government entity's strategy and objectives.",
+    'The government entity shall ensure its employees have full dedicated time for all forms of development and training in programs whose nature requires it.',
+    "Job development and training activities are directly linked to the government entity's strategic objectives.",
+  ],
+  ar: [
+    'تلتزم الجهة الحكومية بتطوير وتدريب مواردها البشرية بصفة مستمرة والعناية بذوي الكفاءات والمواهب المتميزة.',
+    'على الجهة الحكومية السعي إلى منح مواردها البشرية فرصاً ملائمة للتطوير والتدريب لتنمية وتعزيز معارفهم ومهاراتهم وقدراتهم في وظائفهم الحالية ولتمكينهم من تولي أدوار مستقبلية تدعم استراتيجية وأهداف الجهة الحكومية.',
+    'على الجهة الحكومية أن تكفل لموظفيها التفرغ التام لكل أشكال التطوير والتدريب في البرامج التي تقتضي طبيعتها ذلك.',
+    'يرتبط نشاط التطوير والتدريب الوظيفي ارتباطاً مباشراً بالأهداف الاستراتيجية للجهة الحكومية.',
+  ],
+};
 
 function renderLoginTicker() {
   const track = el('loginTicker');
-  const items = POLICY_STATEMENTS.map((s) => `<span class="login-ticker-item">${s}</span><span class="ticker-palm-wrap"><span class="ticker-palm-dot"></span></span>`).join('');
+  const items = POLICY_STATEMENTS[getLang()].map((s) => `<span class="login-ticker-item">${s}</span><span class="ticker-palm-wrap"><span class="ticker-palm-dot"></span></span>`).join('');
   track.innerHTML = items + items; // duplicated once for a seamless loop
 }
 
@@ -103,7 +157,7 @@ async function loadEmployees() {
       <td>${r.national_id}</td>
       <td dir="ltr">${r.mobile_e164}</td>
       <td>${r.updated_at}</td>
-      <td><button class="rowbtn" data-id="${r.national_id}">Remove</button></td>
+      <td><button class="rowbtn" data-id="${r.national_id}">${at('remove')}</button></td>
     </tr>
   `).join('');
 
@@ -113,24 +167,24 @@ async function loadEmployees() {
 }
 
 async function removeEmployee(nationalId) {
-  if (!confirm(`Remove employee ${nationalId}? They will no longer be able to sign in.`)) return;
+  if (!confirm(at('confirmRemoveEmployee')(nationalId))) return;
   await api(`/admin/api/employees?id=${encodeURIComponent(nationalId)}`, { method: 'DELETE' });
   loadEmployees();
 }
 
 async function clearAllEmployees() {
-  if (!confirm('Remove ALL employees from the system? This cannot be undone — you will need to re-import the sheet.')) return;
+  if (!confirm(at('confirmRemoveAll'))) return;
   const resp = await api('/admin/api/employees/clear', { method: 'POST' });
   const data = await resp.json();
   el('importMsg').className = 'msg ok';
-  el('importMsg').textContent = `Removed ${data.removed} employee(s).`;
+  el('importMsg').textContent = at('removedCount')(data.removed);
   loadEmployees();
 }
 
 async function importXlsx(file) {
   const msg = el('importMsg');
   msg.className = 'msg';
-  msg.textContent = 'Importing…';
+  msg.textContent = at('importing');
   const buffer = await file.arrayBuffer();
   const resp = await api('/admin/api/employees/import', {
     method: 'POST',
@@ -140,12 +194,12 @@ async function importXlsx(file) {
   const data = await resp.json();
   if (resp.ok) {
     msg.className = 'msg ok';
-    msg.textContent = `Imported ${data.imported} record(s). Skipped ${data.skipped.length}.` +
-      (data.skipped.length ? ` First issue: row ${data.skipped[0].row} — ${data.skipped[0].reason}` : '');
+    const firstIssue = data.skipped.length ? `row ${data.skipped[0].row} — ${data.skipped[0].reason}` : '';
+    msg.textContent = at('importedCount')(data.imported, data.skipped.length, firstIssue);
     loadEmployees();
   } else {
     msg.className = 'msg err';
-    msg.textContent = data.error || 'Import failed.';
+    msg.textContent = data.error || at('importFailed');
   }
 }
 
@@ -154,15 +208,22 @@ async function importXlsx(file) {
 // ---------------------------------------------------------------------
 
 function statusBadge(status) {
-  const label = { open: 'Open', closed: 'Closed', conducted: 'Conducted', cancelled: 'Cancelled' }[status] || status;
-  return `<span class="badge ${status}">${label}</span>`;
+  const key = { open: 'statusOpen', closed: 'statusClosed', conducted: 'statusConducted', cancelled: 'statusCancelled' }[status];
+  return `<span class="badge ${status}">${key ? at(key) : status}</span>`;
 }
+
+let LAST_TRAININGS = [];
 
 async function loadTrainings() {
   const resp = await api('/admin/api/trainings');
   if (!resp.ok) return;
   const data = await resp.json();
-  const rows = data.trainings || [];
+  LAST_TRAININGS = data.trainings || [];
+  renderTrainingsTable();
+}
+
+function renderTrainingsTable() {
+  const rows = LAST_TRAININGS;
   const tbody = document.querySelector('#trainingsTable tbody');
   const emptyNote = el('trainingsEmptyNote');
 
@@ -173,14 +234,15 @@ async function loadTrainings() {
   }
   emptyNote.classList.add('hidden');
 
+  const lang = getLang();
   tbody.innerHTML = rows.map((tr) => `
     <tr>
       <td><span class="idpill">${tr.id}</span></td>
-      <td>${tr.title_en}</td>
+      <td>${lang === 'ar' ? tr.title_ar : tr.title_en}</td>
       <td>${tr.deadline}</td>
       <td>${statusBadge(tr.effectiveStatus)}</td>
       <td>${tr.registrantCount}</td>
-      <td><button class="ghost-btn" data-roster="${tr.id}">${tr.effectiveStatus === 'closed' ? 'Mark attendance' : 'View'}</button></td>
+      <td><button class="ghost-btn" data-roster="${tr.id}">${tr.effectiveStatus === 'closed' ? at('markAttendance') : at('view')}</button></td>
     </tr>
   `).join('');
 
@@ -196,7 +258,7 @@ async function saveTraining() {
   const msg = el('trainingMsg');
   if (!titleEn || !titleAr || !deadline) {
     msg.className = 'msg err';
-    msg.textContent = 'Title (both languages) and a deadline are required.';
+    msg.textContent = at('titleRequired');
     return;
   }
   const resp = await api('/admin/api/trainings', {
@@ -207,18 +269,19 @@ async function saveTraining() {
   const data = await resp.json();
   if (resp.ok) {
     msg.className = 'msg ok';
-    msg.textContent = `Created ${data.training.id}.`;
+    msg.textContent = at('created')(data.training.id);
     el('ntTitleEn').value = '';
     el('ntTitleAr').value = '';
     el('ntDeadline').value = '';
     loadTrainings();
   } else {
     msg.className = 'msg err';
-    msg.textContent = data.error || 'Could not create training.';
+    msg.textContent = data.error || at('createFailed');
   }
 }
 
 let ROSTER_TRAINING_ID = null;
+let ROSTER_TRAINING = null;
 let ROSTER_OUTCOMES = {}; // nationalId -> 'attended' | 'absent'
 let ROSTER_REGISTRANTS = [];
 
@@ -227,15 +290,21 @@ async function openRoster(trainingId) {
   if (!resp.ok) return;
   const data = await resp.json();
   ROSTER_TRAINING_ID = trainingId;
+  ROSTER_TRAINING = data.training;
   ROSTER_OUTCOMES = {};
   ROSTER_REGISTRANTS = data.registrants;
   data.registrants.forEach((r) => { if (r.outcome) ROSTER_OUTCOMES[r.national_id] = r.outcome; });
 
-  el('rosterTitle').textContent = data.training.title_en;
-  el('rosterId').textContent = trainingId;
+  renderRosterHeader();
   el('rosterCard').classList.remove('hidden');
   renderRoster(ROSTER_REGISTRANTS);
   el('rosterCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderRosterHeader() {
+  if (!ROSTER_TRAINING) return;
+  el('rosterTitle').textContent = getLang() === 'ar' ? ROSTER_TRAINING.title_ar : ROSTER_TRAINING.title_en;
+  el('rosterId').textContent = ROSTER_TRAINING_ID;
 }
 
 function renderRoster(registrants) {
@@ -256,8 +325,8 @@ function renderRoster(registrants) {
       <td>${r.mobile_e164 || ''}</td>
       <td>${r.registered_at}</td>
       <td><div class="seg">
-        <button class="${outcome === 'attended' ? 'a' : ''}" data-id="${r.national_id}" data-outcome="attended">Attended</button>
-        <button class="${outcome === 'absent' ? 'd' : ''}" data-id="${r.national_id}" data-outcome="absent">Absent</button>
+        <button class="${outcome === 'attended' ? 'a' : ''}" data-id="${r.national_id}" data-outcome="attended">${at('attended')}</button>
+        <button class="${outcome === 'absent' ? 'd' : ''}" data-id="${r.national_id}" data-outcome="absent">${at('absent')}</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -308,7 +377,25 @@ function filterVisibleTable(query) {
   });
 }
 
+function onLangChanged() {
+  const label = el('loginLangLabel');
+  if (label) label.textContent = getLang() === 'ar' ? 'English' : 'العربية';
+  renderLoginTicker();
+  if (!el('adminApp').classList.contains('hidden')) {
+    loadEmployees();
+    renderTrainingsTable();
+    if (!el('rosterCard').classList.contains('hidden')) {
+      renderRosterHeader();
+      renderRoster(ROSTER_REGISTRANTS);
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  applyStaticLang();
+  onLangChanged();
+  el('loginLangBtn').addEventListener('click', toggleLang);
+  el('langBtn').addEventListener('click', toggleLang);
   el('adminLoginBtn').addEventListener('click', login);
   ['user', 'pass'].forEach((id) => {
     el(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
@@ -337,6 +424,5 @@ document.addEventListener('DOMContentLoaded', () => {
   el('navAudit').addEventListener('click', () => showSection('audit'));
   el('adminSearch').addEventListener('input', (e) => filterVisibleTable(e.target.value));
 
-  renderLoginTicker();
   checkAuth();
 });

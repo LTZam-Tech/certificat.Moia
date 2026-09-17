@@ -24,18 +24,24 @@
   <div class="login-header">
     <div class="login-header-logo"><img src="/emblem.svg" alt="MOIA"></div>
   </div>
+  <div class="lang-toggle-corner">
+    <button class="ghost-btn" id="loginLangBtn" aria-label="Switch language" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span id="loginLangLabel">العربية</span>
+    </button>
+  </div>
   <div class="admin-card" style="max-width:380px;margin:0 auto">
-    <h2>Training Admin sign-in</h2>
-    <p class="admin-note">Separate account from employee logins — cannot be reached with a National ID or mobile number.</p>
+    <h2 data-ar="دخول مسؤول التدريب" data-en="Training Admin sign-in">Training Admin sign-in</h2>
+    <p class="admin-note" data-ar="حساب مستقل عن حسابات الموظفين — لا يمكن الوصول إليه برقم الهوية الوطنية أو الجوال." data-en="Separate account from employee logins — cannot be reached with a National ID or mobile number.">Separate account from employee logins — cannot be reached with a National ID or mobile number.</p>
     <div class="field">
-      <label for="user">Username</label>
+      <label for="user" data-ar="اسم المستخدم" data-en="Username">Username</label>
       <div class="secure"><input id="user" type="text" autocomplete="username"></div>
     </div>
     <div class="field">
-      <label for="pass">Password</label>
+      <label for="pass" data-ar="كلمة المرور" data-en="Password">Password</label>
       <div class="secure"><input id="pass" type="password" autocomplete="current-password"></div>
     </div>
-    <button class="btn" id="adminLoginBtn">Sign in</button>
+    <button class="btn" id="adminLoginBtn" data-ar="تسجيل الدخول" data-en="Sign in">Sign in</button>
     <div class="msg err" id="loginMsg"></div>
   </div>
   <div class="login-ticker" aria-hidden="true">
@@ -46,10 +52,11 @@
 <!-- ============ post-login shell (same compact header as the employee shell) ============ -->
 <div class="hidden" id="adminApp">
   <header class="masthead compact-header">
-    <div class="compact-brand"><span>Certificate Portal — Administration</span></div>
-    <input class="compact-search" type="search" id="adminSearch" aria-label="Search" placeholder="Search">
+    <div class="compact-brand"><span data-ar="بوابة الشهادات — الإدارة" data-en="Certificate Portal — Administration">Certificate Portal — Administration</span></div>
+    <input class="compact-search" type="search" id="adminSearch" aria-label="Search" data-ar-ph="بحث" data-en-ph="Search" placeholder="Search">
     <div class="compact-tools" aria-label="System tools">
       <button class="compact-tool" type="button" title="Notifications" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="compact-tool" type="button" id="langBtn" title="Language" aria-label="Switch language">ع</button>
       <button class="compact-tool" type="button" title="Appearance" aria-label="Appearance">☼</button>
     </div>
   </header>
@@ -60,15 +67,15 @@
       <nav class="sidebar-nav">
         <button class="side-link on" id="navEmployees">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="8.5" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 14a5 5 0 015.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span>Employees</span>
+          <span data-ar="الموظفون" data-en="Employees">Employees</span>
         </button>
         <button class="side-link" id="navTrainings">
           <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
-          <span>Trainings</span>
+          <span data-ar="التدريبات" data-en="Trainings">Trainings</span>
         </button>
         <button class="side-link" id="navAudit">
           <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M8 9.5h8M8 13h8M8 16.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-          <span>Audit Log</span>
+          <span data-ar="سجل التدقيق" data-en="Audit Log">Audit Log</span>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -78,7 +85,7 @@
         </div>
         <button class="side-signout" id="logoutBtn">
           <svg viewBox="0 0 24 24" fill="none"><path d="M15 17l5-5-5-5M20 12H9M12 4H6a2 2 0 00-2 2v12a2 2 0 002 2h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Sign out</span>
+          <span data-ar="تسجيل الخروج" data-en="Sign out">Sign out</span>
         </button>
       </div>
     </aside>
@@ -88,14 +95,14 @@
       <div id="scr-employees">
         <div class="admin-card">
           <div class="hd">
-            <h2>Employees</h2>
+            <h2 data-ar="الموظفون" data-en="Employees">Employees</h2>
             <div>
               <input type="file" id="xlsxFile" accept=".xlsx" style="display:none">
-              <button class="ghost-btn" id="pickFileBtn">Import .xlsx sheet</button>
-              <button class="danger-btn" id="clearAllBtn">Remove all</button>
+              <button class="ghost-btn" id="pickFileBtn" data-ar="استيراد ملف Excel" data-en="Import .xlsx sheet">Import .xlsx sheet</button>
+              <button class="danger-btn" id="clearAllBtn" data-ar="إزالة الكل" data-en="Remove all">Remove all</button>
             </div>
           </div>
-          <p class="admin-note">
+          <p class="admin-note" data-ar="يجب أن يحتوي الملف على صف عناوين فيه عمود يتضمن كلمة \"ID\" وآخر يتضمن كلمة \"mobile\" (يطابق تنسيق تصدير الوزارة — رقم الهوية الوطنية والجوال فقط، بلا أسماء). إعادة استيراد رقم هوية موجود يُحدّث رقم جواله. الحذف هنا يزيل سجل الدخول فقط — ملفات الشهادات في المجلد المشترك لا تُمس أبدًا." data-en="Sheet must have a header row with a column containing &quot;ID&quot; and one containing &quot;mobile&quot; (matches the ministry's export format — National ID + mobile number only, no names). Re-importing an existing National ID updates its mobile number. Removing here only deletes login records — certificate files in the shared folder are never touched.">
             Sheet must have a header row with a column containing "ID" and one containing "mobile"
             (matches the ministry's export format — National ID + mobile number only, no names).
             Re-importing an existing National ID updates its mobile number. Removing here only
@@ -104,10 +111,15 @@
           <div class="msg" id="importMsg"></div>
           <div style="overflow:auto;margin-top:14px">
             <table class="plain" id="empTable">
-              <thead><tr><th>National ID</th><th>Mobile</th><th>Updated</th><th></th></tr></thead>
+              <thead><tr>
+                <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
+                <th data-ar="الجوال" data-en="Mobile">Mobile</th>
+                <th data-ar="آخر تحديث" data-en="Updated">Updated</th>
+                <th></th>
+              </tr></thead>
               <tbody></tbody>
             </table>
-            <div class="empty-note hidden" id="empEmptyNote">No employees loaded yet — import a sheet above.</div>
+            <div class="empty-note hidden" id="empEmptyNote" data-ar="لا يوجد موظفون بعد — استورد ملفًا أعلاه." data-en="No employees loaded yet — import a sheet above.">No employees loaded yet — import a sheet above.</div>
           </div>
         </div>
       </div>
@@ -115,10 +127,10 @@
       <div id="scr-trainings" class="hidden">
         <div class="admin-card">
           <div class="hd">
-            <h2>Trainings</h2>
-            <button class="solid-btn" id="newTrainingBtn">+ New training</button>
+            <h2 data-ar="التدريبات" data-en="Trainings">Trainings</h2>
+            <button class="solid-btn" id="newTrainingBtn" data-ar="+ تدريب جديد" data-en="+ New training">+ New training</button>
           </div>
-          <p class="admin-note">
+          <p class="admin-note" data-ar="يسجّل الموظفون أنفسهم في التدريبات المفتوحة. بعد انتهاء أجل التسجيل وعقد التدريب، علِّم كل مسجَّل بـ«حضر» أو «لم يحضر» أدناه — فقط من عُلِّم حاضرًا يمكن أن تُقدَّم له شهادة مرتبطة بذلك التدريب (ملف باسم {ID}-{TrainingID}.ext)." data-en="Employees self-register for Open trainings. Once the deadline passes and the training is conducted, mark each registrant Attended or Did Not Attend below — only Attended employees can ever be served a certificate tied to that training (file named {ID}-{TrainingID}.ext).">
             Employees self-register for Open trainings. Once the deadline passes and the training is
             conducted, mark each registrant Attended or Did Not Attend below — only Attended employees
             can ever be served a certificate tied to that training (file named {ID}-{TrainingID}.ext).
@@ -126,20 +138,27 @@
 
           <div class="admin-card" id="newTrainingForm" style="max-width:560px;box-shadow:none;border-style:dashed" hidden>
             <div class="two">
-              <div class="field"><label>Title (English)</label><div class="secure"><input id="ntTitleEn" placeholder="e.g. Presentation Skills"></div></div>
-              <div class="field"><label>Title (Arabic)</label><div class="secure"><input id="ntTitleAr" dir="rtl" placeholder="مثال: مهارات العرض"></div></div>
+              <div class="field"><label data-ar="العنوان (إنجليزي)" data-en="Title (English)">Title (English)</label><div class="secure"><input id="ntTitleEn" data-ar-ph="e.g. Presentation Skills" data-en-ph="e.g. Presentation Skills" placeholder="e.g. Presentation Skills"></div></div>
+              <div class="field"><label data-ar="العنوان (عربي)" data-en="Title (Arabic)">Title (Arabic)</label><div class="secure"><input id="ntTitleAr" dir="rtl" placeholder="مثال: مهارات العرض"></div></div>
             </div>
-            <div class="field"><label>Registration deadline</label><div class="secure"><input id="ntDeadline" type="date"></div></div>
-            <button class="btn" id="saveTrainingBtn" style="width:auto">Save &amp; publish</button>
+            <div class="field"><label data-ar="آخر أجل للتسجيل" data-en="Registration deadline">Registration deadline</label><div class="secure"><input id="ntDeadline" type="date"></div></div>
+            <button class="btn" id="saveTrainingBtn" style="width:auto" data-ar="حفظ ونشر" data-en="Save &amp; publish">Save &amp; publish</button>
             <div class="msg" id="trainingMsg"></div>
           </div>
 
           <div style="overflow:auto;margin-top:14px">
             <table class="plain" id="trainingsTable">
-              <thead><tr><th>ID</th><th>Title</th><th>Deadline</th><th>Status</th><th>Registrants</th><th></th></tr></thead>
+              <thead><tr>
+                <th data-ar="الرمز" data-en="ID">ID</th>
+                <th data-ar="العنوان" data-en="Title">Title</th>
+                <th data-ar="آخر أجل" data-en="Deadline">Deadline</th>
+                <th data-ar="الحالة" data-en="Status">Status</th>
+                <th data-ar="المسجَّلون" data-en="Registrants">Registrants</th>
+                <th></th>
+              </tr></thead>
               <tbody></tbody>
             </table>
-            <div class="empty-note hidden" id="trainingsEmptyNote">No trainings created yet.</div>
+            <div class="empty-note hidden" id="trainingsEmptyNote" data-ar="لا توجد تدريبات بعد." data-en="No trainings created yet.">No trainings created yet.</div>
           </div>
         </div>
 
@@ -147,17 +166,22 @@
           <div class="hd">
             <div><h2 id="rosterTitle" style="margin-bottom:2px"></h2><span class="idpill" id="rosterId"></span></div>
             <div style="display:flex;gap:8px">
-              <button class="ghost-btn" id="markAllAttendedBtn">Mark all: Attended</button>
-              <button class="solid-btn" id="saveOutcomesBtn">Save outcomes</button>
+              <button class="ghost-btn" id="markAllAttendedBtn" data-ar="تعليم الكل: حضر" data-en="Mark all: Attended">Mark all: Attended</button>
+              <button class="solid-btn" id="saveOutcomesBtn" data-ar="حفظ النتائج" data-en="Save outcomes">Save outcomes</button>
             </div>
           </div>
-          <p class="admin-note">National ID only — this system has no name field, so there is nothing else to display.</p>
+          <p class="admin-note" data-ar="رقم الهوية الوطنية فقط — لا يوجد حقل اسم في هذا النظام، فلا يوجد ما يُعرض غيره." data-en="National ID only — this system has no name field, so there is nothing else to display.">National ID only — this system has no name field, so there is nothing else to display.</p>
           <div style="overflow:auto">
             <table class="plain" id="rosterTable">
-              <thead><tr><th>National ID</th><th>Mobile</th><th>Registered</th><th>Outcome</th></tr></thead>
+              <thead><tr>
+                <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
+                <th data-ar="الجوال" data-en="Mobile">Mobile</th>
+                <th data-ar="تاريخ التسجيل" data-en="Registered">Registered</th>
+                <th data-ar="النتيجة" data-en="Outcome">Outcome</th>
+              </tr></thead>
               <tbody></tbody>
             </table>
-            <div class="empty-note hidden" id="rosterEmptyNote">No registrants yet.</div>
+            <div class="empty-note hidden" id="rosterEmptyNote" data-ar="لا يوجد مسجَّلون بعد." data-en="No registrants yet.">No registrants yet.</div>
           </div>
         </div>
       </div>
@@ -165,13 +189,20 @@
       <div id="scr-audit" class="hidden">
         <div class="admin-card">
           <div class="hd">
-            <h2>Recent audit log</h2>
-            <button class="ghost-btn" id="refreshLogBtn">Refresh</button>
+            <h2 data-ar="سجل التدقيق الأخير" data-en="Recent audit log">Recent audit log</h2>
+            <button class="ghost-btn" id="refreshLogBtn" data-ar="تحديث" data-en="Refresh">Refresh</button>
           </div>
-          <p class="admin-note">Every login attempt and certificate download, most recent first.</p>
+          <p class="admin-note" data-ar="كل محاولة دخول وكل تنزيل شهادة، الأحدث أولًا." data-en="Every login attempt and certificate download, most recent first.">Every login attempt and certificate download, most recent first.</p>
           <div style="overflow:auto">
             <table class="plain" id="auditTable">
-              <thead><tr><th>Time</th><th>Event</th><th>ID (last 4)</th><th>File</th><th>Source IP</th><th>Detail</th></tr></thead>
+              <thead><tr>
+                <th data-ar="الوقت" data-en="Time">Time</th>
+                <th data-ar="الحدث" data-en="Event">Event</th>
+                <th data-ar="آخر 4 أرقام" data-en="ID (last 4)">ID (last 4)</th>
+                <th data-ar="الملف" data-en="File">File</th>
+                <th data-ar="عنوان IP" data-en="Source IP">Source IP</th>
+                <th data-ar="التفاصيل" data-en="Detail">Detail</th>
+              </tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -182,6 +213,7 @@
   </div>
 </div>
 
+<script src="/i18n.js"></script>
 <script src="/admin.js"></script>
 </body>
 </html>
