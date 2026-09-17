@@ -186,7 +186,7 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
    a fixed 62px icon-only sidebar rail below 1200px, expanding to a 270px
    labeled sidebar with its own logo tab at 1200px and up.
    ===================================================================== */
-:root{--shell-dark:var(--green-900)}
+:root{--shell-dark:var(--green-900);--header-total:44px}
 
 .app-shell{display:flex;align-items:stretch;min-height:calc(100vh - 44px);flex-direction:row;padding-right:62px}
 html[dir="ltr"] .app-shell{padding-right:0;padding-left:62px}
@@ -318,7 +318,7 @@ table.plain th{color:var(--muted);font-weight:600}
 header.masthead.compact-header{
   height:44px;min-height:44px;background:var(--shell-dark);overflow:hidden;
   margin:0 70px 0 8px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;
-  border-radius:0 0 14px 14px;box-shadow:0 2px 7px rgba(13,49,50,.12);position:relative;z-index:10;
+  border-radius:0 0 14px 14px;box-shadow:0 2px 7px rgba(13,49,50,.12);position:sticky;top:0;z-index:30;
 }
 html[dir="ltr"] header.masthead.compact-header{margin:0 8px 0 70px}
 header.masthead.compact-header::before{
@@ -356,6 +356,7 @@ header.masthead.compact-header::after{
    overhanging logo tab -- this block must stay LAST so it wins the cascade
    over the unconditional base rules above. */
 @media(min-width:1200px){
+  :root{--header-total:108px}
   header.masthead.compact-header{height:100px;min-height:100px;margin:8px 158px 0 29px;padding:0 32px;border-radius:20px}
   html[dir="ltr"] header.masthead.compact-header{margin:8px 29px 0 158px}
   .compact-brand{height:100px;font-size:24px;gap:0}

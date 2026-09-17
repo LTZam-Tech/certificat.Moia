@@ -6,7 +6,11 @@
 <title>Certificate Portal — Admin</title>
 <link rel="stylesheet" href="/style.css">
 <style>
-  .admin-card .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .admin-card .hd{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    position:sticky;top:var(--header-total);z-index:5;
+    background:#fff;margin:-24px -24px 0;padding:24px 24px 14px;border-radius:var(--radius) var(--radius) 0 0;
+  }
   .msg{margin-top:10px;font-size:13.5px}
   .msg.ok{color:var(--green-700)}
   .msg.err{color:var(--danger)}
