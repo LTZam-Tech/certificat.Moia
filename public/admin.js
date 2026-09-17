@@ -491,10 +491,12 @@ function onLangChanged() {
     }
     renderAudit();
   }
+  if (typeof window.sidebarToggleSync === 'function') window.sidebarToggleSync();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   applyStaticLang();
+  initSidebarToggle();
   onLangChanged();
   el('loginLangBtn').addEventListener('click', toggleLang);
   el('langBtn').addEventListener('click', toggleLang);

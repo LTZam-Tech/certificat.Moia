@@ -302,8 +302,36 @@ html[dir="ltr"] .app-shell{padding-right:0;padding-left:62px}
   background:var(--shell-dark);border-radius:0 0 18px 18px;
   box-shadow:-2px 0 9px rgba(0,0,0,.12);z-index:15;position:fixed;inset:0 0 auto auto;
   height:100vh;overflow:visible;box-sizing:border-box;
+  transition:width .25s ease, padding .25s ease;
 }
 html[dir="ltr"] .sidebar{right:auto;left:0;box-shadow:2px 0 9px rgba(0,0,0,.12)}
+
+/* Manual open/close handle -- sits at the vertical middle of the sidebar's
+   own content-facing edge (a child of .sidebar positioned relative to the
+   sidebar's own box, so it tracks the sidebar's current width automatically
+   whether the sidebar is collapsed or expanded, and at any breakpoint). The
+   visible circle stays compact; ::before pads out the actual hit target. */
+.sidebar-toggle{
+  position:absolute;top:50%;left:0;transform:translate(-50%,-50%);
+  width:26px;height:26px;padding:0;box-sizing:border-box;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--paper);color:var(--green-700);
+  border:1px solid var(--line-strong);border-radius:var(--radius-pill);
+  box-shadow:var(--shadow);cursor:pointer;z-index:21;
+  transition:background .15s ease, box-shadow .15s ease, transform .25s ease;
+}
+html[dir="ltr"] .sidebar-toggle{left:auto;right:0;transform:translate(50%,-50%)}
+.sidebar-toggle::before{content:"";position:absolute;inset:-9px}
+.sidebar-toggle:hover{background:var(--sand)}
+.sidebar-toggle:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.sidebar-toggle svg{width:14px;height:14px;flex:none;transition:transform .25s ease}
+html.sidebar-expanded .sidebar-toggle svg{transform:rotate(180deg)}
+html[dir="ltr"] .sidebar-toggle svg{transform:rotate(180deg)}
+html[dir="ltr"].sidebar-expanded .sidebar-toggle svg{transform:rotate(0deg)}
+@media(prefers-reduced-motion:reduce){
+  .sidebar,.sidebar-toggle,.sidebar-toggle svg,.content-area,.admin-footer{transition:none}
+}
+
 .sidebar-logo{display:none}
 .sidebar-nav{display:flex;flex-direction:column;margin-top:0;gap:5px}
 .side-link{
@@ -334,12 +362,33 @@ html[dir="ltr"] [data-colorblind] .side-link.on{box-shadow:inset -3px 0 0 var(--
 }
 .side-signout:hover{background:rgba(255,255,255,.12);color:#fff}
 .side-signout svg{flex:none;width:22px;height:22px}
-.content-area{flex:1;min-width:0;padding:30px 34px;box-sizing:border-box;display:block}
+.content-area{flex:1;min-width:0;padding:30px 34px;box-sizing:border-box;display:block;transition:padding .25s ease}
 .content-area table.plain th,.content-area table.plain td{text-align:right}
 html[dir="ltr"] .content-area table.plain th,
 html[dir="ltr"] .content-area table.plain td{text-align:left}
-.admin-footer{margin-right:62px}
+.admin-footer{margin-right:62px;transition:margin .25s ease}
 html[dir="ltr"] .admin-footer{margin-right:0;margin-left:62px}
+
+/* ===== Manual sidebar expand/collapse (any breakpoint) =====
+   Default state is set synchronously in theme.js (expanded at >=1200px,
+   collapsed below it, matching the previous pure-CSS-breakpoint behavior)
+   and can then be overridden by the user via the .sidebar-toggle handle,
+   persisted in localStorage. Below 1200px the expanded sidebar behaves as
+   an overlay (it does not push .content-area/.admin-footer, since there
+   is no room to reflow content on a small screen); at >=1200px it behaves
+   exactly as the old unconditional desktop rule did. */
+html.sidebar-expanded .sidebar{width:270px;padding:38px 12px 14px}
+html.sidebar-expanded .sidebar-nav{gap:7px;width:100%;border-inline-start:4px solid rgba(0,0,0,.18);padding-inline-start:0}
+html.sidebar-expanded .side-link{width:100%;height:62px;padding:0 18px;margin:0;gap:15px;justify-content:flex-start;border-radius:14px;color:#fff;font-size:17px;font-weight:700}
+html.sidebar-expanded .side-link svg{width:27px;height:27px}
+html.sidebar-expanded .side-link span{display:inline!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html.sidebar-expanded .side-link.on{color:var(--shell-dark);border-radius:14px;background:#fff}
+html.sidebar-expanded .sidebar-footer{width:100%;padding:0;gap:10px}
+html.sidebar-expanded .profile-chip{width:100%;height:72px;padding:0 14px;border-radius:14px;background:#fff;justify-content:flex-start}
+html.sidebar-expanded .profile-chip span:not(.profile-avatar){display:inline!important;color:var(--shell-dark)!important;font-size:16px;font-weight:700}
+html.sidebar-expanded .side-signout{width:100%;height:50px;padding:0 18px;gap:15px;justify-content:flex-start;color:#fff;font-size:16px}
+html.sidebar-expanded .side-signout span{display:inline!important}
+html.sidebar-expanded .profile-avatar{width:40px;height:40px;background:transparent;color:var(--shell-dark)}
 
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
 .tcard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow);animation:certPulse 2.6s ease-in-out infinite}
@@ -545,10 +594,14 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .content-area{padding:22px 16px}
 }
 
-/* Expanded shell state at 1200px+: taller rounded header, search bar fills the
-   middle, and the sidebar expands into a labeled 270px panel with its own
-   overhanging logo tab -- this block must stay LAST so it wins the cascade
-   over the unconditional base rules above. */
+/* Tall-header desktop shell at 1200px+. Header/search sizing and the
+   sidebar's vertical position always apply at this width; the sidebar's
+   WIDTH (rail vs. labeled panel) is controlled separately by the
+   .sidebar-expanded class above, so the manual toggle can collapse the
+   sidebar to a rail even while the tall header stays put, or expand it
+   as a push-panel here (vs. an overlay below 1200px, see above). This
+   block must stay LAST so it wins the cascade over the unconditional
+   base rules above. */
 @media(min-width:1200px){
   :root{--header-total:108px}
   header.masthead.compact-header{height:100px;min-height:100px;margin:8px 158px 0 29px;padding:0 32px;border-radius:20px}
@@ -558,27 +611,18 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .compact-tools{gap:16px}
   .compact-tool{width:46px;height:46px;font-size:18px}
   .compact-tool svg{width:22px;height:22px}
-  .app-shell{min-height:calc(100vh - 108px);padding-right:270px}
-  html[dir="ltr"] .app-shell{padding-right:0;padding-left:270px}
-  .sidebar{flex:0 0 0;width:270px;height:calc(100vh - 153px);padding:38px 12px 14px;top:153px;right:0;bottom:auto;border-radius:20px 0 0 0;box-shadow:none}
-  html[dir="ltr"] .sidebar{right:auto;left:0;top:153px;border-radius:0 20px 0 0}
-  .sidebar-logo{display:block;position:absolute;top:-145px;right:0;width:140px;height:145px;padding:16px 12px;background:var(--shell-dark);border-radius:20px 0 0 0;z-index:20}
-  html[dir="ltr"] .sidebar-logo{right:auto;left:0;border-radius:0 20px 0 0}
-  .sidebar-logo img{display:block;width:100%;height:100%;object-fit:contain;background:transparent;padding:0;border-radius:0;animation:logoGlow 4s ease-in-out infinite}
-  .sidebar-nav{gap:7px;width:100%;border-inline-start:4px solid rgba(0,0,0,.18);padding-inline-start:0}
-  .side-link{width:100%;height:62px;padding:0 18px;margin:0;gap:15px;justify-content:flex-start;border-radius:14px;color:#fff;font-size:17px;font-weight:700}
-  .side-link svg{width:27px;height:27px}
-  .side-link span{display:inline!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .side-link.on{color:var(--shell-dark);border-radius:14px;background:#fff}
-  .sidebar-footer{width:100%;padding:0;gap:10px}
-  .profile-chip{width:100%;height:72px;padding:0 14px;border-radius:14px;background:#fff;justify-content:flex-start}
-  .profile-chip span:not(.profile-avatar){display:inline!important;color:var(--shell-dark)!important;font-size:16px;font-weight:700}
-  .profile-avatar{width:40px;height:40px;background:transparent;color:var(--shell-dark)}
-  .side-signout{width:100%;height:50px;padding:0 18px;gap:15px;justify-content:flex-start;color:#fff;font-size:16px}
-  .side-signout span{display:inline!important}
-  .content-area{padding:48px 20px 30px}
-  .admin-footer{margin-right:270px}
-  html[dir="ltr"] .admin-footer{margin-right:0;margin-left:270px}
+  .sidebar{top:153px;height:calc(100vh - 153px);border-radius:20px 0 0 0;box-shadow:none}
+  html[dir="ltr"] .sidebar{top:153px;border-radius:0 20px 0 0}
+  .app-shell{min-height:calc(100vh - 108px)}
+
+  html.sidebar-expanded .app-shell{padding-right:270px}
+  html[dir="ltr"].sidebar-expanded .app-shell{padding-right:0;padding-left:270px}
+  html.sidebar-expanded .content-area{padding:48px 20px 30px}
+  html.sidebar-expanded .admin-footer{margin-right:270px}
+  html[dir="ltr"].sidebar-expanded .admin-footer{margin-right:0;margin-left:270px}
+  html.sidebar-expanded .sidebar-logo{display:block;position:absolute;top:-145px;right:0;width:140px;height:145px;padding:16px 12px;background:var(--shell-dark);border-radius:20px 0 0 0;z-index:20}
+  html[dir="ltr"].sidebar-expanded .sidebar-logo{right:auto;left:0;border-radius:0 20px 0 0}
+  html.sidebar-expanded .sidebar-logo img{display:block;width:100%;height:100%;object-fit:contain;background:transparent;padding:0;border-radius:0;animation:logoGlow 4s ease-in-out infinite}
 }
 
 .cert-list{display:flex;flex-direction:column;gap:10px}

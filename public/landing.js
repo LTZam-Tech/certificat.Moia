@@ -15,6 +15,7 @@ function onLangChanged() {
   renderTrainings();
   renderMine();
   if (document.getElementById('notifMenu').classList.contains('open')) renderNotifList();
+  if (typeof window.sidebarToggleSync === 'function') window.sidebarToggleSync();
 }
 
 function formatShortDate(iso) {
@@ -437,6 +438,7 @@ window.addEventListener('resize', () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   applyStaticLang();
+  initSidebarToggle();
   document.getElementById('langBtn').addEventListener('click', toggleLang);
   document.getElementById('signOutBtn').addEventListener('click', signOut);
   document.getElementById('tabTrain').addEventListener('click', () => switchTab('train'));
