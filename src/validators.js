@@ -44,14 +44,8 @@ function toE164(nsn) {
   return `+966${nsn}`;
 }
 
-function isValidMobile(rawMobile) {
-  return normalizeMobile(rawMobile) !== null;
-}
-
 module.exports = {
   isValidSaudiId,
-  digitsOnly,
   normalizeMobile,
   toE164,
-  isValidMobile,
 };

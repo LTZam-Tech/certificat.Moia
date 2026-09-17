@@ -37,4 +37,4 @@ function recentEntries(limit = 100) {
     .all(limit);
 }
 
-module.exports = { log, recentEntries, hashId, last4 };
+module.exports = { log, recentEntries };

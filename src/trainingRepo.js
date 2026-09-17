@@ -175,5 +175,4 @@ module.exports = {
   setOutcomes,
   cancelTraining,
   isAttended,
-  effectiveStatus,
 };

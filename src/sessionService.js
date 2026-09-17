@@ -79,7 +79,6 @@ function getTokenFromRequest(req) {
 }
 
 module.exports = {
-  COOKIE_NAME,
   createSession,
   resolveSession,
   destroySession,

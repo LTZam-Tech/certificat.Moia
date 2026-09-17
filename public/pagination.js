@@ -42,5 +42,5 @@ function createPaginator({ containerId, pageSize, renderPage, pageLabel }) {
     container.querySelector('[data-dir="next"]').addEventListener('click', () => { page++; render(); });
   }
 
-  return { setItems, render };
+  return { setItems };
 }

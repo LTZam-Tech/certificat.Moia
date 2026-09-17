@@ -3,7 +3,7 @@
 const db = require('./db');
 const config = require('./config');
 
-const { maxAttempts, windowMinutes, lockoutMinutes } = config.lockout;
+const { maxAttempts, lockoutMinutes } = config.lockout;
 
 const countStmt = db.prepare(`
   SELECT COUNT(*) AS n FROM failed_attempts
@@ -71,7 +71,4 @@ module.exports = {
   checkAdminLockout,
   recordAdminFailedAttempt,
   clearAdminAttempts,
-  windowMinutes,
-  lockoutMinutes,
-  maxAttempts,
 };

@@ -160,7 +160,6 @@ html[dir="rtl"] body{line-height:1.7}
   header.masthead::after{animation:none}
   .cert{animation:none}
 }
-.serif{font-family:Georgia,"Traditional Arabic",serif}
 
 header.masthead{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--green-700),var(--green-900));color:#fff}
 /* Shared masthead "brand texture" (diamond pattern drift + light sweep),
@@ -225,7 +224,6 @@ header.masthead.compact-header::after{
 
 main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:44px 20px 40px}
 .stage{width:100%;max-width:460px}
-.stage.wide{max-width:720px}
 
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
 .card-head{padding:28px 30px 8px}
@@ -251,16 +249,9 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
 .field .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
 .field.invalid input, .field.invalid .secure, .field.invalid .phone{border-color:var(--danger) !important}
-.field.invalid .field-error{display:block}
-.field-error{display:none;font-size:12.5px;color:var(--danger);margin-top:6px}
-/* Gated behind Color Blind Mode like every other icon-prefix redundancy
-   (.msg, .alert, badges) instead of being the one always-on exception --
-   the field-error text itself is already always shown regardless, so
-   nothing is lost by keeping this consistent with the rest. */
-[data-colorblind] .field-error::before{content:"! ";font-weight:700}
 /* Color Blind Mode: a thicker border on invalid fields adds a shape cue
-   on top of the color change, and the field-error text (already always
-   shown) carries the meaning regardless of color perception. */
+   on top of the color change -- the actual error message is shown via
+   the shared .alert above the form, not per-field text. */
 [data-colorblind] .field.invalid input,
 [data-colorblind] .field.invalid .secure,
 [data-colorblind] .field.invalid .phone{border-width:2px !important}
@@ -286,14 +277,8 @@ h1.card-title{font-weight:700;font-size:27px;line-height:1.2;margin:0 0 8px;colo
 .secnote{display:flex;gap:9px;align-items:flex-start;margin-top:18px;font-size:12.5px;color:var(--muted)}
 .secnote svg{flex:none;color:var(--green-500);margin-top:1px}
 
-.id-bar{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-5) var(--space-6);margin-bottom:18px;box-shadow:var(--shadow)}
-.who{display:flex;align-items:center;gap:12px}
-.avatar{width:42px;height:42px;border-radius:50%;background:var(--green-700);color:#fff;display:grid;place-items:center;font-weight:700}
-.name{font-weight:700}
-.meta{display:flex;gap:14px;color:var(--muted);font-size:12.5px;margin-top:2px;flex-wrap:wrap}
 .masked-id{display:inline-flex;gap:4px;direction:ltr;color:#fff}
 html[dir="rtl"] .masked-id{flex-direction:row-reverse}
-.verified{display:flex;align-items:center;gap:5px;color:var(--green-500)}
 
 .toast{
   position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-8px);
@@ -745,8 +730,6 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .empty .ico{color:var(--green-500);margin-bottom:10px}
 .empty h3{margin:0 0 6px;color:var(--ink)}
 .empty p{margin:0;font-size:13.5px}
-
-.lockout-box, .service-down{text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:32px 24px;color:var(--ink)}
 
 .pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
 .page-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}

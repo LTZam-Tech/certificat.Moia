@@ -16,7 +16,6 @@ const upsertAdminStmt = db.prepare(`
   ON CONFLICT(username) DO UPDATE SET password_hash = excluded.password_hash, salt = excluded.salt
 `);
 const countAdminsStmt = db.prepare('SELECT COUNT(*) AS n FROM admins');
-const deleteAdminStmt = db.prepare('DELETE FROM admins WHERE username = ?');
 
 function hash(password, salt) {
   return crypto.scryptSync(String(password), salt, SCRYPT_KEYLEN).toString('hex');
@@ -27,10 +26,6 @@ function upsertAdmin(username, password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hash(password, salt);
   upsertAdminStmt.run(username, passwordHash, salt);
-}
-
-function removeAdmin(username) {
-  deleteAdminStmt.run(username);
 }
 
 function adminCount() {
@@ -74,7 +69,6 @@ function resolveSession(token) {
 module.exports = {
   COOKIE_NAME,
   upsertAdmin,
-  removeAdmin,
   adminCount,
   verifyCredentials,
   issueToken,
