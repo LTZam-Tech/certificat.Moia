@@ -606,7 +606,13 @@ html[dir="ltr"] header.masthead.compact-header{margin:0 8px 0 70px}
 .compact-brand,.compact-search,.compact-tools{position:relative;z-index:1}
 .compact-brand{height:44px;min-width:220px;padding:0;display:flex;align-items:center;gap:10px;background:transparent;color:#fff;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .compact-tools{display:flex;gap:8px;align-items:center;direction:ltr}
-.compact-tool{width:32px;height:32px;border:0;border-radius:50%;background:var(--sand);color:var(--shell-dark);display:grid;place-items:center;cursor:pointer;font:700 13px/1 system-ui}
+/* Icon color paired with --ink (not --shell-dark) because the background
+   is --sand, and --ink/--sand are the two tokens that actually invert
+   together across light/dark mode. --shell-dark stays a fixed dark brand
+   green in both themes (by design, for the sidebar rail), so pairing it
+   with --sand went invisible in dark mode: --sand turns near-black there
+   too, leaving a near-black icon on a near-black circle. */
+.compact-tool{width:32px;height:32px;border:0;border-radius:50%;background:var(--sand);color:var(--ink);display:grid;place-items:center;cursor:pointer;font:700 13px/1 system-ui}
 .compact-tool:hover{background:var(--ok-bg)}
 .compact-tool svg{width:17px;height:17px}
 .compact-search{width:min(320px,30vw);height:38px;border:0;border-radius:var(--radius-md);background:rgba(255,255,255,.95);color:var(--ink);padding:0 13px;font-family:inherit;font-size:14px;outline:0}
