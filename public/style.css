@@ -566,7 +566,13 @@ html[dir="ltr"] header.masthead.compact-header{margin:0 8px 0 70px}
   width:260px;max-width:92vw;padding:8px;color:var(--ink);
   opacity:0;visibility:hidden;transform:translateY(-6px) scale(.97);
   transition:opacity .16s ease, transform .16s ease, visibility 0s linear .16s;
+  /* .tool-menu lives inside .compact-tools, which is forced direction:ltr
+     so the icon row itself never flips -- without resetting it here, that
+     LTR forcing leaks into the popover's own content (notification text,
+     icon placement) and silently mirrors it even on an RTL page. */
+  direction:rtl;
 }
+html[dir="ltr"] .tool-menu{direction:ltr}
 .tool-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1);transition:opacity .16s ease, transform .16s ease}
 .tool-menu.notif-menu{width:340px;padding:0}
 .tool-menu-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 14px 6px}
