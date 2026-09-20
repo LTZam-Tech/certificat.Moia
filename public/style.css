@@ -691,8 +691,12 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .compact-tools{gap:16px}
   .compact-tool{width:46px;height:46px;font-size:18px}
   .compact-tool svg{width:22px;height:22px}
-  .sidebar{top:153px;border-radius:20px;box-shadow:var(--shadow)}
-  html[dir="ltr"] .sidebar{top:153px;border-radius:20px}
+  /* The corner touching the screen edge at the top stays sharp (0) --
+     that's exactly where the overhanging .sidebar-logo tab attaches, and
+     that tab's own outer corner is sharp too, so the two continue flush
+     into each other instead of a rounded notch appearing at the seam. */
+  .sidebar{top:153px;border-radius:20px 0 20px 20px;box-shadow:var(--shadow)}
+  html[dir="ltr"] .sidebar{top:153px;border-radius:0 20px 20px 20px}
 
   html.sidebar-expanded .app-shell{padding-right:270px}
   html[dir="ltr"].sidebar-expanded .app-shell{padding-right:0;padding-left:270px}
