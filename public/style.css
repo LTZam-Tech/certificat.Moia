@@ -314,7 +314,12 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
    ===================================================================== */
 :root{--shell-dark:var(--green-900);--header-total:44px}
 
-.app-shell{display:flex;align-items:stretch;min-height:calc(100vh - 44px);flex-direction:row;padding-right:62px}
+/* flex:1 (not a fixed min-height:calc(100vh - headerHeight)) so this fills
+   exactly the space between the header and the footer, whatever their real
+   heights are -- the old fixed calc didn't account for the footer's own
+   height at all, so the page was always taller than 100vh by exactly the
+   footer's height and scrolled even with zero content. */
+.app-shell{display:flex;align-items:stretch;flex:1;flex-direction:row;padding-right:62px}
 html[dir="ltr"] .app-shell{padding-right:0;padding-left:62px}
 
 .sidebar{
@@ -372,7 +377,11 @@ html[dir="ltr"].sidebar-expanded .sidebar-toggle svg{transform:rotate(0deg)}
 html[dir="ltr"] [data-colorblind] .side-link.on{box-shadow:inset -3px 0 0 var(--gold)}
 .side-link svg{flex:none;width:24px;height:24px}
 .side-link span,.profile-chip span:not(.profile-avatar),.side-signout span{display:none}
-.sidebar-footer{margin-top:auto;padding-bottom:0;display:flex;flex-direction:column;align-items:center;gap:5px}
+/* A fixed gap below the nav instead of margin-top:auto -- pinning the
+   profile/sign-out block to the very bottom of a full-viewport-height
+   sidebar left a huge, disproportionate empty gap under just 3 nav items
+   on a tall screen. */
+.sidebar-footer{margin-top:32px;padding-bottom:0;display:flex;flex-direction:column;align-items:center;gap:5px}
 .profile-chip{display:flex;align-items:center;gap:10px;height:48px;width:52px;padding:0;box-sizing:border-box;background:transparent;border-radius:12px;justify-content:center}
 .profile-avatar{flex:none;width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--shell-dark)}
 .side-signout{
@@ -680,7 +689,6 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .compact-tool svg{width:22px;height:22px}
   .sidebar{top:153px;height:calc(100vh - 153px);border-radius:20px 0 0 0;box-shadow:none}
   html[dir="ltr"] .sidebar{top:153px;border-radius:0 20px 0 0}
-  .app-shell{min-height:calc(100vh - 108px)}
 
   html.sidebar-expanded .app-shell{padding-right:270px}
   html[dir="ltr"].sidebar-expanded .app-shell{padding-right:0;padding-left:270px}
