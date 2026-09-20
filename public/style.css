@@ -727,7 +727,12 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
 .stream-note.show{display:block}
 
 .empty{text-align:center;background:var(--paper);border:1px dashed var(--line-strong);border-radius:var(--radius);padding:40px 24px;color:var(--muted)}
+/* The icon svgs here only declare a viewBox, no width/height -- without an
+   explicit size, the SVG spec's default intrinsic size (300x150px) wins,
+   producing a huge, mostly-blank icon box instead of a small centered
+   glyph. */
 .empty .ico{color:var(--green-500);margin-bottom:10px}
+.empty .ico svg{width:40px;height:40px}
 .empty h3{margin:0 0 6px;color:var(--ink)}
 .empty p{margin:0;font-size:13.5px}
 
