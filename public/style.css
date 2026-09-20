@@ -323,10 +323,14 @@ html[dir="rtl"] .masked-id{flex-direction:row-reverse}
 html[dir="ltr"] .app-shell{padding-right:0;padding-left:62px}
 
 .sidebar{
+  /* Height is content-driven (nav + footer), not stretched to fill the
+     viewport -- with a short nav list that leaves the panel floating well
+     above the bottom of the screen, so all four corners round off instead
+     of assuming it's flush with the viewport edge. */
   display:flex;flex-direction:column;flex:0 0 62px;width:62px;padding:8px 5px;
-  background:var(--shell-dark);border-radius:0 0 18px 18px;
+  background:var(--shell-dark);border-radius:18px;
   box-shadow:-2px 0 9px rgba(0,0,0,.12);z-index:15;position:fixed;inset:0 0 auto auto;
-  height:100vh;overflow:visible;box-sizing:border-box;
+  overflow:visible;box-sizing:border-box;
   transition:width .25s ease, padding .25s ease;
 }
 html[dir="ltr"] .sidebar{right:auto;left:0;box-shadow:2px 0 9px rgba(0,0,0,.12)}
@@ -687,8 +691,8 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .compact-tools{gap:16px}
   .compact-tool{width:46px;height:46px;font-size:18px}
   .compact-tool svg{width:22px;height:22px}
-  .sidebar{top:153px;height:calc(100vh - 153px);border-radius:20px 0 0 0;box-shadow:none}
-  html[dir="ltr"] .sidebar{top:153px;border-radius:0 20px 0 0}
+  .sidebar{top:153px;border-radius:20px;box-shadow:var(--shadow)}
+  html[dir="ltr"] .sidebar{top:153px;border-radius:20px}
 
   html.sidebar-expanded .app-shell{padding-right:270px}
   html[dir="ltr"].sidebar-expanded .app-shell{padding-right:0;padding-left:270px}
