@@ -479,6 +479,39 @@ function handleAdminTrainingRegistrants(req, res, parsedUrl) {
   sendJson(res, 200, { training, registrants: trainingRepo.listRegistrants(id) });
 }
 
+function csvEscape(value) {
+  const s = value === null || value === undefined ? '' : String(value);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function rowsToCsv(header, rows) {
+  const lines = [header.map(csvEscape).join(',')];
+  for (const row of rows) lines.push(row.map(csvEscape).join(','));
+  return lines.join('\r\n');
+}
+
+/** CSV export of a training's roster split by attendance (BRD 13.4 follow-up reporting). */
+function handleAdminTrainingExport(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  const id = parsedUrl.searchParams.get('id') || '';
+  const kind = parsedUrl.searchParams.get('kind') || '';
+  const training = trainingRepo.getById(id);
+  if (!training) return sendJson(res, 404, { error: 'not_found' });
+  if (kind !== 'attended' && kind !== 'not-attended') return sendJson(res, 400, { error: 'invalid_kind' });
+
+  const rows = kind === 'attended' ? trainingRepo.listAttended(id) : trainingRepo.listNotAttended(id);
+  const csv = kind === 'attended'
+    ? rowsToCsv(['national_id', 'mobile', 'registered_at', 'marked_at'], rows.map((r) => [r.national_id, r.mobile_e164, r.registered_at, r.marked_at]))
+    : rowsToCsv(['national_id', 'mobile', 'registered_at', 'outcome'], rows.map((r) => [r.national_id, r.mobile_e164, r.registered_at, r.outcome || 'not_marked']));
+
+  res.writeHead(200, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': `attachment; filename="${id}-${kind}.csv"`,
+    'Cache-Control': 'no-store',
+  });
+  res.end('﻿' + csv); // BOM so Excel opens UTF-8 (Arabic-safe) correctly
+}
+
 async function handleAdminTrainingAttendance(req, res, parsedUrl) {
   const username = requireAdmin(req, res);
   if (!username) return;
@@ -541,6 +574,7 @@ async function router(req, res) {
     if (method === 'GET' && p === '/admin/api/trainings') return handleAdminTrainingsList(req, res);
     if (method === 'POST' && p === '/admin/api/trainings') return await handleAdminTrainingCreate(req, res);
     if (method === 'GET' && p === '/admin/api/trainings/registrants') return handleAdminTrainingRegistrants(req, res, parsedUrl);
+    if (method === 'GET' && p === '/admin/api/trainings/export') return handleAdminTrainingExport(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/trainings/attendance') return await handleAdminTrainingAttendance(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/trainings/cancel') return handleAdminTrainingCancel(req, res, parsedUrl);
 
