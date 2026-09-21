@@ -281,6 +281,7 @@ function renderTrainingsPage(pageItems) {
       <td>${tr.deadline}</td>
       <td>${statusBadge(tr.effectiveStatus)}</td>
       <td>${tr.registrantCount}</td>
+      <td>${tr.created_by || '—'}</td>
       <td><button class="ghost-btn" data-roster="${tr.id}">${tr.effectiveStatus === 'closed' ? at('markAttendance') : at('view')}</button></td>
     </tr>
   `).join('');
@@ -389,6 +390,11 @@ function renderRosterPage(pageItems) {
       absentBtn.className = outcome === 'absent' ? 'on d' : '';
     });
   });
+}
+
+function exportRoster(kind) {
+  if (!ROSTER_TRAINING_ID) return;
+  window.open(`/admin/api/trainings/export?id=${encodeURIComponent(ROSTER_TRAINING_ID)}&kind=${kind}`, '_blank');
 }
 
 function markAllAttended() {
@@ -555,6 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
   el('saveTrainingBtn').addEventListener('click', saveTraining);
   el('markAllAttendedBtn').addEventListener('click', markAllAttended);
   el('saveOutcomesBtn').addEventListener('click', saveOutcomes);
+  el('exportAttendedBtn').addEventListener('click', () => exportRoster('attended'));
+  el('exportNotAttendedBtn').addEventListener('click', () => exportRoster('not-attended'));
 
   el('navEmployees').addEventListener('click', () => showSection('employees'));
   el('navTrainings').addEventListener('click', () => showSection('trainings'));

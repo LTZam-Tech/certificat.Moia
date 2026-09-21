@@ -21,6 +21,11 @@ const countRegistrantsStmt = db.prepare(`
 const findRegistrationStmt = db.prepare(`
   SELECT * FROM training_registrations WHERE training_id = ? AND national_id = ?
 `);
+const activeRegistrationStmt = db.prepare(`
+  SELECT r.training_id FROM training_registrations r
+  JOIN trainings t ON t.id = r.training_id
+  WHERE r.national_id = ? AND r.status = 'registered' AND t.status NOT IN ('conducted', 'cancelled')
+`);
 const insertRegistrationStmt = db.prepare(`
   INSERT INTO training_registrations (training_id, national_id, status)
   VALUES (?, ?, 'registered')
@@ -55,6 +60,21 @@ const setOutcomeStmt = db.prepare(`
 const attendedCheckStmt = db.prepare(`
   SELECT 1 FROM training_registrations
   WHERE training_id = ? AND national_id = ? AND status = 'registered' AND outcome = 'attended'
+`);
+
+const listAttendedStmt = db.prepare(`
+  SELECT r.national_id, e.mobile_e164, r.registered_at, r.marked_at
+  FROM training_registrations r
+  LEFT JOIN employees e ON e.national_id = r.national_id
+  WHERE r.training_id = ? AND r.status = 'registered' AND r.outcome = 'attended'
+  ORDER BY r.national_id ASC
+`);
+const listNotAttendedStmt = db.prepare(`
+  SELECT r.national_id, e.mobile_e164, r.registered_at, r.outcome
+  FROM training_registrations r
+  LEFT JOIN employees e ON e.national_id = r.national_id
+  WHERE r.training_id = ? AND r.status = 'registered' AND (r.outcome IS NULL OR r.outcome = 'absent')
+  ORDER BY r.national_id ASC
 `);
 
 function pad4(n) {
@@ -110,12 +130,20 @@ function listOpenForEmployee() {
     .map(withCounts);
 }
 
+/**
+ * An employee may only hold one active registration at a time (a training
+ * they've registered for but that hasn't yet been conducted or cancelled).
+ * Once that training is conducted (attendance recorded) or cancelled, they
+ * are free to register for another.
+ */
 function register(trainingId, nationalId) {
   const training = getById(trainingId);
   if (!training) return { ok: false, error: 'not_found' };
   if (effectiveStatus(training) !== 'open') return { ok: false, error: 'not_open' };
   const existing = findRegistrationStmt.get(trainingId, nationalId);
   if (existing && existing.status === 'registered') return { ok: false, error: 'already_registered' };
+  const active = activeRegistrationStmt.get(nationalId);
+  if (active && active.training_id !== trainingId) return { ok: false, error: 'active_training_exists' };
   insertRegistrationStmt.run(trainingId, nationalId);
   return { ok: true };
 }
@@ -163,6 +191,16 @@ function isAttended(trainingId, nationalId) {
   return !!attendedCheckStmt.get(trainingId, nationalId);
 }
 
+/** Registrants marked Attended for a training -- for the admin CSV export. */
+function listAttended(trainingId) {
+  return listAttendedStmt.all(trainingId);
+}
+
+/** Registrants who signed up but were not marked Attended (absent or not yet marked). */
+function listNotAttended(trainingId) {
+  return listNotAttendedStmt.all(trainingId);
+}
+
 module.exports = {
   create,
   getById,
@@ -175,4 +213,6 @@ module.exports = {
   setOutcomes,
   cancelTraining,
   isAttended,
+  listAttended,
+  listNotAttended,
 };

@@ -83,7 +83,10 @@ async function registerTraining(btn) {
     const data = await resp.json();
     if (resp.status === 401) { window.location.href = '/'; return; }
     if (!resp.ok) {
-      showToast(data.error === 'already_registered' ? t('alreadyRegistered') : t('registerFailed'));
+      let msg = t('registerFailed');
+      if (data.error === 'already_registered') msg = t('alreadyRegistered');
+      else if (data.error === 'active_training_exists') msg = t('activeTrainingExists');
+      showToast(msg);
       btn.disabled = false;
       btn.textContent = t('register');
       return;
