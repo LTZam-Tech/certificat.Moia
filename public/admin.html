@@ -69,6 +69,7 @@
   </header>
 
   <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar">
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-controls="scr-employees">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -112,7 +113,7 @@
               <button class="danger-btn" id="clearAllBtn" data-ar="إزالة الكل" data-en="Remove all">Remove all</button>
             </div>
           </div>
-          <p class="admin-note" data-ar="يجب أن يحتوي الملف على صف عناوين فيه عمود يتضمن كلمة \"ID\" وآخر يتضمن كلمة \"mobile\" (يطابق تنسيق تصدير الوزارة — رقم الهوية الوطنية والجوال فقط، بلا أسماء). إعادة استيراد رقم هوية موجود يُحدّث رقم جواله. الحذف هنا يزيل سجل الدخول فقط — ملفات الشهادات في المجلد المشترك لا تُمس أبدًا." data-en="Sheet must have a header row with a column containing &quot;ID&quot; and one containing &quot;mobile&quot; (matches the ministry's export format — National ID + mobile number only, no names). Re-importing an existing National ID updates its mobile number. Removing here only deletes login records — certificate files in the shared folder are never touched.">
+          <p class="admin-note" data-ar="يجب أن يحتوي الملف على صف عناوين فيه عمود يتضمن كلمة &quot;ID&quot; وآخر يتضمن كلمة &quot;mobile&quot; (يطابق تنسيق تصدير الوزارة — رقم الهوية الوطنية والجوال فقط، بلا أسماء). إعادة استيراد رقم هوية موجود يُحدّث رقم جواله. الحذف هنا يزيل سجل الدخول فقط — ملفات الشهادات في المجلد المشترك لا تُمس أبدًا." data-en="Sheet must have a header row with a column containing &quot;ID&quot; and one containing &quot;mobile&quot; (matches the ministry's export format — National ID + mobile number only, no names). Re-importing an existing National ID updates its mobile number. Removing here only deletes login records — certificate files in the shared folder are never touched.">
             Sheet must have a header row with a column containing "ID" and one containing "mobile"
             (matches the ministry's export format — National ID + mobile number only, no names).
             Re-importing an existing National ID updates its mobile number. Removing here only

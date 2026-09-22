@@ -362,6 +362,7 @@ html[dir="ltr"].sidebar-expanded .sidebar-toggle svg{transform:rotate(0deg)}
 }
 
 .sidebar-logo{display:none}
+.sidebar-backdrop{display:none}
 .sidebar-nav{display:flex;flex-direction:column;margin-top:0;gap:5px}
 .side-link{
   display:flex;align-items:center;gap:12px;justify-content:center;
@@ -539,6 +540,14 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
 .admin-card.dashed{max-width:560px;box-shadow:none;border-style:dashed}
 .scroll-x{overflow:auto}
 .scroll-x.mt{margin-top:var(--space-4)}
+/* table.plain defaults to width:100%, which lets it shrink to fit any
+   viewport by crushing columns into wrapped, barely-readable text on a
+   narrow screen -- the .scroll-x wrapper around it never actually
+   triggers because the table never becomes wider than its container.
+   A min-width keeps columns at a readable size and hands genuinely
+   narrow viewports a horizontal scrollbar instead, which .scroll-x
+   already supports. */
+.scroll-x table.plain{min-width:640px}
 .btn-row{display:flex;gap:8px}
 .btn.auto{width:auto}
 #rosterTitle{margin-bottom:2px}
@@ -672,6 +681,21 @@ html[dir="rtl"] .switch input:checked + .switch-track::before{transform:translat
   .compact-brand{min-width:0;padding:0 14px;font-size:14px}
   .compact-search{display:none}
   .content-area{padding:22px 16px}
+
+  /* Below the desktop breakpoint the expanded sidebar is a full-height
+     overlay drawer (it can't push .content-area -- there's no room to
+     reflow on a small screen), so it needs to actually cover the full
+     viewport height/edge-to-edge rather than staying content-sized and
+     floating -- otherwise it only shades part of the header underneath
+     it and looks like broken overlap rather than a deliberate drawer.
+     A dimmed backdrop behind it (closable by tap) makes that intent
+     unambiguous and gives touch users an obvious way to dismiss it. */
+  html.sidebar-expanded .sidebar{
+    top:0;height:100vh;width:min(300px,84vw);border-radius:0;box-shadow:var(--shadow);
+  }
+  html.sidebar-expanded .sidebar-backdrop{
+    display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:14;
+  }
 }
 
 /* Tall-header desktop shell at 1200px+. Header/search sizing and the
