@@ -29,6 +29,14 @@ function initSidebarToggle() {
     sync();
   });
 
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      setSidebarExpanded(false);
+      sync();
+    });
+  }
+
   sync();
   window.sidebarToggleSync = sync;
 }
