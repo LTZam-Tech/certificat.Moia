@@ -548,7 +548,7 @@ html[dir="rtl"] .login-ticker-track{animation-name:loginTickerScrollReverse}
    narrow viewports a horizontal scrollbar instead, which .scroll-x
    already supports. */
 .scroll-x table.plain{min-width:640px}
-.btn-row{display:flex;gap:8px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
 .btn.auto{width:auto}
 #rosterTitle{margin-bottom:2px}
 #auditTabs{margin-bottom:var(--space-4)}

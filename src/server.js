@@ -403,6 +403,22 @@ function handleAdminEmployeesList(req, res) {
   sendJson(res, 200, employeeRepo.listAll());
 }
 
+/** CSV export of the full employee roster (national ID, name, department, mobile, updated). */
+function handleAdminEmployeesExport(req, res) {
+  if (!requireAdmin(req, res)) return;
+  const rows = employeeRepo.listAll();
+  const csv = rowsToCsv(
+    ['national_id', 'name', 'department', 'mobile', 'updated_at'],
+    rows.map((r) => [r.national_id, r.name, r.department, r.mobile_e164, r.updated_at])
+  );
+  res.writeHead(200, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': 'attachment; filename="employees.csv"',
+    'Cache-Control': 'no-store',
+  });
+  res.end('﻿' + csv);
+}
+
 async function handleAdminImportXlsx(req, res) {
   if (!requireAdmin(req, res)) return;
   let buffer;
@@ -586,6 +602,7 @@ async function router(req, res) {
     if (method === 'POST' && p === '/admin/login') return await handleAdminLogin(req, res);
     if (method === 'POST' && p === '/admin/logout') return handleAdminLogout(req, res);
     if (method === 'GET' && p === '/admin/api/employees') return handleAdminEmployeesList(req, res);
+    if (method === 'GET' && p === '/admin/api/employees/export') return handleAdminEmployeesExport(req, res);
     if (method === 'POST' && p === '/admin/api/employees/import') return await handleAdminImportXlsx(req, res);
     if (method === 'DELETE' && p === '/admin/api/employees') return handleAdminEmployeeDelete(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/employees/clear') return handleAdminEmployeesClear(req, res);
