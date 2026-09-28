@@ -33,6 +33,8 @@ const ADMIN_STRINGS = {
     eventLockout: 'Locked out', eventDownload: 'Certificate download',
     noLogins: 'No login attempts recorded yet.',
     noDownloads: 'No certificate downloads recorded yet.',
+    saveOutcomesFailed: 'Could not save outcomes. Please try again.',
+    certGenerationFailed: (msg) => `Outcomes were saved, but certificate generation failed: ${msg}`,
   },
   ar: {
     statusOpen: 'مفتوح', statusClosed: 'مُغلق', statusConducted: 'مُنعقد', statusCancelled: 'مُلغى',
@@ -54,6 +56,8 @@ const ADMIN_STRINGS = {
     eventLockout: 'تم القفل', eventDownload: 'تنزيل شهادة',
     noLogins: 'لا توجد محاولات دخول مسجَّلة بعد.',
     noDownloads: 'لا توجد تنزيلات شهادات مسجَّلة بعد.',
+    saveOutcomesFailed: 'تعذّر حفظ النتائج. حاول مرة أخرى.',
+    certGenerationFailed: (msg) => `تم حفظ النتائج، لكن توليد الشهادة فشل: ${msg}`,
   },
 };
 
@@ -407,11 +411,19 @@ function markAllAttended() {
 async function saveOutcomes() {
   const outcomes = Object.entries(ROSTER_OUTCOMES).map(([nationalId, outcome]) => ({ nationalId, outcome }));
   if (!outcomes.length) return;
-  await api(`/admin/api/trainings/attendance?id=${encodeURIComponent(ROSTER_TRAINING_ID)}`, {
+  const resp = await api(`/admin/api/trainings/attendance?id=${encodeURIComponent(ROSTER_TRAINING_ID)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ outcomes }),
   });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    alert(data.error || at('saveOutcomesFailed'));
+    return;
+  }
+  if (data.certificateError) {
+    alert(at('certGenerationFailed')(data.certificateError));
+  }
   el('rosterCard').classList.add('hidden');
   loadTrainings();
 }
