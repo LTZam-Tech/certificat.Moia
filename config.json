@@ -15,5 +15,10 @@
   },
   "sessionTimeoutMinutes": 15,
   "sessionSecret": "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_BEFORE_DEPLOYMENT",
-  "dbPath": "./data/portal.db"
+  "dbPath": "./data/portal.db",
+  "sms": {
+    "username": "CHANGE_ME",
+    "password": "CHANGE_ME",
+    "sender": "CHANGE_ME"
+  }
 }
