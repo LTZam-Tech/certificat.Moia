@@ -167,7 +167,7 @@ async function loadEmployees() {
 function renderEmployeesFiltered() {
   const q = ACTIVE_SECTION === 'employees' ? CURRENT_SEARCH : '';
   const filtered = q
-    ? LAST_EMPLOYEES.filter((r) => `${r.national_id} ${r.mobile_e164}`.toLowerCase().includes(q))
+    ? LAST_EMPLOYEES.filter((r) => `${r.national_id} ${r.mobile_e164} ${r.name || ''} ${r.department || ''}`.toLowerCase().includes(q))
     : LAST_EMPLOYEES;
 
   const emptyNote = el('empEmptyNote');
@@ -186,6 +186,8 @@ function renderEmployeesPage(pageItems) {
   tbody.innerHTML = pageItems.map((r) => `
     <tr>
       <td>${r.national_id}</td>
+      <td>${r.name || '—'}</td>
+      <td>${r.department || '—'}</td>
       <td dir="ltr">${r.mobile_e164}</td>
       <td>${r.updated_at}</td>
       <td><button class="rowbtn" data-id="${r.national_id}">${at('remove')}</button></td>

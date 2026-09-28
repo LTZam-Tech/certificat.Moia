@@ -18,6 +18,11 @@ function importEmployeesXlsx(buffer) {
   const header = rows[0].map((h) => (h || '').toString().trim().toLowerCase());
   const idIdx = header.findIndex((h) => h.includes('id'));
   const mobileIdx = header.findIndex((h) => h.includes('mobile'));
+  // Optional -- older sheets (and the ministry's original export) may not
+  // have these; certificate generation just won't have a name/department
+  // to print until an employee's row is re-imported with them included.
+  const nameIdx = header.findIndex((h) => h.includes('name'));
+  const deptIdx = header.findIndex((h) => h.includes('department'));
 
   if (idIdx === -1 || mobileIdx === -1) {
     throw new Error('Could not find ID / Mobile columns in the sheet header.');
@@ -49,7 +54,9 @@ function importEmployeesXlsx(buffer) {
     }
     seenIds.add(rawId);
 
-    employeeRepo.upsert(rawId, toE164(nsn));
+    const name = nameIdx === -1 ? null : (row[nameIdx] ?? '').toString().trim() || null;
+    const department = deptIdx === -1 ? null : (row[deptIdx] ?? '').toString().trim() || null;
+    employeeRepo.upsert(rawId, toE164(nsn), name, department);
     imported++;
   }
 

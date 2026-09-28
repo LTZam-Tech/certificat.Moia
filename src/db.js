@@ -15,6 +15,8 @@ db.exec(`
 CREATE TABLE IF NOT EXISTS employees (
   national_id   TEXT PRIMARY KEY,
   mobile_e164   TEXT NOT NULL,
+  name          TEXT,
+  department    TEXT,
   active        INTEGER NOT NULL DEFAULT 1,
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -81,5 +83,16 @@ CREATE TABLE IF NOT EXISTS training_registrations (
 
 CREATE INDEX IF NOT EXISTS idx_reg_national_id ON training_registrations(national_id);
 `);
+
+// CREATE TABLE IF NOT EXISTS never alters a pre-existing employees table
+// (e.g. one created before name/department existed), so add them here,
+// tolerating the "duplicate column" error on every run after the first.
+for (const col of ['name', 'department']) {
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN ${col} TEXT`);
+  } catch (err) {
+    if (!/duplicate column/i.test(err.message)) throw err;
+  }
+}
 
 module.exports = db;

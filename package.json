@@ -11,5 +11,7 @@
     "start": "node index.js",
     "import": "node scripts/import-employees.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "puppeteer-core": "25.12.0"
+  }
 }

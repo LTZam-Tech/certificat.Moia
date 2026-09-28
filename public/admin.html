@@ -113,17 +113,20 @@
               <button class="danger-btn" id="clearAllBtn" data-ar="إزالة الكل" data-en="Remove all">Remove all</button>
             </div>
           </div>
-          <p class="admin-note" data-ar="يجب أن يحتوي الملف على صف عناوين فيه عمود يتضمن كلمة &quot;ID&quot; وآخر يتضمن كلمة &quot;mobile&quot; (يطابق تنسيق تصدير الوزارة — رقم الهوية الوطنية والجوال فقط، بلا أسماء). إعادة استيراد رقم هوية موجود يُحدّث رقم جواله. الحذف هنا يزيل سجل الدخول فقط — ملفات الشهادات في المجلد المشترك لا تُمس أبدًا." data-en="Sheet must have a header row with a column containing &quot;ID&quot; and one containing &quot;mobile&quot; (matches the ministry's export format — National ID + mobile number only, no names). Re-importing an existing National ID updates its mobile number. Removing here only deletes login records — certificate files in the shared folder are never touched.">
+          <p class="admin-note" data-ar="يجب أن يحتوي الملف على صف عناوين فيه عمود يتضمن كلمة &quot;ID&quot; وآخر يتضمن كلمة &quot;mobile&quot; (يطابق تنسيق تصدير الوزارة). أضِف عمودَي &quot;Name&quot; و&quot;Department&quot; (اختياريان) لطباعة اسم الموظف وإدارته على شهاداته المُولَّدة تلقائيًا. إعادة استيراد رقم هوية موجود يُحدّث بياناته. الحذف هنا يزيل سجل الدخول فقط — ملفات الشهادات لا تُمس أبدًا." data-en="Sheet must have a header row with a column containing &quot;ID&quot; and one containing &quot;mobile&quot; (matches the ministry's export format). Add optional &quot;Name&quot; and &quot;Department&quot; columns to have them printed on that employee's auto-generated certificates. Re-importing an existing National ID updates its data. Removing here only deletes login records — certificate files are never touched.">
             Sheet must have a header row with a column containing "ID" and one containing "mobile"
-            (matches the ministry's export format — National ID + mobile number only, no names).
-            Re-importing an existing National ID updates its mobile number. Removing here only
-            deletes login records — certificate files in the shared folder are never touched.
+            (matches the ministry's export format). Add optional "Name" and "Department" columns to
+            have them printed on that employee's auto-generated certificates. Re-importing an existing
+            National ID updates its data. Removing here only deletes login records — certificate files
+            are never touched.
           </p>
           <div class="msg" id="importMsg"></div>
           <div class="scroll-x mt">
             <table class="plain" id="empTable">
               <thead><tr>
                 <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
+                <th data-ar="الاسم" data-en="Name">Name</th>
+                <th data-ar="الإدارة" data-en="Department">Department</th>
                 <th data-ar="الجوال" data-en="Mobile">Mobile</th>
                 <th data-ar="آخر تحديث" data-en="Updated">Updated</th>
                 <th></th>

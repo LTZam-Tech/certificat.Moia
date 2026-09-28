@@ -16,6 +16,7 @@ const certService = require('./certService');
 const adminAuth = require('./adminAuth');
 const { importEmployeesXlsx } = require('./xlsxImport');
 const trainingRepo = require('./trainingRepo');
+const certGenerator = require('./certGenerator');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -524,7 +525,26 @@ async function handleAdminTrainingAttendance(req, res, parsedUrl) {
   }
   const outcomes = Array.isArray(body.outcomes) ? body.outcomes : [];
   const result = trainingRepo.setOutcomes(id, outcomes, username);
-  sendJson(res, result.ok ? 200 : 400, result);
+  if (!result.ok) return sendJson(res, 400, result);
+
+  // Certificates are generated here, synchronously, so the admin's "Save
+  // outcomes" response reflects whether generation actually succeeded
+  // rather than silently failing in the background.
+  const training = trainingRepo.getById(id);
+  const attendees = outcomes
+    .filter((o) => o.outcome === 'attended')
+    .map((o) => {
+      const emp = employeeRepo.findById(o.nationalId);
+      return { nationalId: o.nationalId, name: emp && emp.name, department: emp && emp.department };
+    });
+
+  let certificateError = null;
+  try {
+    await certGenerator.generateCertificatesForAttendees(training, attendees);
+  } catch (err) {
+    certificateError = err.message;
+  }
+  sendJson(res, 200, certificateError ? Object.assign({}, result, { certificateError }) : result);
 }
 
 function handleAdminTrainingCancel(req, res, parsedUrl) {

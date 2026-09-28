@@ -15,6 +15,8 @@ function importEmployeesCsv(csvText) {
   const header = lines[0].split(',').map((h) => h.trim().toLowerCase());
   const idxId = header.indexOf('national_id');
   const idxMobile = header.indexOf('mobile');
+  const idxName = header.indexOf('name');
+  const idxDept = header.indexOf('department');
 
   if (idxId === -1 || idxMobile === -1) {
     throw new Error('CSV header must include: national_id,mobile');
@@ -46,7 +48,9 @@ function importEmployeesCsv(csvText) {
     seenIds.add(rawId);
 
     const mobileE164 = toE164(nsn);
-    employeeRepo.upsert(rawId, mobileE164);
+    const name = idxName === -1 ? null : (cols[idxName] || '').trim() || null;
+    const department = idxDept === -1 ? null : (cols[idxDept] || '').trim() || null;
+    employeeRepo.upsert(rawId, mobileE164, name, department);
     imported++;
   }
 
