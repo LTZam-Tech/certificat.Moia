@@ -176,7 +176,17 @@ async function generateCertificatePdf(browser, { nationalId, employeeName, depar
 async function generateCertificatesForAttendees(training, attendees) {
   if (attendees.length === 0) return [];
   const puppeteer = require('puppeteer-core');
-  const browser = await puppeteer.launch({ executablePath: findBrowserExecutable(), headless: true });
+  // Running as a Windows Service means no interactive desktop/window
+  // station (Session 0 isolation) -- Chromium's sandbox requires one and
+  // fails to launch at all without --no-sandbox. A dedicated, writable
+  // profile directory inside the app's own tree avoids relying on the
+  // service account having a normal user profile to create one in.
+  const browser = await puppeteer.launch({
+    executablePath: findBrowserExecutable(),
+    headless: true,
+    userDataDir: path.join(__dirname, '..', '.puppeteer-profile'),
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+  });
   try {
     const issuedAt = new Date();
     const results = [];
