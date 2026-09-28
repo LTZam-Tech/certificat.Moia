@@ -560,6 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el('logoutBtn').addEventListener('click', logout);
   el('pickFileBtn').addEventListener('click', () => el('xlsxFile').click());
   el('exportEmployeesBtn').addEventListener('click', () => window.open('/admin/api/employees/export', '_blank'));
+  el('downloadTemplateBtn').addEventListener('click', () => window.open('/admin/api/employees/import-template', '_blank'));
   el('xlsxFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) importXlsx(file);

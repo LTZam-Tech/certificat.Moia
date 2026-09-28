@@ -15,6 +15,7 @@ const session = require('./sessionService');
 const certService = require('./certService');
 const adminAuth = require('./adminAuth');
 const { importEmployeesXlsx } = require('./xlsxImport');
+const { buildEmployeeImportTemplate } = require('./xlsxWriter');
 const trainingRepo = require('./trainingRepo');
 const certGenerator = require('./certGenerator');
 const otpService = require('./otpService');
@@ -473,6 +474,17 @@ function handleAdminEmployeesExport(req, res) {
   res.end('﻿' + csv);
 }
 
+function handleAdminImportTemplate(req, res) {
+  if (!requireAdmin(req, res)) return;
+  const buf = buildEmployeeImportTemplate();
+  res.writeHead(200, {
+    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'Content-Disposition': 'attachment; filename="employee-import-template.xlsx"',
+    'Cache-Control': 'no-store',
+  });
+  res.end(buf);
+}
+
 async function handleAdminImportXlsx(req, res) {
   if (!requireAdmin(req, res)) return;
   let buffer;
@@ -658,6 +670,7 @@ async function router(req, res) {
     if (method === 'POST' && p === '/admin/logout') return handleAdminLogout(req, res);
     if (method === 'GET' && p === '/admin/api/employees') return handleAdminEmployeesList(req, res);
     if (method === 'GET' && p === '/admin/api/employees/export') return handleAdminEmployeesExport(req, res);
+    if (method === 'GET' && p === '/admin/api/employees/import-template') return handleAdminImportTemplate(req, res);
     if (method === 'POST' && p === '/admin/api/employees/import') return await handleAdminImportXlsx(req, res);
     if (method === 'DELETE' && p === '/admin/api/employees') return handleAdminEmployeeDelete(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/employees/clear') return handleAdminEmployeesClear(req, res);
