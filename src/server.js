@@ -17,6 +17,7 @@ const adminAuth = require('./adminAuth');
 const { importEmployeesXlsx } = require('./xlsxImport');
 const trainingRepo = require('./trainingRepo');
 const certGenerator = require('./certGenerator');
+const otpService = require('./otpService');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -156,12 +157,65 @@ async function handleLogin(req, res) {
     return sendJson(res, 401, { ok: false, error: 'verification_failed' });
   }
 
-  lockout.clearAttempts(rawId, ip);
-  const token = session.createSession(employee.national_id, ip);
-  audit.log('login_success', { nationalId: rawId, sourceIp: ip });
+  // ID + mobile match -- now require an OTP sent to that same verified
+  // number before a session is actually created (2FA). Wrong OTP attempts
+  // count against the same lockout counters as a wrong ID/mobile pair.
+  try {
+    await otpService.issueOtp(employee.national_id, mobileE164);
+  } catch (err) {
+    audit.log('login_failure', { nationalId: rawId, sourceIp: ip, detail: 'otp_send_failed: ' + err.message });
+    return sendJson(res, 502, { ok: false, error: 'otp_send_failed' });
+  }
+  audit.log('otp_sent', { nationalId: rawId, sourceIp: ip });
+  sendJson(res, 200, { ok: true, otpRequired: true });
+}
 
-  res.setHeader('Set-Cookie', session.cookieHeader(token));
-  sendJson(res, 200, { ok: true });
+async function handleVerifyOtp(req, res) {
+  const ip = sourceIp(req);
+  let body;
+  try {
+    body = await readJsonBody(req);
+  } catch {
+    return sendJson(res, 400, { ok: false, error: 'bad_request' });
+  }
+
+  const rawId = String(body.nationalId || '');
+  const rawMobile = String(body.mobile || '');
+  const code = String(body.code || '').trim();
+
+  if (!isValidSaudiId(rawId)) return sendJson(res, 400, { ok: false, error: 'invalid_format' });
+  const nsn = normalizeMobile(rawMobile);
+  if (!nsn) return sendJson(res, 400, { ok: false, error: 'invalid_format' });
+
+  if (lockout.checkLockout(rawId, ip)) {
+    audit.log('lockout', { nationalId: rawId, sourceIp: ip });
+    return sendJson(res, 429, { ok: false, error: 'locked_out' });
+  }
+
+  // Re-verify the pair rather than trusting a client-held session for it --
+  // no session exists yet at this point, so this is the only identity check
+  // standing between "knows the OTP" and "is actually this employee".
+  const mobileE164 = toE164(nsn);
+  const employee = employeeRepo.verifyPair(rawId, mobileE164);
+  if (!employee) {
+    lockout.recordFailedAttempt(rawId, ip);
+    audit.log('login_failure', { nationalId: rawId, sourceIp: ip, detail: 'otp_verify_pair_mismatch' });
+    return sendJson(res, 401, { ok: false, error: 'verification_failed' });
+  }
+
+  const result = otpService.verifyOtp(employee.national_id, code);
+  if (result === 'ok') {
+    lockout.clearAttempts(rawId, ip);
+    const token = session.createSession(employee.national_id, ip);
+    audit.log('login_success', { nationalId: rawId, sourceIp: ip });
+    res.setHeader('Set-Cookie', session.cookieHeader(token));
+    return sendJson(res, 200, { ok: true });
+  }
+
+  lockout.recordFailedAttempt(rawId, ip);
+  audit.log('login_failure', { nationalId: rawId, sourceIp: ip, detail: 'otp_' + result });
+  const status = result === 'locked' ? 429 : 401;
+  sendJson(res, status, { ok: false, error: 'otp_' + result });
 }
 
 function requireSession(req, res) {
@@ -588,6 +642,7 @@ async function router(req, res) {
     }
 
     if (method === 'POST' && p === '/api/login') return await handleLogin(req, res);
+    if (method === 'POST' && p === '/api/verify-otp') return await handleVerifyOtp(req, res);
     if (method === 'GET' && p === '/api/me') return handleMe(req, res);
     if (method === 'GET' && p === '/api/certificates') return handleCertificates(req, res);
     if (method === 'GET' && p === '/api/download') return handleDownload(req, res, parsedUrl);

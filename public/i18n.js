@@ -41,6 +41,12 @@ const STRINGS = {
     notifAbsent: (title) => `تم تسجيلك غير حاضر في: ${title}`,
     notifCertReady: (title) => `شهادتك جاهزة: ${title}`,
     notifEmpty: 'لا توجد إشعارات حتى الآن.',
+    otpVerifyBtn: 'تأكيد الرمز',
+    otpSent: 'تم إرسال رمز التحقق إلى جوالك المسجّل.',
+    otpSendFailed: 'تعذّر إرسال رمز التحقق. الرجاء المحاولة لاحقًا.',
+    otpFormatError: 'أدخل رمز التحقق المكوّن من 6 أرقام.',
+    otpExpired: 'انتهت صلاحية رمز التحقق. الرجاء طلب رمز جديد.',
+    otpInvalid: 'رمز التحقق غير صحيح.',
   },
   en: {
     retrieving: 'Retrieving from the ministry shared folder…',
@@ -82,6 +88,12 @@ const STRINGS = {
     notifAbsent: (title) => `You were marked Did Not Attend for: ${title}`,
     notifCertReady: (title) => `Your certificate is ready: ${title}`,
     notifEmpty: 'No notifications yet.',
+    otpVerifyBtn: 'Confirm code',
+    otpSent: 'A verification code was sent to your registered mobile number.',
+    otpSendFailed: 'Could not send the verification code. Please try again later.',
+    otpFormatError: 'Enter the 6-digit verification code.',
+    otpExpired: 'The verification code has expired. Please request a new one.',
+    otpInvalid: 'Incorrect verification code.',
   },
 };
 

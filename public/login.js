@@ -47,7 +47,33 @@ function hideAlert() {
   document.getElementById('loginAlert').classList.remove('show');
 }
 
-async function verify() {
+let OTP_PHASE = false;
+let PENDING_ID = '';
+let PENDING_MOBILE = '';
+
+function enterOtpPhase() {
+  OTP_PHASE = true;
+  document.getElementById('f-id').classList.add('hidden');
+  document.getElementById('f-mob').classList.add('hidden');
+  document.getElementById('f-otp').classList.remove('hidden');
+  document.getElementById('backBtn').classList.remove('hidden');
+  document.querySelector('#verifyBtn .btn-label').textContent = t('otpVerifyBtn');
+  document.getElementById('otp').focus();
+}
+
+function exitOtpPhase() {
+  OTP_PHASE = false;
+  document.getElementById('f-id').classList.remove('hidden');
+  document.getElementById('f-mob').classList.remove('hidden');
+  document.getElementById('f-otp').classList.add('hidden');
+  document.getElementById('backBtn').classList.add('hidden');
+  document.getElementById('otp').value = '';
+  const label = document.querySelector('#verifyBtn .btn-label');
+  label.textContent = label.getAttribute(`data-${getLang()}`);
+  hideAlert();
+}
+
+async function submitCredentials() {
   const idVal = digitsOnly(document.getElementById('nid').value);
   const mobVal = document.getElementById('mob').value;
 
@@ -74,13 +100,17 @@ async function verify() {
     });
     const data = await resp.json();
 
-    if (resp.status === 200 && data.ok) {
-      sessionStorage.setItem('portal_just_verified', '1');
-      window.location.href = '/landing';
+    if (resp.status === 200 && data.ok && data.otpRequired) {
+      PENDING_ID = idVal;
+      PENDING_MOBILE = mobVal;
+      enterOtpPhase();
+      showAlert(t('otpSent'), 'info');
       return;
     }
     if (resp.status === 429) {
       showAlert(t('lockedOut'));
+    } else if (resp.status === 502) {
+      showAlert(t('otpSendFailed'));
     } else {
       showAlert(t('genericError'));
     }
@@ -90,6 +120,47 @@ async function verify() {
     btn.classList.remove('loading');
     btn.disabled = false;
   }
+}
+
+async function submitOtp() {
+  const code = digitsOnly(document.getElementById('otp').value);
+  if (code.length !== 6) {
+    showAlert(t('otpFormatError'));
+    return;
+  }
+  hideAlert();
+
+  const btn = document.getElementById('verifyBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nationalId: PENDING_ID, mobile: PENDING_MOBILE, code }),
+    });
+    const data = await resp.json();
+
+    if (resp.status === 200 && data.ok) {
+      sessionStorage.setItem('portal_just_verified', '1');
+      window.location.href = '/landing';
+      return;
+    }
+    if (data.error === 'otp_expired') showAlert(t('otpExpired'));
+    else if (data.error === 'otp_locked' || resp.status === 429) showAlert(t('lockedOut'));
+    else showAlert(t('otpInvalid'));
+  } catch (err) {
+    showAlert(t('serviceDown'));
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function verify() {
+  if (OTP_PHASE) submitOtp();
+  else submitCredentials();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -106,5 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   document.getElementById('verifyBtn').addEventListener('click', verify);
+  document.getElementById('backBtn').addEventListener('click', exitOtpPhase);
+  document.getElementById('otp').addEventListener('input', (e) => {
+    e.target.value = digitsOnly(e.target.value).slice(0, 6);
+  });
+  document.getElementById('otp').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') verify();
+  });
   document.getElementById('langBtn').addEventListener('click', toggleLang);
 });

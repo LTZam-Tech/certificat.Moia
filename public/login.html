@@ -52,10 +52,20 @@
           <div class="hint" data-ar="الرقم المسجّل على هويتك." data-en="The number registered against your ID.">الرقم المسجّل على هويتك.</div>
         </div>
 
+        <div class="field hidden" id="f-otp">
+          <label for="otp" data-ar="رمز التحقق" data-en="Verification code">رمز التحقق</label>
+          <div class="secure">
+            <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+          </div>
+          <div class="hint" data-ar="أرسلنا رمزًا مكوّنًا من 6 أرقام إلى جوالك المسجّل." data-en="We sent a 6-digit code to your registered mobile number.">أرسلنا رمزًا مكوّنًا من 6 أرقام إلى جوالك المسجّل.</div>
+        </div>
+
         <button class="btn" id="verifyBtn" type="button">
           <span class="spin"></span>
           <span class="btn-label" data-ar="تحقّق ومتابعة" data-en="Verify and continue">تحقّق ومتابعة</span>
         </button>
+
+        <button class="ghost-btn hidden" id="backBtn" type="button" data-ar="تغيير الرقم" data-en="Change number">Change number</button>
 
         <div class="secnote">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -82,6 +82,16 @@ CREATE TABLE IF NOT EXISTS training_registrations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reg_national_id ON training_registrations(national_id);
+
+-- One active OTP per National ID -- a fresh login request overwrites any
+-- prior unconsumed code rather than accumulating rows.
+CREATE TABLE IF NOT EXISTS otp_codes (
+  national_id   TEXT PRIMARY KEY,
+  code_hash     TEXT NOT NULL,
+  expires_at    TEXT NOT NULL,
+  attempts      INTEGER NOT NULL DEFAULT 0,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `);
 
 // CREATE TABLE IF NOT EXISTS never alters a pre-existing employees table
