@@ -130,6 +130,17 @@ async function login() {
 let ACTIVE_SECTION = 'dashboard';
 let CURRENT_SEARCH = '';
 
+/** Restarts a CSS entrance animation on elements that are already in the DOM
+ * (toggling .hidden doesn't replay an animation on its own, so without this
+ * the dashboard's fade-in only ever plays once, the very first time). */
+function replayEntrance(container) {
+  container.querySelectorAll('.dash-card, .dash-kpi').forEach((elm) => {
+    elm.style.animation = 'none';
+    void elm.offsetWidth; // force reflow so the next line re-triggers the animation
+    elm.style.animation = '';
+  });
+}
+
 function showSection(name) {
   ACTIVE_SECTION = name;
   CURRENT_SEARCH = '';
@@ -138,10 +149,15 @@ function showSection(name) {
     el(`scr-${n}`).classList.toggle('hidden', n !== name);
     el(`nav${n.charAt(0).toUpperCase()}${n.slice(1)}`).classList.toggle('on', n === name);
   });
+  const activeScreen = el(`scr-${name}`);
+  activeScreen.style.animation = 'none';
+  void activeScreen.offsetWidth;
+  activeScreen.style.animation = '';
+
   if (name === 'employees') renderEmployeesFiltered();
   if (name === 'trainings') renderTrainingsFiltered();
   if (name === 'audit') renderAudit();
-  if (name === 'dashboard') loadDashboard();
+  if (name === 'dashboard') { replayEntrance(activeScreen); loadDashboard(); }
   if (name === 'search') populateSearchLookups();
 }
 
@@ -508,7 +524,7 @@ function renderDashConducted(rows, lang) {
     const title = lang === 'ar' ? tr.title_ar : tr.title_en;
     const pct = tr.registrantCount ? Math.round((tr.attendedCount / tr.registrantCount) * 100) : 0;
     return `
-      <div class="dash-list-item" style="animation-delay:${i * 70}ms">
+      <div class="dash-list-item dash-list-item-click" data-training="${tr.id}" style="animation-delay:${i * 70}ms">
         <div>
           <div class="dash-list-title">${title}</div>
           <div class="dash-list-sub">${at('dashConductedOn')(fmtDate(tr.conductedAt))} · ${at('dashRegistrants')(tr.registrantCount)}</div>
@@ -516,6 +532,13 @@ function renderDashConducted(rows, lang) {
         <div class="dash-list-stat">${pct}%<small>${at('attended')}</small></div>
       </div>`;
   }).join('');
+  wrap.querySelectorAll('[data-training]').forEach((node) => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showSection('trainings');
+      openRoster(node.getAttribute('data-training'));
+    });
+  });
 }
 
 function renderDashUpcoming(rows, lang) {
@@ -533,7 +556,7 @@ function renderDashUpcoming(rows, lang) {
     const title = lang === 'ar' ? tr.title_ar : tr.title_en;
     const days = Math.max(0, Math.round((new Date(tr.deadline) - today) / 86400000));
     return `
-      <div class="dash-list-item" style="animation-delay:${i * 70}ms">
+      <div class="dash-list-item dash-list-item-click" data-training="${tr.id}" style="animation-delay:${i * 70}ms">
         <div>
           <div class="dash-list-title">${title}</div>
           <div class="dash-list-sub">${at('dashDeadline')(tr.deadline)} · ${at('dashRegistrants')(tr.registrantCount)}</div>
@@ -541,6 +564,13 @@ function renderDashUpcoming(rows, lang) {
         <div class="dash-list-stat">${days}<small>${at('daysLeft')}</small></div>
       </div>`;
   }).join('');
+  wrap.querySelectorAll('[data-training]').forEach((node) => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showSection('trainings');
+      openRoster(node.getAttribute('data-training'));
+    });
+  });
 }
 
 function renderDashTrend(months) {
@@ -621,8 +651,10 @@ function animateTrendChart(svg) {
  * fixed gap (bigger than the circle ever needs) keeps the dash pattern from
  * wrapping around and drawing a second arc, regardless of segment length.
  */
+const PIE_STROKE = 26;
+
 function pieChartSvg(segments, size, centerLabel) {
-  const stroke = 26;
+  const stroke = PIE_STROKE;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const mid = size / 2;
@@ -635,28 +667,48 @@ function pieChartSvg(segments, size, centerLabel) {
     const dashoffset = -cumulative;
     cumulative += len;
     return `<circle class="pie-seg" data-key="${seg.key}" data-final-len="${len.toFixed(2)}" cx="${mid}" cy="${mid}" r="${r}" fill="none"
-      style="stroke:${seg.color};stroke-dasharray:0 ${GAP}" stroke-width="${stroke}" stroke-dashoffset="${dashoffset.toFixed(2)}"
+      style="stroke:${seg.color};stroke-width:${stroke}px;stroke-dasharray:0 ${GAP}" stroke-dashoffset="${dashoffset.toFixed(2)}"
       pointer-events="visibleStroke" transform="rotate(-90 ${mid} ${mid})"><title>${seg.label}: ${seg.value}</title></circle>`;
   }).join('');
 
   const centerText = centerLabel === undefined ? '' : `<text x="${mid}" y="${mid + 6}" text-anchor="middle" font-size="20" font-weight="800" style="fill:var(--ink)">${centerLabel}</text>`;
 
-  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-    <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line)" stroke-width="${stroke}"/>
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="pie-svg">
+    <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line);stroke-width:${stroke}px"/>
     ${arcs}
     ${centerText}
   </svg>`;
 }
 
-/** Kicks off the "grow" transition on a freshly-inserted pieChartSvg. */
+/** Kicks off the "grow" transition on a freshly-inserted pieChartSvg -- a slow, springy sweep so it reads clearly as motion. */
 function animatePieSegments(container) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     container.querySelectorAll('.pie-seg').forEach((circle, i) => {
       const len = circle.getAttribute('data-final-len');
-      circle.style.transition = `stroke-dasharray .8s ease-out ${i * 120}ms`;
+      circle.style.transition = `stroke-dasharray 1.1s cubic-bezier(.34,1.56,.64,1) ${i * 180}ms`;
       circle.style.strokeDasharray = `${len} 9999`;
     });
   }));
+}
+
+/** Hovering a legend row highlights its matching arc and dims the rest, and vice versa. */
+function wireChartHoverLinks(wrap) {
+  wrap.querySelectorAll('[data-key]').forEach((node) => {
+    const key = node.getAttribute('data-key');
+    const partnerSelector = node.classList.contains('pie-legend-row')
+      ? `.pie-seg[data-key="${CSS.escape(key)}"]`
+      : `.pie-legend-row[data-key="${CSS.escape(key)}"]`;
+    node.addEventListener('mouseenter', () => {
+      wrap.classList.add('pie-hover-active');
+      node.classList.add('pie-hl');
+      const partner = wrap.querySelector(partnerSelector);
+      if (partner) partner.classList.add('pie-hl');
+    });
+    node.addEventListener('mouseleave', () => {
+      wrap.classList.remove('pie-hover-active');
+      wrap.querySelectorAll('.pie-hl').forEach((n) => n.classList.remove('pie-hl'));
+    });
+  });
 }
 
 function pieLegend(segments, total) {
@@ -678,6 +730,7 @@ function renderDashOutcomes(outcomes) {
   const wrap = el('dashOutcomesGauges');
   wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
   animatePieSegments(wrap);
+  wireChartHoverLinks(wrap);
 
   wrap.querySelectorAll('[data-key]').forEach((node) => {
     node.addEventListener('click', () => openSearch('registrations', { outcome: node.getAttribute('data-key') }));
@@ -699,6 +752,7 @@ function renderDashDepartments(rows) {
   const segments = rows.map((r, i) => ({ key: r.department, value: r.total, color: DEPT_PALETTE[i % DEPT_PALETTE.length], label: r.department }));
   wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
   animatePieSegments(wrap);
+  wireChartHoverLinks(wrap);
 
   wrap.querySelectorAll('[data-key]').forEach((node) => {
     node.addEventListener('click', () => openSearch('registrations', { department: node.getAttribute('data-key') }));

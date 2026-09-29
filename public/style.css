@@ -790,19 +790,24 @@ footer.sig{background:var(--paper);border-top:1px solid var(--line)}
 /* ===== Dashboard ===== */
 .dash-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-5);margin-bottom:var(--space-6)}
 @media(max-width:900px){.dash-kpis{grid-template-columns:repeat(2,1fr)}}
-.dash-kpi{display:flex;flex-direction:column;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-5) var(--space-6);cursor:pointer;text-align:start;font-family:inherit}
-.dash-kpi:hover{border-color:var(--green-500)}
+.dash-kpi{display:flex;flex-direction:column;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--space-5) var(--space-6);cursor:pointer;text-align:start;font-family:inherit;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease}
+.dash-kpi:hover{border-color:var(--green-500);transform:translateY(-4px);box-shadow:var(--shadow-soft), 0 10px 24px rgba(0,45,24,.12)}
+.dash-kpi:active{transform:translateY(-1px) scale(.98)}
 .dash-kpi-num{font-size:28px;font-weight:800;color:var(--green-700);line-height:1.1}
 .dash-kpi-label{font-size:12.5px;color:var(--muted);font-weight:600}
 
 .dash-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5)}
 @media(max-width:900px){.dash-row{grid-template-columns:1fr}}
-.dash-card[role="button"]{cursor:pointer;transition:border-color .12s ease}
-.dash-card[role="button"]:hover{border-color:var(--green-500)}
+.dash-card[role="button"]{cursor:pointer;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease}
+.dash-card[role="button"]:hover{border-color:var(--green-500);transform:translateY(-3px);box-shadow:var(--shadow-soft), 0 14px 28px rgba(0,45,24,.1)}
+.dash-card[role="button"]:active{transform:translateY(-1px) scale(.995)}
 .dash-card[role="button"]:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 
 .dash-list{display:flex;flex-direction:column;gap:var(--space-3)}
-.dash-list-item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) var(--space-4);background:var(--sand);border-radius:var(--radius-md);border:1px solid var(--line)}
+.dash-list-item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) var(--space-4);background:var(--sand);border-radius:var(--radius-md);border:1px solid var(--line);transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease}
+.dash-list-item-click{cursor:pointer}
+.dash-list-item-click:hover{transform:scale(1.015);border-color:var(--green-500);box-shadow:var(--shadow-soft)}
+.dash-list-item-click:active{transform:scale(.99)}
 .dash-list-title{font-weight:700;font-size:14px;margin-bottom:2px}
 .dash-list-sub{font-size:12px;color:var(--muted)}
 .dash-list-stat{flex:none;text-align:end;font-weight:800;font-size:15px;color:var(--green-700)}
@@ -814,21 +819,29 @@ footer.sig{background:var(--paper);border-top:1px solid var(--line)}
 
 /* Pie/donut charts (attendance outcomes, department breakdown) */
 .pie-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-6);justify-content:center}
+.pie-seg{cursor:pointer;transition:stroke-width .18s ease, opacity .18s ease}
+.pie-seg.pie-hl{stroke-width:34px !important}
+.pie-hover-active .pie-seg:not(.pie-hl){opacity:.35}
 .pie-legend{display:flex;flex-direction:column;gap:var(--space-2);min-width:170px}
-.pie-legend-row{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:var(--radius-sm);padding:5px 7px;transition:background .12s ease}
-.pie-legend-row:hover{background:var(--sand)}
+.pie-legend-row{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:var(--radius-sm);padding:5px 7px;transition:background .15s ease, transform .15s ease, opacity .15s ease}
+.pie-legend-row:hover,.pie-legend-row.pie-hl{background:var(--sand);transform:scale(1.04)}
+.pie-hover-active .pie-legend-row:not(.pie-hl){opacity:.55}
 .pie-legend-swatch{width:11px;height:11px;border-radius:50%;flex:none}
 .pie-legend-label{font-size:13px;font-weight:600;flex:1}
 .pie-legend-val{font-size:12.5px;color:var(--muted);white-space:nowrap}
 
-/* Entrance motion */
-@keyframes dashFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.dash-list-item{animation:dashFadeIn .5s ease both}
-.dash-kpis .dash-kpi{animation:dashFadeIn .5s ease both}
-.dash-kpis .dash-kpi:nth-child(2){animation-delay:80ms}
-.dash-kpis .dash-kpi:nth-child(3){animation-delay:160ms}
-.dash-kpis .dash-kpi:nth-child(4){animation-delay:240ms}
-.dash-card{animation:dashFadeIn .5s ease both}
+/* Entrance motion -- noticeably slower/larger than a typical micro-transition
+   on purpose, so it actually reads as motion rather than a flicker. */
+@keyframes dashFadeIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes screenFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+[id^="scr-"]{animation:screenFadeIn .4s ease}
+.dash-list-item{animation:dashFadeIn .6s cubic-bezier(.22,1,.36,1) both}
+.dash-kpis .dash-kpi{animation:dashFadeIn .6s cubic-bezier(.22,1,.36,1) both}
+.dash-kpis .dash-kpi:nth-child(2){animation-delay:90ms}
+.dash-kpis .dash-kpi:nth-child(3){animation-delay:180ms}
+.dash-kpis .dash-kpi:nth-child(4){animation-delay:270ms}
+.dash-card{animation:dashFadeIn .6s cubic-bezier(.22,1,.36,1) both}
+@media(max-width:900px){.dash-row .dash-card:nth-child(2){animation-delay:120ms}}
 
 /* ===== Advanced search filters ===== */
 .filter-row{display:flex;flex-wrap:wrap;gap:var(--space-4);align-items:flex-end;margin-top:var(--space-2)}
