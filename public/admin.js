@@ -464,15 +464,29 @@ function fmtDate(s) {
   return s ? s.slice(0, 10) : '';
 }
 
+/** Animates a KPI number counting up from 0 to `target` (easeOutCubic). */
+function animateCountUp(node, target, duration) {
+  duration = duration || 700;
+  const startTime = performance.now();
+  function tick(now) {
+    const progress = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    node.textContent = Math.round(target * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+    else node.textContent = target;
+  }
+  requestAnimationFrame(tick);
+}
+
 function renderDashboard() {
   if (!LAST_DASHBOARD) return;
   const d = LAST_DASHBOARD;
   const lang = getLang();
 
-  el('kpiConductedNum').textContent = d.totals.totalConducted;
-  el('kpiUpcomingNum').textContent = d.totals.totalUpcoming;
-  el('kpiEmployeesNum').textContent = d.totals.totalEmployees;
-  el('kpiRegistrationsNum').textContent = d.totals.totalRegistrations;
+  animateCountUp(el('kpiConductedNum'), d.totals.totalConducted);
+  animateCountUp(el('kpiUpcomingNum'), d.totals.totalUpcoming);
+  animateCountUp(el('kpiEmployeesNum'), d.totals.totalEmployees);
+  animateCountUp(el('kpiRegistrationsNum'), d.totals.totalRegistrations);
 
   renderDashConducted(d.latestConducted, lang);
   renderDashUpcoming(d.upcoming, lang);
@@ -490,11 +504,11 @@ function renderDashConducted(rows, lang) {
     return;
   }
   empty.classList.add('hidden');
-  wrap.innerHTML = rows.map((tr) => {
+  wrap.innerHTML = rows.map((tr, i) => {
     const title = lang === 'ar' ? tr.title_ar : tr.title_en;
     const pct = tr.registrantCount ? Math.round((tr.attendedCount / tr.registrantCount) * 100) : 0;
     return `
-      <div class="dash-list-item">
+      <div class="dash-list-item" style="animation-delay:${i * 70}ms">
         <div>
           <div class="dash-list-title">${title}</div>
           <div class="dash-list-sub">${at('dashConductedOn')(fmtDate(tr.conductedAt))} · ${at('dashRegistrants')(tr.registrantCount)}</div>
@@ -515,11 +529,11 @@ function renderDashUpcoming(rows, lang) {
   empty.classList.add('hidden');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  wrap.innerHTML = rows.map((tr) => {
+  wrap.innerHTML = rows.map((tr, i) => {
     const title = lang === 'ar' ? tr.title_ar : tr.title_en;
     const days = Math.max(0, Math.round((new Date(tr.deadline) - today) / 86400000));
     return `
-      <div class="dash-list-item">
+      <div class="dash-list-item" style="animation-delay:${i * 70}ms">
         <div>
           <div class="dash-list-title">${title}</div>
           <div class="dash-list-sub">${at('dashDeadline')(tr.deadline)} · ${at('dashRegistrants')(tr.registrantCount)}</div>
@@ -568,50 +582,109 @@ function renderDashTrend(months) {
     </div>
     <svg viewBox="0 0 ${w} ${h}" width="100%" height="220" preserveAspectRatio="none">
       ${gridLines}
-      <path d="${areaFor('registrations')}" style="fill:color-mix(in srgb, var(--green-700) 18%, transparent);stroke:none"/>
-      <path d="${pathFor('registrations')}" style="fill:none;stroke:var(--green-700);stroke-width:2.2"/>
-      <path d="${areaFor('attended')}" style="fill:color-mix(in srgb, var(--gold) 25%, transparent);stroke:none"/>
-      <path d="${pathFor('attended')}" style="fill:none;stroke:var(--gold);stroke-width:2.2"/>
+      <path class="trend-area" data-order="0" d="${areaFor('registrations')}" style="fill:color-mix(in srgb, var(--green-700) 18%, transparent);stroke:none"/>
+      <path class="trend-line" d="${pathFor('registrations')}" style="fill:none;stroke:var(--green-700);stroke-width:2.2"/>
+      <path class="trend-area" data-order="1" d="${areaFor('attended')}" style="fill:color-mix(in srgb, var(--gold) 25%, transparent);stroke:none"/>
+      <path class="trend-line" d="${pathFor('attended')}" style="fill:none;stroke:var(--gold);stroke-width:2.2"/>
       ${monthLabels}
     </svg>`;
+
+  animateTrendChart(container.querySelector('svg'));
 }
 
-function gaugeSvg(percent, colorVar, size) {
-  size = size || 116;
-  const stroke = 12;
+/** Draws the trend lines in (stroke sweep) and fades the area fills in behind them. */
+function animateTrendChart(svg) {
+  const lines = svg.querySelectorAll('.trend-line');
+  lines.forEach((path) => {
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = `${len}`;
+    path.style.strokeDashoffset = `${len}`;
+  });
+  svg.querySelectorAll('.trend-area').forEach((area) => { area.style.opacity = '0'; });
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    lines.forEach((path, i) => {
+      path.style.transition = `stroke-dashoffset 1.1s ease-out ${i * 150}ms`;
+      path.style.strokeDashoffset = '0';
+    });
+    svg.querySelectorAll('.trend-area').forEach((area) => {
+      const order = Number(area.getAttribute('data-order')) || 0;
+      area.style.transition = `opacity 900ms ease-out ${400 + order * 200}ms`;
+      area.style.opacity = '1';
+    });
+  }));
+}
+
+/**
+ * Builds a multi-segment donut/pie: one stacked <circle> per segment, each
+ * animated growing from 0 length to its share of the circumference. A large
+ * fixed gap (bigger than the circle ever needs) keeps the dash pattern from
+ * wrapping around and drawing a second arc, regardless of segment length.
+ */
+function pieChartSvg(segments, size, centerLabel) {
+  const stroke = 26;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const offset = c * (1 - percent / 100);
   const mid = size / 2;
-  return `
-    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-      <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line)" stroke-width="${stroke}"/>
-      <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:${colorVar}" stroke-width="${stroke}"
-        stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"
-        transform="rotate(-90 ${mid} ${mid})"/>
-      <text x="${mid}" y="${mid + 7}" text-anchor="middle" font-size="21" font-weight="800" style="fill:var(--ink)">${percent}%</text>
-    </svg>`;
+  const total = segments.reduce((s, x) => s + x.value, 0) || 1;
+  const GAP = 9999;
+
+  let cumulative = 0;
+  const arcs = segments.map((seg) => {
+    const len = (seg.value / total) * c;
+    const dashoffset = -cumulative;
+    cumulative += len;
+    return `<circle class="pie-seg" data-key="${seg.key}" data-final-len="${len.toFixed(2)}" cx="${mid}" cy="${mid}" r="${r}" fill="none"
+      style="stroke:${seg.color};stroke-dasharray:0 ${GAP}" stroke-width="${stroke}" stroke-dashoffset="${dashoffset.toFixed(2)}"
+      pointer-events="visibleStroke" transform="rotate(-90 ${mid} ${mid})"><title>${seg.label}: ${seg.value}</title></circle>`;
+  }).join('');
+
+  const centerText = centerLabel === undefined ? '' : `<text x="${mid}" y="${mid + 6}" text-anchor="middle" font-size="20" font-weight="800" style="fill:var(--ink)">${centerLabel}</text>`;
+
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line)" stroke-width="${stroke}"/>
+    ${arcs}
+    ${centerText}
+  </svg>`;
+}
+
+/** Kicks off the "grow" transition on a freshly-inserted pieChartSvg. */
+function animatePieSegments(container) {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    container.querySelectorAll('.pie-seg').forEach((circle, i) => {
+      const len = circle.getAttribute('data-final-len');
+      circle.style.transition = `stroke-dasharray .8s ease-out ${i * 120}ms`;
+      circle.style.strokeDasharray = `${len} 9999`;
+    });
+  }));
+}
+
+function pieLegend(segments, total) {
+  return `<div class="pie-legend">${segments.map((seg) => `
+    <div class="pie-legend-row" data-key="${seg.key}">
+      <span class="pie-legend-swatch" style="background:${seg.color}"></span>
+      <span class="pie-legend-label">${seg.label}</span>
+      <span class="pie-legend-val">${seg.value} (${total ? Math.round((seg.value / total) * 100) : 0}%)</span>
+    </div>`).join('')}</div>`;
 }
 
 function renderDashOutcomes(outcomes) {
   const total = outcomes.attended + outcomes.absent + outcomes.awaiting;
-  const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
-  const items = [
-    { key: 'attended', pct: pct(outcomes.attended), color: 'var(--green-700)', label: at('attended') },
-    { key: 'absent', pct: pct(outcomes.absent), color: 'var(--danger)', label: at('absent') },
-    { key: 'awaiting', pct: pct(outcomes.awaiting), color: 'var(--warning)', label: at('awaitingOutcome') },
+  const segments = [
+    { key: 'attended', value: outcomes.attended, color: 'var(--green-700)', label: at('attended') },
+    { key: 'absent', value: outcomes.absent, color: 'var(--danger)', label: at('absent') },
+    { key: 'awaiting', value: outcomes.awaiting, color: 'var(--warning)', label: at('awaitingOutcome') },
   ];
   const wrap = el('dashOutcomesGauges');
-  wrap.innerHTML = items.map((it) => `
-    <div class="dash-gauge" data-outcome="${it.key}">
-      ${gaugeSvg(it.pct, it.color)}
-      <span class="dash-gauge-label">${it.label}</span>
-    </div>`).join('');
+  wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
+  animatePieSegments(wrap);
 
-  wrap.querySelectorAll('[data-outcome]').forEach((node) => {
-    node.addEventListener('click', () => openSearch('registrations', { outcome: node.getAttribute('data-outcome') }));
+  wrap.querySelectorAll('[data-key]').forEach((node) => {
+    node.addEventListener('click', () => openSearch('registrations', { outcome: node.getAttribute('data-key') }));
   });
 }
+
+const DEPT_PALETTE = ['var(--green-700)', 'var(--gold)', 'var(--info)', 'var(--warning)', 'var(--danger)', 'var(--green-500)'];
 
 function renderDashDepartments(rows) {
   const wrap = el('dashDeptChart');
@@ -622,15 +695,13 @@ function renderDashDepartments(rows) {
     return;
   }
   empty.classList.add('hidden');
-  const max = Math.max(...rows.map((r) => r.total));
-  wrap.innerHTML = rows.map((r) => `
-    <div class="dash-bar-row" data-dept="${r.department}">
-      <div class="dash-bar-head"><b>${r.department}</b><span>${r.total} (${r.attended} ${at('attended')})</span></div>
-      <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${Math.round((r.total / max) * 100)}%"></div></div>
-    </div>`).join('');
+  const total = rows.reduce((s, r) => s + r.total, 0);
+  const segments = rows.map((r, i) => ({ key: r.department, value: r.total, color: DEPT_PALETTE[i % DEPT_PALETTE.length], label: r.department }));
+  wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
+  animatePieSegments(wrap);
 
-  wrap.querySelectorAll('[data-dept]').forEach((node) => {
-    node.addEventListener('click', () => openSearch('registrations', { department: node.getAttribute('data-dept') }));
+  wrap.querySelectorAll('[data-key]').forEach((node) => {
+    node.addEventListener('click', () => openSearch('registrations', { department: node.getAttribute('data-key') }));
   });
 }
 
@@ -993,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dashboard drill-downs into Advanced Search.
   function dashCardKeydown(handler) {
     return (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('[data-outcome], [data-dept]')) {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('[data-key]')) {
         e.preventDefault();
         handler();
       }
@@ -1005,9 +1076,9 @@ document.addEventListener('DOMContentLoaded', () => {
   el('dashUpcomingCard').addEventListener('keydown', dashCardKeydown(() => openSearch('trainings', { status: 'open' })));
   el('dashTrendCard').addEventListener('click', () => openSearch('registrations', {}));
   el('dashTrendCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
-  el('dashOutcomesCard').addEventListener('click', (e) => { if (!e.target.closest('[data-outcome]')) openSearch('registrations', {}); });
+  el('dashOutcomesCard').addEventListener('click', (e) => { if (!e.target.closest('[data-key]')) openSearch('registrations', {}); });
   el('dashOutcomesCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
-  el('dashDeptCard').addEventListener('click', (e) => { if (!e.target.closest('[data-dept]')) openSearch('registrations', {}); });
+  el('dashDeptCard').addEventListener('click', (e) => { if (!e.target.closest('[data-key]')) openSearch('registrations', {}); });
   el('dashDeptCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
   el('kpiConducted').addEventListener('click', () => openSearch('trainings', { status: 'conducted' }));
   el('kpiUpcoming').addEventListener('click', () => openSearch('trainings', { status: 'open' }));
