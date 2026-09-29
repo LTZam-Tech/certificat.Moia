@@ -17,6 +17,7 @@ const adminAuth = require('./adminAuth');
 const { importEmployeesXlsx } = require('./xlsxImport');
 const { buildEmployeeImportTemplate } = require('./xlsxWriter');
 const trainingRepo = require('./trainingRepo');
+const dashboardRepo = require('./dashboardRepo');
 const certGenerator = require('./certGenerator');
 const otpService = require('./otpService');
 
@@ -637,6 +638,63 @@ function handleAdminTrainingCancel(req, res, parsedUrl) {
 }
 
 // ---------------------------------------------------------------------
+// Admin dashboard + advanced search
+// ---------------------------------------------------------------------
+
+function handleAdminDashboard(req, res) {
+  if (!requireAdmin(req, res)) return;
+  sendJson(res, 200, dashboardRepo.getDashboard());
+}
+
+function trainingSearchFilters(parsedUrl) {
+  return {
+    status: parsedUrl.searchParams.get('status') || '',
+    dateFrom: parsedUrl.searchParams.get('dateFrom') || '',
+    dateTo: parsedUrl.searchParams.get('dateTo') || '',
+    q: parsedUrl.searchParams.get('q') || '',
+  };
+}
+
+function registrationSearchFilters(parsedUrl) {
+  return {
+    nationalId: parsedUrl.searchParams.get('nationalId') || '',
+    department: parsedUrl.searchParams.get('department') || '',
+    trainingId: parsedUrl.searchParams.get('trainingId') || '',
+    outcome: parsedUrl.searchParams.get('outcome') || '',
+    dateFrom: parsedUrl.searchParams.get('dateFrom') || '',
+    dateTo: parsedUrl.searchParams.get('dateTo') || '',
+  };
+}
+
+function handleAdminSearchTrainings(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  sendJson(res, 200, { trainings: dashboardRepo.searchTrainings(trainingSearchFilters(parsedUrl)) });
+}
+
+function handleAdminSearchRegistrations(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  sendJson(res, 200, {
+    registrations: dashboardRepo.searchRegistrations(registrationSearchFilters(parsedUrl)),
+    departments: dashboardRepo.listDepartments(),
+  });
+}
+
+function handleAdminSearchRegistrationsExport(req, res, parsedUrl) {
+  if (!requireAdmin(req, res)) return;
+  const rows = dashboardRepo.searchRegistrations(registrationSearchFilters(parsedUrl));
+  const csv = rowsToCsv(
+    ['national_id', 'name', 'department', 'mobile', 'training_id', 'training_title', 'registered_at', 'outcome'],
+    rows.map((r) => [r.national_id, r.name, r.department, r.mobile_e164, r.training_id, r.title_en, r.registered_at, r.outcome || 'awaiting'])
+  );
+  res.writeHead(200, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': 'attachment; filename="registrations-search.csv"',
+    'Cache-Control': 'no-store',
+  });
+  res.end('﻿' + csv);
+}
+
+// ---------------------------------------------------------------------
 // Routing
 // ---------------------------------------------------------------------
 
@@ -682,6 +740,10 @@ async function router(req, res) {
     if (method === 'GET' && p === '/admin/api/trainings/export') return handleAdminTrainingExport(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/trainings/attendance') return await handleAdminTrainingAttendance(req, res, parsedUrl);
     if (method === 'POST' && p === '/admin/api/trainings/cancel') return handleAdminTrainingCancel(req, res, parsedUrl);
+    if (method === 'GET' && p === '/admin/api/dashboard') return handleAdminDashboard(req, res);
+    if (method === 'GET' && p === '/admin/api/search/trainings') return handleAdminSearchTrainings(req, res, parsedUrl);
+    if (method === 'GET' && p === '/admin/api/search/registrations') return handleAdminSearchRegistrations(req, res, parsedUrl);
+    if (method === 'GET' && p === '/admin/api/search/registrations/export') return handleAdminSearchRegistrationsExport(req, res, parsedUrl);
 
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not found');

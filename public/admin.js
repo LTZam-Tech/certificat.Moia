@@ -35,6 +35,13 @@ const ADMIN_STRINGS = {
     noDownloads: 'No certificate downloads recorded yet.',
     saveOutcomesFailed: 'Could not save outcomes. Please try again.',
     certGenerationFailed: (msg) => `Outcomes were saved, but certificate generation failed: ${msg}`,
+    dashConductedOn: (d) => `Conducted ${d}`,
+    dashDeadline: (d) => `Deadline ${d}`,
+    dashRegistrants: (n) => `${n} registrant${n === 1 ? '' : 's'}`,
+    daysLeft: 'days left',
+    awaitingOutcome: 'Awaiting outcome',
+    legendRegistrations: 'Registrations',
+    legendAttended: 'Attendance recorded',
   },
   ar: {
     statusOpen: 'مفتوح', statusClosed: 'مُغلق', statusConducted: 'مُنعقد', statusCancelled: 'مُلغى',
@@ -58,6 +65,13 @@ const ADMIN_STRINGS = {
     noDownloads: 'لا توجد تنزيلات شهادات مسجَّلة بعد.',
     saveOutcomesFailed: 'تعذّر حفظ النتائج. حاول مرة أخرى.',
     certGenerationFailed: (msg) => `تم حفظ النتائج، لكن توليد الشهادة فشل: ${msg}`,
+    dashConductedOn: (d) => `انعقد في ${d}`,
+    dashDeadline: (d) => `الأجل ${d}`,
+    dashRegistrants: (n) => `${n} مسجَّل`,
+    daysLeft: 'يوم متبقٍ',
+    awaitingOutcome: 'بانتظار النتيجة',
+    legendRegistrations: 'التسجيلات',
+    legendAttended: 'الحضور المُسجَّل',
   },
 };
 
@@ -83,6 +97,7 @@ async function checkAuth() {
     renderAudit(await resp.json());
     loadEmployees();
     loadTrainings();
+    loadDashboard();
   } else {
     showLoggedOut();
   }
@@ -112,20 +127,22 @@ async function login() {
 // Sidebar navigation
 // ---------------------------------------------------------------------
 
-let ACTIVE_SECTION = 'employees';
+let ACTIVE_SECTION = 'dashboard';
 let CURRENT_SEARCH = '';
 
 function showSection(name) {
   ACTIVE_SECTION = name;
   CURRENT_SEARCH = '';
   el('adminSearch').value = '';
-  ['employees', 'trainings', 'audit'].forEach((n) => {
+  ['dashboard', 'employees', 'trainings', 'search', 'audit'].forEach((n) => {
     el(`scr-${n}`).classList.toggle('hidden', n !== name);
     el(`nav${n.charAt(0).toUpperCase()}${n.slice(1)}`).classList.toggle('on', n === name);
   });
   if (name === 'employees') renderEmployeesFiltered();
   if (name === 'trainings') renderTrainingsFiltered();
   if (name === 'audit') renderAudit();
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'search') populateSearchLookups();
 }
 
 // ---------------------------------------------------------------------
@@ -166,6 +183,7 @@ async function loadEmployees() {
   if (!resp.ok) return;
   LAST_EMPLOYEES = await resp.json();
   renderEmployeesFiltered();
+  populateSearchLookups();
 }
 
 function renderEmployeesFiltered() {
@@ -258,6 +276,7 @@ async function loadTrainings() {
   const data = await resp.json();
   LAST_TRAININGS = data.trainings || [];
   renderTrainingsFiltered();
+  populateSearchLookups();
 }
 
 function renderTrainingsFiltered() {
@@ -428,6 +447,383 @@ async function saveOutcomes() {
   loadTrainings();
 }
 
+// ---------------------------------------------------------------------
+// Dashboard
+// ---------------------------------------------------------------------
+
+let LAST_DASHBOARD = null;
+
+async function loadDashboard() {
+  const resp = await api('/admin/api/dashboard');
+  if (!resp.ok) return;
+  LAST_DASHBOARD = await resp.json();
+  renderDashboard();
+}
+
+function fmtDate(s) {
+  return s ? s.slice(0, 10) : '';
+}
+
+function renderDashboard() {
+  if (!LAST_DASHBOARD) return;
+  const d = LAST_DASHBOARD;
+  const lang = getLang();
+
+  el('kpiConductedNum').textContent = d.totals.totalConducted;
+  el('kpiUpcomingNum').textContent = d.totals.totalUpcoming;
+  el('kpiEmployeesNum').textContent = d.totals.totalEmployees;
+  el('kpiRegistrationsNum').textContent = d.totals.totalRegistrations;
+
+  renderDashConducted(d.latestConducted, lang);
+  renderDashUpcoming(d.upcoming, lang);
+  renderDashTrend(d.monthlyTrend);
+  renderDashOutcomes(d.outcomes);
+  renderDashDepartments(d.departmentBreakdown);
+}
+
+function renderDashConducted(rows, lang) {
+  const wrap = el('dashConductedList');
+  const empty = el('dashConductedEmpty');
+  if (!rows.length) {
+    wrap.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  wrap.innerHTML = rows.map((tr) => {
+    const title = lang === 'ar' ? tr.title_ar : tr.title_en;
+    const pct = tr.registrantCount ? Math.round((tr.attendedCount / tr.registrantCount) * 100) : 0;
+    return `
+      <div class="dash-list-item">
+        <div>
+          <div class="dash-list-title">${title}</div>
+          <div class="dash-list-sub">${at('dashConductedOn')(fmtDate(tr.conductedAt))} · ${at('dashRegistrants')(tr.registrantCount)}</div>
+        </div>
+        <div class="dash-list-stat">${pct}%<small>${at('attended')}</small></div>
+      </div>`;
+  }).join('');
+}
+
+function renderDashUpcoming(rows, lang) {
+  const wrap = el('dashUpcomingList');
+  const empty = el('dashUpcomingEmpty');
+  if (!rows.length) {
+    wrap.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  wrap.innerHTML = rows.map((tr) => {
+    const title = lang === 'ar' ? tr.title_ar : tr.title_en;
+    const days = Math.max(0, Math.round((new Date(tr.deadline) - today) / 86400000));
+    return `
+      <div class="dash-list-item">
+        <div>
+          <div class="dash-list-title">${title}</div>
+          <div class="dash-list-sub">${at('dashDeadline')(tr.deadline)} · ${at('dashRegistrants')(tr.registrantCount)}</div>
+        </div>
+        <div class="dash-list-stat">${days}<small>${at('daysLeft')}</small></div>
+      </div>`;
+  }).join('');
+}
+
+function renderDashTrend(months) {
+  const container = el('dashTrendChart');
+  const w = 760;
+  const h = 220;
+  const padL = 10;
+  const padR = 10;
+  const padT = 10;
+  const padB = 24;
+  const maxVal = Math.max(1, ...months.map((m) => Math.max(m.registrations, m.attended)));
+  const stepX = (w - padL - padR) / Math.max(1, months.length - 1);
+  const scaleY = (v) => h - padB - (v / maxVal) * (h - padT - padB);
+  const scaleX = (i) => padL + i * stepX;
+
+  function pathFor(key) {
+    return months.map((m, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(i).toFixed(1)} ${scaleY(m[key]).toFixed(1)}`).join(' ');
+  }
+  function areaFor(key) {
+    return `${pathFor(key)} L ${scaleX(months.length - 1).toFixed(1)} ${h - padB} L ${scaleX(0).toFixed(1)} ${h - padB} Z`;
+  }
+
+  const everyN = Math.max(1, Math.ceil(months.length / 6));
+  const monthLabels = months.map((m, i) => {
+    if (i % everyN !== 0) return '';
+    const [y, mo] = m.ym.split('-');
+    return `<text x="${scaleX(i).toFixed(1)}" y="${h - 6}" font-size="10" text-anchor="middle" style="fill:var(--muted)">${mo}/${y.slice(2)}</text>`;
+  }).join('');
+
+  const gridLines = [0, 0.5, 1].map((f) => {
+    const y = padT + f * (h - padT - padB);
+    return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w - padR}" y2="${y.toFixed(1)}" style="stroke:var(--line)" stroke-width="1"/>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="dash-trend-legend">
+      <span><i style="background:var(--green-700)"></i>${at('legendRegistrations')}</span>
+      <span><i style="background:var(--gold)"></i>${at('legendAttended')}</span>
+    </div>
+    <svg viewBox="0 0 ${w} ${h}" width="100%" height="220" preserveAspectRatio="none">
+      ${gridLines}
+      <path d="${areaFor('registrations')}" style="fill:color-mix(in srgb, var(--green-700) 18%, transparent);stroke:none"/>
+      <path d="${pathFor('registrations')}" style="fill:none;stroke:var(--green-700);stroke-width:2.2"/>
+      <path d="${areaFor('attended')}" style="fill:color-mix(in srgb, var(--gold) 25%, transparent);stroke:none"/>
+      <path d="${pathFor('attended')}" style="fill:none;stroke:var(--gold);stroke-width:2.2"/>
+      ${monthLabels}
+    </svg>`;
+}
+
+function gaugeSvg(percent, colorVar, size) {
+  size = size || 116;
+  const stroke = 12;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c * (1 - percent / 100);
+  const mid = size / 2;
+  return `
+    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line)" stroke-width="${stroke}"/>
+      <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:${colorVar}" stroke-width="${stroke}"
+        stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"
+        transform="rotate(-90 ${mid} ${mid})"/>
+      <text x="${mid}" y="${mid + 7}" text-anchor="middle" font-size="21" font-weight="800" style="fill:var(--ink)">${percent}%</text>
+    </svg>`;
+}
+
+function renderDashOutcomes(outcomes) {
+  const total = outcomes.attended + outcomes.absent + outcomes.awaiting;
+  const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
+  const items = [
+    { key: 'attended', pct: pct(outcomes.attended), color: 'var(--green-700)', label: at('attended') },
+    { key: 'absent', pct: pct(outcomes.absent), color: 'var(--danger)', label: at('absent') },
+    { key: 'awaiting', pct: pct(outcomes.awaiting), color: 'var(--warning)', label: at('awaitingOutcome') },
+  ];
+  const wrap = el('dashOutcomesGauges');
+  wrap.innerHTML = items.map((it) => `
+    <div class="dash-gauge" data-outcome="${it.key}">
+      ${gaugeSvg(it.pct, it.color)}
+      <span class="dash-gauge-label">${it.label}</span>
+    </div>`).join('');
+
+  wrap.querySelectorAll('[data-outcome]').forEach((node) => {
+    node.addEventListener('click', () => openSearch('registrations', { outcome: node.getAttribute('data-outcome') }));
+  });
+}
+
+function renderDashDepartments(rows) {
+  const wrap = el('dashDeptChart');
+  const empty = el('dashDeptEmpty');
+  if (!rows.length) {
+    wrap.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  const max = Math.max(...rows.map((r) => r.total));
+  wrap.innerHTML = rows.map((r) => `
+    <div class="dash-bar-row" data-dept="${r.department}">
+      <div class="dash-bar-head"><b>${r.department}</b><span>${r.total} (${r.attended} ${at('attended')})</span></div>
+      <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${Math.round((r.total / max) * 100)}%"></div></div>
+    </div>`).join('');
+
+  wrap.querySelectorAll('[data-dept]').forEach((node) => {
+    node.addEventListener('click', () => openSearch('registrations', { department: node.getAttribute('data-dept') }));
+  });
+}
+
+// ---------------------------------------------------------------------
+// Advanced search
+// ---------------------------------------------------------------------
+
+let ACTIVE_SEARCH_TAB = 'trainings';
+
+function setSearchTab(tab) {
+  ACTIVE_SEARCH_TAB = tab;
+  document.querySelectorAll('#searchTabs button').forEach((btn) => {
+    btn.classList.toggle('on', btn.getAttribute('data-search-tab') === tab);
+  });
+  el('searchTrainingsPanel').classList.toggle('hidden', tab !== 'trainings');
+  el('searchRegistrationsPanel').classList.toggle('hidden', tab !== 'registrations');
+}
+
+/** Populates the Department/Training dropdowns from already-loaded data, preserving any current selection. */
+function populateSearchLookups() {
+  const depts = Array.from(new Set(LAST_EMPLOYEES.map((e) => e.department).filter(Boolean))).sort();
+  const deptSel = el('srDepartment');
+  const currentDept = deptSel.value;
+  deptSel.querySelectorAll('option:not(:first-child)').forEach((o) => o.remove());
+  depts.forEach((d) => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    deptSel.appendChild(opt);
+  });
+  if (depts.includes(currentDept)) deptSel.value = currentDept;
+
+  const lang = getLang();
+  const trainSel = el('srTraining');
+  const currentTrain = trainSel.value;
+  trainSel.querySelectorAll('option:not(:first-child)').forEach((o) => o.remove());
+  LAST_TRAININGS.forEach((t) => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = `${t.id} — ${lang === 'ar' ? t.title_ar : t.title_en}`;
+    trainSel.appendChild(opt);
+  });
+  if (LAST_TRAININGS.some((t) => t.id === currentTrain)) trainSel.value = currentTrain;
+}
+
+/** Switches to Advanced Search, selects a tab, pre-fills its filters, and runs the search. Used by dashboard drill-downs. */
+function openSearch(tab, filters) {
+  showSection('search');
+  setSearchTab(tab);
+  if (tab === 'trainings') {
+    el('stStatus').value = filters.status || '';
+    el('stDateFrom').value = filters.dateFrom || '';
+    el('stDateTo').value = filters.dateTo || '';
+    el('stQuery').value = filters.q || '';
+    runTrainingsSearch();
+  } else {
+    el('srNationalId').value = filters.nationalId || '';
+    el('srDepartment').value = filters.department || '';
+    el('srTraining').value = filters.trainingId || '';
+    el('srOutcome').value = filters.outcome || '';
+    el('srDateFrom').value = filters.dateFrom || '';
+    el('srDateTo').value = filters.dateTo || '';
+    runRegistrationsSearch();
+  }
+}
+
+const ST_PAGER = createPaginator({ containerId: 'stPager', pageSize: 10, renderPage: renderStPage });
+let LAST_ST_RESULTS = [];
+
+async function runTrainingsSearch() {
+  const params = new URLSearchParams({
+    status: el('stStatus').value,
+    dateFrom: el('stDateFrom').value,
+    dateTo: el('stDateTo').value,
+    q: el('stQuery').value.trim(),
+  });
+  const resp = await api(`/admin/api/search/trainings?${params.toString()}`);
+  if (!resp.ok) return;
+  const data = await resp.json();
+  LAST_ST_RESULTS = data.trainings || [];
+  renderStResults();
+}
+
+function renderStResults() {
+  const empty = el('stEmptyNote');
+  if (!LAST_ST_RESULTS.length) {
+    document.querySelector('#stTable tbody').innerHTML = '';
+    el('stPager').classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  ST_PAGER.setItems(LAST_ST_RESULTS);
+}
+
+function renderStPage(pageItems) {
+  const tbody = document.querySelector('#stTable tbody');
+  const lang = getLang();
+  tbody.innerHTML = pageItems.map((tr) => `
+    <tr class="clickable-row" data-roster="${tr.id}">
+      <td><span class="idpill">${tr.id}</span></td>
+      <td>${lang === 'ar' ? tr.title_ar : tr.title_en}</td>
+      <td>${tr.deadline}</td>
+      <td>${statusBadge(tr.effectiveStatus)}</td>
+      <td>${tr.registrantCount}</td>
+      <td>${tr.attendedCount || 0}</td>
+      <td>${tr.absentCount || 0}</td>
+    </tr>`).join('');
+  tbody.querySelectorAll('[data-roster]').forEach((row) => {
+    row.addEventListener('click', () => {
+      showSection('trainings');
+      openRoster(row.getAttribute('data-roster'));
+    });
+  });
+}
+
+function resetTrainingsSearch() {
+  el('stStatus').value = '';
+  el('stDateFrom').value = '';
+  el('stDateTo').value = '';
+  el('stQuery').value = '';
+  runTrainingsSearch();
+}
+
+const SR_PAGER = createPaginator({ containerId: 'srPager', pageSize: 10, renderPage: renderSrPage });
+let LAST_SR_RESULTS = [];
+
+function srQueryParams() {
+  return new URLSearchParams({
+    nationalId: el('srNationalId').value.trim(),
+    department: el('srDepartment').value,
+    trainingId: el('srTraining').value,
+    outcome: el('srOutcome').value,
+    dateFrom: el('srDateFrom').value,
+    dateTo: el('srDateTo').value,
+  });
+}
+
+async function runRegistrationsSearch() {
+  const resp = await api(`/admin/api/search/registrations?${srQueryParams().toString()}`);
+  if (!resp.ok) return;
+  const data = await resp.json();
+  LAST_SR_RESULTS = data.registrations || [];
+  renderSrResults();
+}
+
+function renderSrResults() {
+  const empty = el('srEmptyNote');
+  if (!LAST_SR_RESULTS.length) {
+    document.querySelector('#srTable tbody').innerHTML = '';
+    el('srPager').classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  SR_PAGER.setItems(LAST_SR_RESULTS);
+}
+
+function srOutcomeBadge(r) {
+  if (r.outcome === 'attended') return `<span class="badge attend">${at('attended')}</span>`;
+  if (r.outcome === 'absent') return `<span class="badge absent">${at('absent')}</span>`;
+  return `<span class="badge wait">${at('awaitingOutcome')}</span>`;
+}
+
+function renderSrPage(pageItems) {
+  const tbody = document.querySelector('#srTable tbody');
+  const lang = getLang();
+  tbody.innerHTML = pageItems.map((r) => `
+    <tr>
+      <td>${r.national_id}</td>
+      <td>${r.name || '—'}</td>
+      <td>${r.department || '—'}</td>
+      <td dir="ltr">${r.mobile_e164 || ''}</td>
+      <td><span class="idpill">${r.training_id}</span> ${lang === 'ar' ? r.title_ar : r.title_en}</td>
+      <td>${r.registered_at}</td>
+      <td>${srOutcomeBadge(r)}</td>
+    </tr>`).join('');
+}
+
+function resetRegistrationsSearch() {
+  el('srNationalId').value = '';
+  el('srDepartment').value = '';
+  el('srTraining').value = '';
+  el('srOutcome').value = '';
+  el('srDateFrom').value = '';
+  el('srDateTo').value = '';
+  runRegistrationsSearch();
+}
+
+function exportRegistrationsSearch() {
+  window.open(`/admin/api/search/registrations/export?${srQueryParams().toString()}`, '_blank');
+}
+
 const LOGIN_EVENT_TYPES = ['login_success', 'login_failure', 'lockout'];
 const AUDIT_PAGER = createPaginator({ containerId: 'auditPager', pageSize: 10, renderPage: renderAuditPage });
 
@@ -510,6 +906,10 @@ function onLangChanged() {
       renderRoster(ROSTER_REGISTRANTS);
     }
     renderAudit();
+    renderDashboard();
+    populateSearchLookups();
+    if (LAST_ST_RESULTS.length) renderStResults();
+    if (LAST_SR_RESULTS.length) renderSrResults();
   }
   if (typeof window.sidebarToggleSync === 'function') window.sidebarToggleSync();
 }
@@ -580,13 +980,49 @@ document.addEventListener('DOMContentLoaded', () => {
   el('exportAttendedBtn').addEventListener('click', () => exportRoster('attended'));
   el('exportNotAttendedBtn').addEventListener('click', () => exportRoster('not-attended'));
 
+  el('navDashboard').addEventListener('click', () => showSection('dashboard'));
   el('navEmployees').addEventListener('click', () => showSection('employees'));
   el('navTrainings').addEventListener('click', () => showSection('trainings'));
+  el('navSearch').addEventListener('click', () => showSection('search'));
   el('navAudit').addEventListener('click', () => showSection('audit'));
   document.querySelectorAll('#auditTabs button').forEach((btn) => {
     btn.addEventListener('click', () => setAuditTab(btn.getAttribute('data-audit-tab')));
   });
   el('adminSearch').addEventListener('input', (e) => handleSearchInput(e.target.value));
+
+  // Dashboard drill-downs into Advanced Search.
+  function dashCardKeydown(handler) {
+    return (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('[data-outcome], [data-dept]')) {
+        e.preventDefault();
+        handler();
+      }
+    };
+  }
+  el('dashConductedCard').addEventListener('click', () => openSearch('trainings', { status: 'conducted' }));
+  el('dashConductedCard').addEventListener('keydown', dashCardKeydown(() => openSearch('trainings', { status: 'conducted' })));
+  el('dashUpcomingCard').addEventListener('click', () => openSearch('trainings', { status: 'open' }));
+  el('dashUpcomingCard').addEventListener('keydown', dashCardKeydown(() => openSearch('trainings', { status: 'open' })));
+  el('dashTrendCard').addEventListener('click', () => openSearch('registrations', {}));
+  el('dashTrendCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
+  el('dashOutcomesCard').addEventListener('click', (e) => { if (!e.target.closest('[data-outcome]')) openSearch('registrations', {}); });
+  el('dashOutcomesCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
+  el('dashDeptCard').addEventListener('click', (e) => { if (!e.target.closest('[data-dept]')) openSearch('registrations', {}); });
+  el('dashDeptCard').addEventListener('keydown', dashCardKeydown(() => openSearch('registrations', {})));
+  el('kpiConducted').addEventListener('click', () => openSearch('trainings', { status: 'conducted' }));
+  el('kpiUpcoming').addEventListener('click', () => openSearch('trainings', { status: 'open' }));
+  el('kpiEmployees').addEventListener('click', () => showSection('employees'));
+  el('kpiRegistrations').addEventListener('click', () => openSearch('registrations', {}));
+
+  // Advanced search.
+  document.querySelectorAll('#searchTabs button').forEach((btn) => {
+    btn.addEventListener('click', () => setSearchTab(btn.getAttribute('data-search-tab')));
+  });
+  el('stSearchBtn').addEventListener('click', runTrainingsSearch);
+  el('stResetBtn').addEventListener('click', resetTrainingsSearch);
+  el('srSearchBtn').addEventListener('click', runRegistrationsSearch);
+  el('srResetBtn').addEventListener('click', resetRegistrationsSearch);
+  el('srExportBtn').addEventListener('click', exportRegistrationsSearch);
 
   checkAuth();
 });

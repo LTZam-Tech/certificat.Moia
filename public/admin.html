@@ -76,13 +76,21 @@
       </button>
       <div class="sidebar-logo"><img src="/emblem-full.png" alt="MOIA"></div>
       <nav class="sidebar-nav">
-        <button class="side-link on" id="navEmployees">
+        <button class="side-link on" id="navDashboard">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7.5" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="3.5" width="7.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="11" width="7.5" height="9.5" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="14.5" width="7.5" height="6" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
+          <span data-ar="لوحة المعلومات" data-en="Dashboard">Dashboard</span>
+        </button>
+        <button class="side-link" id="navEmployees">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="8.5" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 14a5 5 0 015.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span data-ar="الموظفون" data-en="Employees">Employees</span>
         </button>
         <button class="side-link" id="navTrainings">
           <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.7"/></svg>
           <span data-ar="التدريبات" data-en="Trainings">Trainings</span>
+        </button>
+        <button class="side-link" id="navSearch">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-4.8-4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span data-ar="البحث المتقدم" data-en="Advanced Search">Advanced Search</span>
         </button>
         <button class="side-link" id="navAudit">
           <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M8 9.5h8M8 13h8M8 16.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -103,7 +111,63 @@
 
     <main class="content-area">
 
-      <div id="scr-employees">
+      <div id="scr-dashboard">
+        <div class="dash-kpis">
+          <button class="dash-kpi" id="kpiConducted" type="button">
+            <span class="dash-kpi-num" id="kpiConductedNum">0</span>
+            <span class="dash-kpi-label" data-ar="تدريبات مُنعقدة" data-en="Trainings conducted">Trainings conducted</span>
+          </button>
+          <button class="dash-kpi" id="kpiUpcoming" type="button">
+            <span class="dash-kpi-num" id="kpiUpcomingNum">0</span>
+            <span class="dash-kpi-label" data-ar="تدريبات قادمة" data-en="Upcoming trainings">Upcoming trainings</span>
+          </button>
+          <button class="dash-kpi" id="kpiEmployees" type="button">
+            <span class="dash-kpi-num" id="kpiEmployeesNum">0</span>
+            <span class="dash-kpi-label" data-ar="الموظفون" data-en="Employees">Employees</span>
+          </button>
+          <button class="dash-kpi" id="kpiRegistrations" type="button">
+            <span class="dash-kpi-num" id="kpiRegistrationsNum">0</span>
+            <span class="dash-kpi-label" data-ar="إجمالي التسجيلات" data-en="Total registrations">Total registrations</span>
+          </button>
+        </div>
+
+        <div class="dash-row">
+          <div class="admin-card dash-card" id="dashConductedCard" role="button" tabindex="0">
+            <div class="hd"><h2 data-ar="أحدث التدريبات المُنعقدة" data-en="Latest conducted trainings">Latest conducted trainings</h2></div>
+            <p class="admin-note" data-ar="انقر لعرض كل التدريبات المُنعقدة في البحث المتقدم." data-en="Click to see all conducted trainings in Advanced Search.">Click to see all conducted trainings in Advanced Search.</p>
+            <div id="dashConductedList" class="dash-list"></div>
+            <div class="empty-note hidden" id="dashConductedEmpty" data-ar="لا توجد تدريبات مُنعقدة بعد." data-en="No trainings conducted yet.">No trainings conducted yet.</div>
+          </div>
+          <div class="admin-card dash-card" id="dashUpcomingCard" role="button" tabindex="0">
+            <div class="hd"><h2 data-ar="التدريبات القادمة" data-en="Upcoming trainings">Upcoming trainings</h2></div>
+            <p class="admin-note" data-ar="انقر لعرض كل التدريبات المفتوحة في البحث المتقدم." data-en="Click to see all open trainings in Advanced Search.">Click to see all open trainings in Advanced Search.</p>
+            <div id="dashUpcomingList" class="dash-list"></div>
+            <div class="empty-note hidden" id="dashUpcomingEmpty" data-ar="لا توجد تدريبات قادمة." data-en="No upcoming trainings.">No upcoming trainings.</div>
+          </div>
+        </div>
+
+        <div class="admin-card dash-card" id="dashTrendCard" role="button" tabindex="0">
+          <div class="hd"><h2 data-ar="حجم التسجيل والحضور الشهري" data-en="Monthly registrations &amp; attendance">Monthly registrations &amp; attendance</h2></div>
+          <p class="admin-note" data-ar="انقر لعرض كل سجلات التسجيل في البحث المتقدم." data-en="Click to see all registration records in Advanced Search.">Click to see all registration records in Advanced Search.</p>
+          <div id="dashTrendChart"></div>
+        </div>
+
+        <div class="dash-row">
+          <div class="admin-card dash-card" id="dashOutcomesCard" role="button" tabindex="0">
+            <div class="hd"><h2 data-ar="نتائج الحضور" data-en="Attendance outcomes">Attendance outcomes</h2></div>
+            <p class="admin-note" data-ar="انقر على أي حلقة لعرض تلك النتيجة في البحث المتقدم." data-en="Click any ring to see that outcome in Advanced Search.">Click any ring to see that outcome in Advanced Search.</p>
+            <div id="dashOutcomesGauges" class="dash-gauges"></div>
+          </div>
+          <div class="admin-card dash-card" id="dashDeptCard" role="button" tabindex="0">
+            <div class="hd"><h2 data-ar="التوزيع حسب الإدارة" data-en="Breakdown by department">Breakdown by department</h2></div>
+            <p class="admin-note" data-ar="انقر على إدارة لعرض تسجيلاتها في البحث المتقدم." data-en="Click a department to see its registrations in Advanced Search.">Click a department to see its registrations in Advanced Search.</p>
+            <div id="dashDeptChart" class="dash-bars"></div>
+            <div class="empty-note hidden" id="dashDeptEmpty" data-ar="لا توجد بيانات إدارات بعد." data-en="No department data yet.">No department data yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scr-employees" class="hidden">
         <div class="admin-card">
           <div class="hd">
             <h2 data-ar="الموظفون" data-en="Employees">Employees</h2>
@@ -204,6 +268,100 @@
             </table>
             <div class="pagination hidden" id="rosterPager"></div>
             <div class="empty-note hidden" id="rosterEmptyNote" data-ar="لا يوجد مسجَّلون بعد." data-en="No registrants yet.">No registrants yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scr-search" class="hidden">
+        <div class="admin-card">
+          <div class="hd">
+            <h2 data-ar="البحث المتقدم" data-en="Advanced Search">Advanced Search</h2>
+          </div>
+          <div class="seg" id="searchTabs">
+            <button class="on" data-search-tab="trainings" data-ar="بحث في التدريبات" data-en="Search Trainings">Search Trainings</button>
+            <button data-search-tab="registrations" data-ar="بحث في التسجيلات" data-en="Search Registrations">Search Registrations</button>
+          </div>
+
+          <div id="searchTrainingsPanel">
+            <div class="filter-row">
+              <div class="field">
+                <label data-ar="الحالة" data-en="Status">Status</label>
+                <select id="stStatus" class="ff">
+                  <option value="" data-ar="الكل" data-en="All">All</option>
+                  <option value="open" data-ar="مفتوح" data-en="Open">Open</option>
+                  <option value="closed" data-ar="مُغلق" data-en="Closed">Closed</option>
+                  <option value="conducted" data-ar="مُنعقد" data-en="Conducted">Conducted</option>
+                  <option value="cancelled" data-ar="مُلغى" data-en="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="field"><label data-ar="آخر أجل من" data-en="Deadline from">Deadline from</label><input type="date" id="stDateFrom" class="ff"></div>
+              <div class="field"><label data-ar="آخر أجل إلى" data-en="Deadline to">Deadline to</label><input type="date" id="stDateTo" class="ff"></div>
+              <div class="field"><label data-ar="بحث نصي" data-en="Search text">Search text</label><input type="text" id="stQuery" class="ff" data-ar-ph="الرمز أو العنوان" data-en-ph="ID or title" placeholder="ID or title"></div>
+              <div class="filter-actions">
+                <button class="solid-btn" id="stSearchBtn" data-ar="بحث" data-en="Search">Search</button>
+                <button class="ghost-btn" id="stResetBtn" data-ar="إعادة تعيين" data-en="Reset">Reset</button>
+              </div>
+            </div>
+            <div class="scroll-x mt">
+              <table class="plain" id="stTable">
+                <thead><tr>
+                  <th data-ar="الرمز" data-en="ID">ID</th>
+                  <th data-ar="العنوان" data-en="Title">Title</th>
+                  <th data-ar="آخر أجل" data-en="Deadline">Deadline</th>
+                  <th data-ar="الحالة" data-en="Status">Status</th>
+                  <th data-ar="المسجَّلون" data-en="Registrants">Registrants</th>
+                  <th data-ar="حضروا" data-en="Attended">Attended</th>
+                  <th data-ar="لم يحضروا" data-en="Absent">Absent</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="pagination hidden" id="stPager"></div>
+              <div class="empty-note hidden" id="stEmptyNote" data-ar="لا نتائج مطابقة." data-en="No matching results.">No matching results.</div>
+            </div>
+          </div>
+
+          <div id="searchRegistrationsPanel" class="hidden">
+            <div class="filter-row">
+              <div class="field"><label data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</label><input type="text" id="srNationalId" class="ff"></div>
+              <div class="field"><label data-ar="الإدارة" data-en="Department">Department</label>
+                <select id="srDepartment" class="ff"><option value="" data-ar="الكل" data-en="All">All</option></select>
+              </div>
+              <div class="field"><label data-ar="التدريب" data-en="Training">Training</label>
+                <select id="srTraining" class="ff"><option value="" data-ar="الكل" data-en="All">All</option></select>
+              </div>
+              <div class="field">
+                <label data-ar="النتيجة" data-en="Outcome">Outcome</label>
+                <select id="srOutcome" class="ff">
+                  <option value="" data-ar="الكل" data-en="All">All</option>
+                  <option value="attended" data-ar="حضر" data-en="Attended">Attended</option>
+                  <option value="absent" data-ar="لم يحضر" data-en="Absent">Absent</option>
+                  <option value="awaiting" data-ar="بانتظار النتيجة" data-en="Awaiting outcome">Awaiting outcome</option>
+                </select>
+              </div>
+              <div class="field"><label data-ar="التسجيل من" data-en="Registered from">Registered from</label><input type="date" id="srDateFrom" class="ff"></div>
+              <div class="field"><label data-ar="التسجيل إلى" data-en="Registered to">Registered to</label><input type="date" id="srDateTo" class="ff"></div>
+              <div class="filter-actions">
+                <button class="solid-btn" id="srSearchBtn" data-ar="بحث" data-en="Search">Search</button>
+                <button class="ghost-btn" id="srResetBtn" data-ar="إعادة تعيين" data-en="Reset">Reset</button>
+                <button class="ghost-btn" id="srExportBtn" data-ar="تصدير النتائج" data-en="Export results">Export results</button>
+              </div>
+            </div>
+            <div class="scroll-x mt">
+              <table class="plain" id="srTable">
+                <thead><tr>
+                  <th data-ar="رقم الهوية الوطنية" data-en="National ID">National ID</th>
+                  <th data-ar="الاسم" data-en="Name">Name</th>
+                  <th data-ar="الإدارة" data-en="Department">Department</th>
+                  <th data-ar="الجوال" data-en="Mobile">Mobile</th>
+                  <th data-ar="التدريب" data-en="Training">Training</th>
+                  <th data-ar="تاريخ التسجيل" data-en="Registered">Registered</th>
+                  <th data-ar="النتيجة" data-en="Outcome">Outcome</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="pagination hidden" id="srPager"></div>
+              <div class="empty-note hidden" id="srEmptyNote" data-ar="لا نتائج مطابقة." data-en="No matching results.">No matching results.</div>
+            </div>
           </div>
         </div>
       </div>
