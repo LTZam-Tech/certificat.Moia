@@ -709,10 +709,34 @@ function handleAdminSearchRegistrationsExport(req, res, parsedUrl) {
 // Routing
 // ---------------------------------------------------------------------
 
+/**
+ * Baseline security headers on every response. setHeader() here merges with
+ * (rather than being overridden by) whatever each handler later passes to
+ * writeHead(), per Node's documented behavior, so this only needs to run once
+ * up front. No inline <script>/event-handler attributes and no third-party
+ * script/style/font hosts exist anywhere in public/ (checked), so the CSP
+ * below can stay strict rather than needing 'unsafe-inline' for scripts.
+ */
+function setSecurityHeaders(req, res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'same-origin');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data:; font-src 'self' data:; object-src 'none'; " +
+    "base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+  );
+  if (config.https.enabled) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+}
+
 async function router(req, res) {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const p = parsedUrl.pathname;
   const method = req.method;
+  setSecurityHeaders(req, res);
 
   try {
     if (method === 'GET' && p === '/') return void serveStatic(req, res, '/login.html');

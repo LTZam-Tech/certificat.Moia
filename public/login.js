@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('verifyBtn').addEventListener('click', verify);
   document.getElementById('backBtn').addEventListener('click', exitOtpPhase);
+  document.getElementById('idEye').addEventListener('click', toggleId);
   document.getElementById('otp').addEventListener('input', (e) => {
     e.target.value = digitsOnly(e.target.value).slice(0, 6);
   });
