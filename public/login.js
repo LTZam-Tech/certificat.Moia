@@ -22,14 +22,17 @@ function isValidMobileClient(v) {
   return /^5\d{8}$/.test(d);
 }
 
+// A single icon, content-swapped on toggle -- one <svg> element in the DOM
+// at all times, so there's never a chance of both states rendering at once.
+const EYE_OPEN_SVG = '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>';
+const EYE_CLOSED_SVG = '<path d="M4 4l16 16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 5.2A9.9 9.9 0 0 1 12 5c6.4 0 10 7 10 7a15.9 15.9 0 0 1-3.1 3.9M6.2 7.3A15.8 15.8 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 3.2-.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>';
+
 function toggleId() {
   const inp = document.getElementById('nid');
-  const open = document.querySelector('#idEye .eye-open');
-  const closed = document.querySelector('#idEye .eye-closed');
+  const icon = document.getElementById('idEyeIcon');
   const reveal = inp.type === 'password';
   inp.type = reveal ? 'text' : 'password';
-  open.classList.toggle('hidden', reveal);
-  closed.classList.toggle('hidden', !reveal);
+  icon.innerHTML = reveal ? EYE_CLOSED_SVG : EYE_OPEN_SVG;
 }
 
 function setFieldInvalid(fieldId, invalid) {
