@@ -32,10 +32,18 @@ const STATIC_TYPES = {
 };
 
 function sourceIp(req) {
-  // Trust X-Forwarded-For only if you terminate TLS behind a trusted reverse
-  // proxy (e.g. IIS/ARR) on the same host; otherwise use the socket address.
-  const xf = req.headers['x-forwarded-for'];
-  if (xf) return xf.split(',')[0].trim();
+  // X-Forwarded-For is attacker-controlled on any request that reaches this
+  // process directly (which is the current deployment -- Node terminates TLS
+  // itself, there is no reverse proxy stripping/rewriting it). Trusting it
+  // unconditionally would let a single client defeat per-IP lockout by
+  // sending a different fake value on every request, and would let it plant
+  // arbitrary text (observed rendered unescaped in the admin audit log) into
+  // security logs. Only honor it when explicitly configured as sitting behind
+  // a trusted proxy that's known to set it correctly.
+  if (config.trustProxy) {
+    const xf = req.headers['x-forwarded-for'];
+    if (xf) return xf.split(',')[0].trim();
+  }
   return req.socket.remoteAddress;
 }
 
@@ -614,12 +622,15 @@ async function handleAdminTrainingAttendance(req, res, parsedUrl) {
   // outcomes" response reflects whether generation actually succeeded
   // rather than silently failing in the background.
   const training = trainingRepo.getById(id);
+  // nationalId ends up in the certificate's file path (certGenerator) -- require
+  // it to both be a well-formed Saudi ID and match a real employee record before
+  // it's ever used for a filesystem write, so a crafted value (e.g. containing
+  // "../") can't escape the shared certificate folder.
   const attendees = outcomes
-    .filter((o) => o.outcome === 'attended')
-    .map((o) => {
-      const emp = employeeRepo.findById(o.nationalId);
-      return { nationalId: o.nationalId, name: emp && emp.name, department: emp && emp.department };
-    });
+    .filter((o) => o.outcome === 'attended' && isValidSaudiId(o.nationalId))
+    .map((o) => ({ nationalId: o.nationalId, emp: employeeRepo.findById(o.nationalId) }))
+    .filter(({ emp }) => emp)
+    .map(({ nationalId, emp }) => ({ nationalId, name: emp.name, department: emp.department }));
 
   let certificateError = null;
   try {

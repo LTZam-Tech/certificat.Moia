@@ -1,5 +1,6 @@
 {
   "port": 3000,
+  "trustProxy": false,
   "https": {
     "enabled": false,
     "certPath": "",

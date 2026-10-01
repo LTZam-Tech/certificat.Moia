@@ -1,5 +1,14 @@
 'use strict';
 
+/** Escapes a value for safe interpolation into innerHTML text content.
+ * Training titles/descriptions are admin-authored but rendered to every
+ * employee viewing this page, so they're treated as untrusted markup. */
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 let CURRENT_ME = null;
 let CURRENT_CERTS = [];
 let CURRENT_TRAININGS = [];
@@ -62,8 +71,8 @@ function renderTrainingsPage(pageItems) {
     return `
     <div class="tcard">
       <div class="tmeta"><span class="idpill">${tr.id}</span><span class="badge open">${t('statusOpen')}</span></div>
-      <div class="tt">${lang === 'ar' ? tr.title_ar : tr.title_en}</div>
-      <div class="td">${lang === 'ar' ? (tr.desc_ar || '') : (tr.desc_en || '')}</div>
+      <div class="tt">${escapeHtml(lang === 'ar' ? tr.title_ar : tr.title_en)}</div>
+      <div class="td">${escapeHtml(lang === 'ar' ? (tr.desc_ar || '') : (tr.desc_en || ''))}</div>
       <div class="tmeta"><span>${t('deadline')}</span><b dir="ltr">${formatShortDate(tr.deadline)}</b></div>
       <button class="btn" data-id="${tr.id}" ${already ? 'disabled' : ''}>${already ? t('registered') : t('register')}</button>
     </div>`;
@@ -132,7 +141,7 @@ function renderMinePage(pageItems) {
     return `
     <div class="mrow">
       <div class="mi">
-        <div class="mt">${lang === 'ar' ? m.title_ar : m.title_en}</div>
+        <div class="mt">${escapeHtml(lang === 'ar' ? m.title_ar : m.title_en)}</div>
         <div class="ms"><span class="idpill">${m.training_id}</span><span>${t('regDate')(formatShortDate(m.registered_at))}</span></div>
       </div>
       ${mineStatusBadge(m)}
@@ -230,7 +239,7 @@ function renderCertsPage(pageItems) {
     <div class="cert">
       <div class="seal" aria-hidden="true">${sealSvg()}</div>
       <div class="info">
-        <div class="t">${trainingCertLabel(c)}</div>
+        <div class="t">${escapeHtml(trainingCertLabel(c))}</div>
         <div class="s">
           <span class="pill done">${t('completed')}</span>
           <span class="pill fmt">${c.ext.replace('.', '').toUpperCase()}</span>
@@ -378,7 +387,7 @@ function renderNotifList() {
     <div class="notif-item">
       <div class="notif-ico${n.type === 'attendance' && n.outcome !== 'attended' ? ' absent' : ''}">${notifIconSvg(n)}</div>
       <div class="notif-body">
-        <div class="notif-text">${notifText(n)}</div>
+        <div class="notif-text">${escapeHtml(notifText(n))}</div>
         <div class="notif-time">${formatShortDate(n.ts)}</div>
       </div>
     </div>

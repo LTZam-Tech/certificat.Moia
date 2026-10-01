@@ -2,6 +2,16 @@
 
 function el(id) { return document.getElementById(id); }
 
+/** Escapes a value for safe interpolation into innerHTML text/attribute contexts.
+ * Every admin-visible field that ultimately comes from imported/uploaded data
+ * (employee name/department, training titles) must go through this before
+ * being placed in a template string -- none of it can be trusted as markup. */
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 async function api(path, opts) {
   const resp = await fetch(path, Object.assign({ credentials: 'same-origin' }, opts));
   return resp;
@@ -242,8 +252,8 @@ function renderEmployeesPage(pageItems) {
   tbody.innerHTML = pageItems.map((r) => `
     <tr>
       <td>${r.national_id}</td>
-      <td>${r.name || '—'}</td>
-      <td>${r.department || '—'}</td>
+      <td>${escapeHtml(r.name) || '—'}</td>
+      <td>${escapeHtml(r.department) || '—'}</td>
       <td dir="ltr">${r.mobile_e164}</td>
       <td>${r.updated_at}</td>
       <td><button class="rowbtn" data-id="${r.national_id}">${at('remove')}</button></td>
@@ -336,11 +346,11 @@ function renderTrainingsPage(pageItems) {
   tbody.innerHTML = pageItems.map((tr) => `
     <tr>
       <td><span class="idpill">${tr.id}</span></td>
-      <td>${lang === 'ar' ? tr.title_ar : tr.title_en}</td>
+      <td>${escapeHtml(lang === 'ar' ? tr.title_ar : tr.title_en)}</td>
       <td>${tr.deadline}</td>
       <td>${statusBadge(tr.effectiveStatus)}</td>
       <td>${tr.registrantCount}</td>
-      <td>${tr.created_by || '—'}</td>
+      <td>${escapeHtml(tr.created_by) || '—'}</td>
       <td><button class="ghost-btn" data-roster="${tr.id}">${tr.effectiveStatus === 'closed' ? at('markAttendance') : at('view')}</button></td>
     </tr>
   `).join('');
@@ -551,8 +561,8 @@ function renderDashKpiBacks(d) {
 /** Compact "glance" summary shown on the front face of the conducted/upcoming cards (the detailed list lives on the back). */
 function renderDashStatFront(containerId, bigNum, subText) {
   el(containerId).innerHTML = `
-    <div class="big-num">${bigNum}</div>
-    <div class="big-sub">${subText}</div>`;
+    <div class="big-num">${escapeHtml(bigNum)}</div>
+    <div class="big-sub">${escapeHtml(subText)}</div>`;
 }
 
 function renderDashConducted(rows, lang) {
@@ -575,7 +585,7 @@ function renderDashConducted(rows, lang) {
   }
   empty.classList.add('hidden');
   wrap.innerHTML = rows.map((tr, i) => {
-    const title = lang === 'ar' ? tr.title_ar : tr.title_en;
+    const title = escapeHtml(lang === 'ar' ? tr.title_ar : tr.title_en);
     const pct = tr.registrantCount ? Math.round((tr.attendedCount / tr.registrantCount) * 100) : 0;
     return `
       <div class="dash-list-item dash-list-item-click" data-training="${tr.id}" style="animation-delay:${i * 70}ms">
@@ -616,7 +626,7 @@ function renderDashUpcoming(rows, lang) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   wrap.innerHTML = rows.map((tr, i) => {
-    const title = lang === 'ar' ? tr.title_ar : tr.title_en;
+    const title = escapeHtml(lang === 'ar' ? tr.title_ar : tr.title_en);
     const days = Math.max(0, Math.round((new Date(tr.deadline) - today) / 86400000));
     return `
       <div class="dash-list-item dash-list-item-click" data-training="${tr.id}" style="animation-delay:${i * 70}ms">
@@ -749,12 +759,12 @@ function pieChartSvg(segments, size, centerLabel) {
     const len = (seg.value / total) * c;
     const dashoffset = -cumulative;
     cumulative += len;
-    return `<circle class="pie-seg" data-key="${seg.key}" data-final-len="${len.toFixed(2)}" cx="${mid}" cy="${mid}" r="${r}" fill="none"
+    return `<circle class="pie-seg" data-key="${escapeHtml(seg.key)}" data-final-len="${len.toFixed(2)}" cx="${mid}" cy="${mid}" r="${r}" fill="none"
       style="stroke:${seg.color};stroke-width:${stroke}px;stroke-dasharray:0 ${GAP}" stroke-dashoffset="${dashoffset.toFixed(2)}"
-      pointer-events="visibleStroke" transform="rotate(-90 ${mid} ${mid})"><title>${seg.label}: ${seg.value}</title></circle>`;
+      pointer-events="visibleStroke" transform="rotate(-90 ${mid} ${mid})"><title>${escapeHtml(seg.label)}: ${seg.value}</title></circle>`;
   }).join('');
 
-  const centerText = centerLabel === undefined ? '' : `<text x="${mid}" y="${mid + 6}" text-anchor="middle" font-size="20" font-weight="800" style="fill:var(--ink)">${centerLabel}</text>`;
+  const centerText = centerLabel === undefined ? '' : `<text x="${mid}" y="${mid + 6}" text-anchor="middle" font-size="20" font-weight="800" style="fill:var(--ink)">${escapeHtml(centerLabel)}</text>`;
 
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="pie-svg">
     <circle cx="${mid}" cy="${mid}" r="${r}" fill="none" style="stroke:var(--line);stroke-width:${stroke}px"/>
@@ -776,9 +786,9 @@ function animatePieSegments(container) {
 
 function pieLegend(segments, total) {
   return `<div class="pie-legend">${segments.map((seg) => `
-    <div class="pie-legend-row" data-key="${seg.key}">
+    <div class="pie-legend-row" data-key="${escapeHtml(seg.key)}">
       <span class="pie-legend-swatch" style="background:${seg.color}"></span>
-      <span class="pie-legend-label">${seg.label}</span>
+      <span class="pie-legend-label">${escapeHtml(seg.label)}</span>
       <span class="pie-legend-val">${seg.value} (${total ? Math.round((seg.value / total) * 100) : 0}%)</span>
     </div>`).join('')}</div>`;
 }
@@ -938,7 +948,7 @@ function renderStPage(pageItems) {
   tbody.innerHTML = pageItems.map((tr) => `
     <tr class="clickable-row" data-roster="${tr.id}">
       <td><span class="idpill">${tr.id}</span></td>
-      <td>${lang === 'ar' ? tr.title_ar : tr.title_en}</td>
+      <td>${escapeHtml(lang === 'ar' ? tr.title_ar : tr.title_en)}</td>
       <td>${tr.deadline}</td>
       <td>${statusBadge(tr.effectiveStatus)}</td>
       <td>${tr.registrantCount}</td>
@@ -1007,10 +1017,10 @@ function renderSrPage(pageItems) {
   tbody.innerHTML = pageItems.map((r) => `
     <tr>
       <td>${r.national_id}</td>
-      <td>${r.name || '—'}</td>
-      <td>${r.department || '—'}</td>
+      <td>${escapeHtml(r.name) || '—'}</td>
+      <td>${escapeHtml(r.department) || '—'}</td>
       <td dir="ltr">${r.mobile_e164 || ''}</td>
-      <td><span class="idpill">${r.training_id}</span> ${lang === 'ar' ? r.title_ar : r.title_en}</td>
+      <td><span class="idpill">${r.training_id}</span> ${escapeHtml(lang === 'ar' ? r.title_ar : r.title_en)}</td>
       <td>${r.registered_at}</td>
       <td>${srOutcomeBadge(r)}</td>
     </tr>`).join('');
@@ -1074,8 +1084,8 @@ function renderAudit(rows) {
 function renderAuditPage(pageItems) {
   const tbody = el('auditTable').querySelector('tbody');
   tbody.innerHTML = pageItems.map((r) => `<tr>
-    <td>${r.ts}</td><td>${eventLabel(r.event_type)}</td><td>${r.national_id_last4 || ''}</td>
-    <td class="audit-col-file">${r.file_ref || ''}</td><td>${r.source_ip || ''}</td><td>${r.detail || ''}</td>
+    <td>${r.ts}</td><td>${eventLabel(r.event_type)}</td><td>${escapeHtml(r.national_id_last4) || ''}</td>
+    <td class="audit-col-file">${escapeHtml(r.file_ref) || ''}</td><td>${escapeHtml(r.source_ip) || ''}</td><td>${escapeHtml(r.detail) || ''}</td>
   </tr>`).join('');
 }
 

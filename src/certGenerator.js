@@ -147,7 +147,16 @@ function findBrowserExecutable() {
  * ({ID}-{TrainingID}.ext) so certService's existing ownership/download
  * checks keep working unchanged.
  */
+/** Both halves of the output file name must be plain identifiers -- this is the
+ * last line of defense against a crafted nationalId/trainingId (e.g. containing
+ * "../") escaping the shared certificate folder via path.join, regardless of
+ * whether the caller already validated them. */
+const SAFE_ID_SEGMENT = /^[A-Za-z0-9-]+$/;
+
 async function generateCertificatePdf(browser, { nationalId, employeeName, department, trainingId, trainingTitleAr, trainingTitleEn, issuedAt }) {
+  if (!SAFE_ID_SEGMENT.test(nationalId) || !SAFE_ID_SEGMENT.test(trainingId)) {
+    throw new Error(`Refusing to generate a certificate for unsafe identifiers: ${nationalId} / ${trainingId}`);
+  }
   const html = renderHtml({ employeeName, department, trainingTitleAr, trainingTitleEn, issuedAt });
   const page = await browser.newPage();
   try {
@@ -160,6 +169,10 @@ async function generateCertificatePdf(browser, { nationalId, employeeName, depar
     });
     const fileName = `${nationalId}-${trainingId}.pdf`;
     const fullPath = path.join(config.sharedFolderPath, fileName);
+    const root = path.resolve(config.sharedFolderPath) + path.sep;
+    if (!path.resolve(fullPath).startsWith(root)) {
+      throw new Error(`Refusing to write certificate outside the shared folder: ${fullPath}`);
+    }
     fs.mkdirSync(config.sharedFolderPath, { recursive: true });
     fs.writeFileSync(fullPath, pdfBuffer);
     return fileName;
