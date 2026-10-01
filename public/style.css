@@ -803,6 +803,45 @@ footer.sig{background:var(--paper);border-top:1px solid var(--line)}
 .dash-card[role="button"]:active{transform:translateY(-1px) scale(.995)}
 .dash-card[role="button"]:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
 
+/* ===== Flip cards -- every dashboard card has a quick "glance" front face
+   and a detailed back face, toggled by the small flip icon (not by the
+   card's own click-to-drill-down, which still fires from either face). ===== */
+.flip-card{perspective:1400px;position:relative}
+.flip-card .flip-card-inner{position:relative;display:block;width:100%;transition:transform .7s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+.flip-card.flipped .flip-card-inner{transform:rotateY(180deg)}
+.flip-card-face{position:absolute;inset:0;display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow-y:auto;border-radius:inherit;box-sizing:border-box;padding:var(--space-7)}
+.flip-card-front{position:relative;min-height:inherit;display:flex;flex-direction:column} /* in normal flow -- this is what gives the card its natural height; inheriting the inner's min-height and using flex lets front-face content (e.g. a centered pie) actually fill it */
+/* .hd's sticky + negative-margin trick (edge-to-edge sticky header while
+   scrolling a tall card) renders unpredictably inside an absolutely
+   positioned, 3D-transformed flip face -- these cards are short, so a
+   plain static heading does the job without that complexity. */
+.flip-card-face .hd{position:static;margin:0;padding:0 0 var(--space-4);background:none;border-radius:0}
+.flip-card-back{transform:rotateY(180deg)}
+
+.dash-card.flip-card{padding:0}
+.pie-flip .flip-card-inner{min-height:380px}
+.trend-flip .flip-card-inner{min-height:300px}
+#dashConductedCard .flip-card-inner,#dashUpcomingCard .flip-card-inner{min-height:300px}
+
+.flip-toggle{position:absolute;top:10px;inset-inline-end:10px;z-index:5;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-strong);background:var(--paper);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .5s ease, background .15s ease, color .15s ease}
+.flip-toggle svg{width:16px;height:16px}
+.flip-toggle:hover{background:var(--sand);color:var(--green-700)}
+.flip-card.flipped .flip-toggle{transform:rotate(180deg)}
+
+.dash-kpi.flip-card{padding:0;display:block}
+.dash-kpi .flip-card-inner{min-height:92px}
+.dash-kpi .flip-card-face{padding:var(--space-5) var(--space-6);display:flex;flex-direction:column;justify-content:center}
+.dash-kpi .flip-toggle{width:20px;height:20px;top:8px;inset-inline-end:8px;background:transparent;border:0}
+.dash-kpi .flip-toggle svg{width:12px;height:12px}
+.dash-kpi-back{font-size:13px;font-weight:600;color:var(--ink);line-height:1.45}
+
+.pie-front-wrap{display:flex;align-items:center;justify-content:center;flex:1}
+.dash-stat-front{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;flex:1;text-align:center}
+.dash-stat-front .big-num{font-size:40px;font-weight:800;color:var(--green-700);line-height:1}
+.dash-stat-front .big-sub{font-size:13px;color:var(--muted);max-width:260px}
+
+.dash-hint{text-align:center;margin-top:var(--space-2)}
+
 .dash-list{display:flex;flex-direction:column;gap:var(--space-3)}
 .dash-list-item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) var(--space-4);background:var(--sand);border-radius:var(--radius-md);border:1px solid var(--line);transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease}
 .dash-list-item-click{cursor:pointer}
@@ -818,14 +857,10 @@ footer.sig{background:var(--paper);border-top:1px solid var(--line)}
 .dash-trend-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 
 /* Pie/donut charts (attendance outcomes, department breakdown) */
-.pie-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-6);justify-content:center}
 .pie-seg{cursor:pointer;transition:stroke-width .18s ease, opacity .18s ease}
-.pie-seg.pie-hl{stroke-width:34px !important}
-.pie-hover-active .pie-seg:not(.pie-hl){opacity:.35}
 .pie-legend{display:flex;flex-direction:column;gap:var(--space-2);min-width:170px}
 .pie-legend-row{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:var(--radius-sm);padding:5px 7px;transition:background .15s ease, transform .15s ease, opacity .15s ease}
-.pie-legend-row:hover,.pie-legend-row.pie-hl{background:var(--sand);transform:scale(1.04)}
-.pie-hover-active .pie-legend-row:not(.pie-hl){opacity:.55}
+.pie-legend-row:hover{background:var(--sand);transform:scale(1.04)}
 .pie-legend-swatch{width:11px;height:11px;border-radius:50%;flex:none}
 .pie-legend-label{font-size:13px;font-weight:600;flex:1}
 .pie-legend-val{font-size:12.5px;color:var(--muted);white-space:nowrap}

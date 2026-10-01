@@ -113,58 +113,151 @@
 
       <div id="scr-dashboard">
         <div class="dash-kpis">
-          <button class="dash-kpi" id="kpiConducted" type="button">
-            <span class="dash-kpi-num" id="kpiConductedNum">0</span>
-            <span class="dash-kpi-label" data-ar="تدريبات مُنعقدة" data-en="Trainings conducted">Trainings conducted</span>
+          <button class="dash-kpi flip-card" id="kpiConducted" type="button">
+            <span class="flip-toggle" data-flip-toggle aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="flip-card-inner">
+              <span class="flip-card-face flip-card-front">
+                <span class="dash-kpi-num" id="kpiConductedNum">0</span>
+                <span class="dash-kpi-label" data-ar="تدريبات مُنعقدة" data-en="Trainings conducted">Trainings conducted</span>
+              </span>
+              <span class="flip-card-face flip-card-back">
+                <span class="dash-kpi-back" id="kpiConductedBack"></span>
+              </span>
+            </span>
           </button>
-          <button class="dash-kpi" id="kpiUpcoming" type="button">
-            <span class="dash-kpi-num" id="kpiUpcomingNum">0</span>
-            <span class="dash-kpi-label" data-ar="تدريبات قادمة" data-en="Upcoming trainings">Upcoming trainings</span>
+          <button class="dash-kpi flip-card" id="kpiUpcoming" type="button">
+            <span class="flip-toggle" data-flip-toggle aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="flip-card-inner">
+              <span class="flip-card-face flip-card-front">
+                <span class="dash-kpi-num" id="kpiUpcomingNum">0</span>
+                <span class="dash-kpi-label" data-ar="تدريبات قادمة" data-en="Upcoming trainings">Upcoming trainings</span>
+              </span>
+              <span class="flip-card-face flip-card-back">
+                <span class="dash-kpi-back" id="kpiUpcomingBack"></span>
+              </span>
+            </span>
           </button>
-          <button class="dash-kpi" id="kpiEmployees" type="button">
-            <span class="dash-kpi-num" id="kpiEmployeesNum">0</span>
-            <span class="dash-kpi-label" data-ar="الموظفون" data-en="Employees">Employees</span>
+          <button class="dash-kpi flip-card" id="kpiEmployees" type="button">
+            <span class="flip-toggle" data-flip-toggle aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="flip-card-inner">
+              <span class="flip-card-face flip-card-front">
+                <span class="dash-kpi-num" id="kpiEmployeesNum">0</span>
+                <span class="dash-kpi-label" data-ar="الموظفون" data-en="Employees">Employees</span>
+              </span>
+              <span class="flip-card-face flip-card-back">
+                <span class="dash-kpi-back" id="kpiEmployeesBack"></span>
+              </span>
+            </span>
           </button>
-          <button class="dash-kpi" id="kpiRegistrations" type="button">
-            <span class="dash-kpi-num" id="kpiRegistrationsNum">0</span>
-            <span class="dash-kpi-label" data-ar="إجمالي التسجيلات" data-en="Total registrations">Total registrations</span>
+          <button class="dash-kpi flip-card" id="kpiRegistrations" type="button">
+            <span class="flip-toggle" data-flip-toggle aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="flip-card-inner">
+              <span class="flip-card-face flip-card-front">
+                <span class="dash-kpi-num" id="kpiRegistrationsNum">0</span>
+                <span class="dash-kpi-label" data-ar="إجمالي التسجيلات" data-en="Total registrations">Total registrations</span>
+              </span>
+              <span class="flip-card-face flip-card-back">
+                <span class="dash-kpi-back" id="kpiRegistrationsBack"></span>
+              </span>
+            </span>
           </button>
         </div>
 
         <div class="dash-row">
-          <div class="admin-card dash-card" id="dashConductedCard" role="button" tabindex="0">
-            <div class="hd"><h2 data-ar="أحدث التدريبات المُنعقدة" data-en="Latest conducted trainings">Latest conducted trainings</h2></div>
-            <p class="admin-note" data-ar="انقر لعرض كل التدريبات المُنعقدة في البحث المتقدم." data-en="Click to see all conducted trainings in Advanced Search.">Click to see all conducted trainings in Advanced Search.</p>
-            <div id="dashConductedList" class="dash-list"></div>
-            <div class="empty-note hidden" id="dashConductedEmpty" data-ar="لا توجد تدريبات مُنعقدة بعد." data-en="No trainings conducted yet.">No trainings conducted yet.</div>
+          <div class="admin-card dash-card flip-card pie-flip" id="dashOutcomesCard" role="button" tabindex="0">
+            <button class="flip-toggle" type="button" data-flip-toggle aria-label="Flip card">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="flip-card-inner">
+              <div class="flip-card-face flip-card-front">
+                <div class="hd"><h2 data-ar="نتائج الحضور" data-en="Attendance outcomes">Attendance outcomes</h2></div>
+                <div id="dashOutcomesFront" class="pie-front-wrap"></div>
+              </div>
+              <div class="flip-card-face flip-card-back">
+                <div class="hd"><h2 data-ar="نتائج الحضور — التفاصيل" data-en="Attendance outcomes — details">Attendance outcomes — details</h2></div>
+                <div id="dashOutcomesGauges" class="dash-gauges"></div>
+              </div>
+            </div>
           </div>
-          <div class="admin-card dash-card" id="dashUpcomingCard" role="button" tabindex="0">
-            <div class="hd"><h2 data-ar="التدريبات القادمة" data-en="Upcoming trainings">Upcoming trainings</h2></div>
-            <p class="admin-note" data-ar="انقر لعرض كل التدريبات المفتوحة في البحث المتقدم." data-en="Click to see all open trainings in Advanced Search.">Click to see all open trainings in Advanced Search.</p>
-            <div id="dashUpcomingList" class="dash-list"></div>
-            <div class="empty-note hidden" id="dashUpcomingEmpty" data-ar="لا توجد تدريبات قادمة." data-en="No upcoming trainings.">No upcoming trainings.</div>
+          <div class="admin-card dash-card flip-card pie-flip" id="dashDeptCard" role="button" tabindex="0">
+            <button class="flip-toggle" type="button" data-flip-toggle aria-label="Flip card">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="flip-card-inner">
+              <div class="flip-card-face flip-card-front">
+                <div class="hd"><h2 data-ar="التوزيع حسب الإدارة" data-en="Breakdown by department">Breakdown by department</h2></div>
+                <div id="dashDeptFront" class="pie-front-wrap"></div>
+                <div class="empty-note hidden" id="dashDeptEmptyFront" data-ar="لا توجد بيانات إدارات بعد." data-en="No department data yet.">No department data yet.</div>
+              </div>
+              <div class="flip-card-face flip-card-back">
+                <div class="hd"><h2 data-ar="التوزيع حسب الإدارة — التفاصيل" data-en="Breakdown by department — details">Breakdown by department — details</h2></div>
+                <div id="dashDeptChart" class="dash-bars"></div>
+                <div class="empty-note hidden" id="dashDeptEmpty" data-ar="لا توجد بيانات إدارات بعد." data-en="No department data yet.">No department data yet.</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="admin-card dash-card" id="dashTrendCard" role="button" tabindex="0">
-          <div class="hd"><h2 data-ar="حجم التسجيل والحضور الشهري" data-en="Monthly registrations &amp; attendance">Monthly registrations &amp; attendance</h2></div>
-          <p class="admin-note" data-ar="انقر لعرض كل سجلات التسجيل في البحث المتقدم." data-en="Click to see all registration records in Advanced Search.">Click to see all registration records in Advanced Search.</p>
-          <div id="dashTrendChart"></div>
+        <div class="admin-card dash-card flip-card trend-flip" id="dashTrendCard" role="button" tabindex="0">
+          <button class="flip-toggle" type="button" data-flip-toggle aria-label="Flip card">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="flip-card-inner">
+            <div class="flip-card-face flip-card-front">
+              <div class="hd"><h2 data-ar="حجم التسجيل والحضور الشهري" data-en="Monthly registrations &amp; attendance">Monthly registrations &amp; attendance</h2></div>
+              <div id="dashTrendChart"></div>
+            </div>
+            <div class="flip-card-face flip-card-back">
+              <div class="hd"><h2 data-ar="حجم التسجيل والحضور الشهري — الأرقام" data-en="Monthly registrations &amp; attendance — figures">Monthly registrations &amp; attendance — figures</h2></div>
+              <div id="dashTrendTable" class="scroll-x"></div>
+            </div>
+          </div>
         </div>
 
         <div class="dash-row">
-          <div class="admin-card dash-card" id="dashOutcomesCard" role="button" tabindex="0">
-            <div class="hd"><h2 data-ar="نتائج الحضور" data-en="Attendance outcomes">Attendance outcomes</h2></div>
-            <p class="admin-note" data-ar="انقر على أي حلقة لعرض تلك النتيجة في البحث المتقدم." data-en="Click any ring to see that outcome in Advanced Search.">Click any ring to see that outcome in Advanced Search.</p>
-            <div id="dashOutcomesGauges" class="dash-gauges"></div>
+          <div class="admin-card dash-card flip-card" id="dashConductedCard" role="button" tabindex="0">
+            <button class="flip-toggle" type="button" data-flip-toggle aria-label="Flip card">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="flip-card-inner">
+              <div class="flip-card-face flip-card-front">
+                <div class="hd"><h2 data-ar="أحدث التدريبات المُنعقدة" data-en="Latest conducted trainings">Latest conducted trainings</h2></div>
+                <div id="dashConductedFront" class="dash-stat-front"></div>
+              </div>
+              <div class="flip-card-face flip-card-back">
+                <div class="hd"><h2 data-ar="أحدث التدريبات المُنعقدة" data-en="Latest conducted trainings">Latest conducted trainings</h2></div>
+                <div id="dashConductedList" class="dash-list"></div>
+                <div class="empty-note hidden" id="dashConductedEmpty" data-ar="لا توجد تدريبات مُنعقدة بعد." data-en="No trainings conducted yet.">No trainings conducted yet.</div>
+              </div>
+            </div>
           </div>
-          <div class="admin-card dash-card" id="dashDeptCard" role="button" tabindex="0">
-            <div class="hd"><h2 data-ar="التوزيع حسب الإدارة" data-en="Breakdown by department">Breakdown by department</h2></div>
-            <p class="admin-note" data-ar="انقر على إدارة لعرض تسجيلاتها في البحث المتقدم." data-en="Click a department to see its registrations in Advanced Search.">Click a department to see its registrations in Advanced Search.</p>
-            <div id="dashDeptChart" class="dash-bars"></div>
-            <div class="empty-note hidden" id="dashDeptEmpty" data-ar="لا توجد بيانات إدارات بعد." data-en="No department data yet.">No department data yet.</div>
+          <div class="admin-card dash-card flip-card" id="dashUpcomingCard" role="button" tabindex="0">
+            <button class="flip-toggle" type="button" data-flip-toggle aria-label="Flip card">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0114-5.3M20 4v4h-4M20 12a8 8 0 01-14 5.3M4 20v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="flip-card-inner">
+              <div class="flip-card-face flip-card-front">
+                <div class="hd"><h2 data-ar="التدريبات القادمة" data-en="Upcoming trainings">Upcoming trainings</h2></div>
+                <div id="dashUpcomingFront" class="dash-stat-front"></div>
+              </div>
+              <div class="flip-card-face flip-card-back">
+                <div class="hd"><h2 data-ar="التدريبات القادمة" data-en="Upcoming trainings">Upcoming trainings</h2></div>
+                <div id="dashUpcomingList" class="dash-list"></div>
+                <div class="empty-note hidden" id="dashUpcomingEmpty" data-ar="لا توجد تدريبات قادمة." data-en="No upcoming trainings.">No upcoming trainings.</div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <p class="admin-note dash-hint" data-ar="انقر على أيقونة القلب لعرض التفاصيل، أو في أي مكان آخر بالبطاقة للانتقال إلى البحث المتقدم." data-en="Click the flip icon for details, or anywhere else on a card to jump to Advanced Search.">Click the flip icon for details, or anywhere else on a card to jump to Advanced Search.</p>
       </div>
 
       <div id="scr-employees" class="hidden">

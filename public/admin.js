@@ -42,6 +42,15 @@ const ADMIN_STRINGS = {
     awaitingOutcome: 'Awaiting outcome',
     legendRegistrations: 'Registrations',
     legendAttended: 'Attendance recorded',
+    noAttendanceYet: 'No attendance recorded yet',
+    attendanceRatePct: (p) => `${p}% attendance rate`,
+    nextTrainingOn: (title, date) => `Next: ${title} · ${date}`,
+    noUpcomingTrainings: 'No upcoming trainings',
+    departmentsCount: (n) => `${n} department${n === 1 ? '' : 's'} tracked`,
+    noDepartmentData: 'No department data yet',
+    outcomeBreakdown: (a, ab, aw) => `Attended ${a} · Absent ${ab} · Awaiting ${aw}`,
+    recentAttendanceRate: (n) => `Across the last ${n} conducted training${n === 1 ? '' : 's'}`,
+    noneConductedYet: 'No trainings conducted yet',
   },
   ar: {
     statusOpen: 'مفتوح', statusClosed: 'مُغلق', statusConducted: 'مُنعقد', statusCancelled: 'مُلغى',
@@ -72,6 +81,15 @@ const ADMIN_STRINGS = {
     awaitingOutcome: 'بانتظار النتيجة',
     legendRegistrations: 'التسجيلات',
     legendAttended: 'الحضور المُسجَّل',
+    noAttendanceYet: 'لا يوجد حضور مسجَّل بعد',
+    attendanceRatePct: (p) => `نسبة حضور ${p}%`,
+    nextTrainingOn: (title, date) => `التالي: ${title} · ${date}`,
+    noUpcomingTrainings: 'لا توجد تدريبات قادمة',
+    departmentsCount: (n) => `${n} إدارة مُتابَعة`,
+    noDepartmentData: 'لا توجد بيانات إدارات بعد',
+    outcomeBreakdown: (a, ab, aw) => `حضر ${a} · لم يحضر ${ab} · بانتظار ${aw}`,
+    recentAttendanceRate: (n) => `عبر آخر ${n} تدريب(ات) مُنعقدة`,
+    noneConductedYet: 'لا توجد تدريبات مُنعقدة بعد',
   },
 };
 
@@ -503,6 +521,7 @@ function renderDashboard() {
   animateCountUp(el('kpiUpcomingNum'), d.totals.totalUpcoming);
   animateCountUp(el('kpiEmployeesNum'), d.totals.totalEmployees);
   animateCountUp(el('kpiRegistrationsNum'), d.totals.totalRegistrations);
+  renderDashKpiBacks(d);
 
   renderDashConducted(d.latestConducted, lang);
   renderDashUpcoming(d.upcoming, lang);
@@ -511,9 +530,44 @@ function renderDashboard() {
   renderDashDepartments(d.departmentBreakdown);
 }
 
+/** The quick one-line insight shown on the back of each KPI tile when flipped. */
+function renderDashKpiBacks(d) {
+  const { attended, absent, awaiting } = d.outcomes;
+  const attendanceDenominator = attended + absent;
+  const attendanceRate = attendanceDenominator ? Math.round((attended / attendanceDenominator) * 100) : null;
+  el('kpiConductedBack').textContent = attendanceRate === null ? at('noAttendanceYet') : at('attendanceRatePct')(attendanceRate);
+
+  const nextUp = d.upcoming[0];
+  el('kpiUpcomingBack').textContent = nextUp
+    ? at('nextTrainingOn')((getLang() === 'ar' ? nextUp.title_ar : nextUp.title_en), nextUp.deadline)
+    : at('noUpcomingTrainings');
+
+  const deptCount = new Set(LAST_EMPLOYEES.map((e) => e.department).filter(Boolean)).size;
+  el('kpiEmployeesBack').textContent = deptCount ? at('departmentsCount')(deptCount) : at('noDepartmentData');
+
+  el('kpiRegistrationsBack').textContent = at('outcomeBreakdown')(attended, absent, awaiting);
+}
+
+/** Compact "glance" summary shown on the front face of the conducted/upcoming cards (the detailed list lives on the back). */
+function renderDashStatFront(containerId, bigNum, subText) {
+  el(containerId).innerHTML = `
+    <div class="big-num">${bigNum}</div>
+    <div class="big-sub">${subText}</div>`;
+}
+
 function renderDashConducted(rows, lang) {
   const wrap = el('dashConductedList');
   const empty = el('dashConductedEmpty');
+
+  const totalAttended = rows.reduce((s, r) => s + r.attendedCount, 0);
+  const totalRegistrants = rows.reduce((s, r) => s + r.registrantCount, 0);
+  const pct = totalRegistrants ? Math.round((totalAttended / totalRegistrants) * 100) : null;
+  renderDashStatFront(
+    'dashConductedFront',
+    pct === null ? rows.length : `${pct}%`,
+    rows.length ? at('recentAttendanceRate')(rows.length) : at('noneConductedYet')
+  );
+
   if (!rows.length) {
     wrap.innerHTML = '';
     empty.classList.remove('hidden');
@@ -544,6 +598,15 @@ function renderDashConducted(rows, lang) {
 function renderDashUpcoming(rows, lang) {
   const wrap = el('dashUpcomingList');
   const empty = el('dashUpcomingEmpty');
+
+  const totalUpcoming = LAST_DASHBOARD ? LAST_DASHBOARD.totals.totalUpcoming : rows.length;
+  const nextUp = rows[0];
+  renderDashStatFront(
+    'dashUpcomingFront',
+    totalUpcoming,
+    nextUp ? at('nextTrainingOn')(lang === 'ar' ? nextUp.title_ar : nextUp.title_en, nextUp.deadline) : at('noUpcomingTrainings')
+  );
+
   if (!rows.length) {
     wrap.innerHTML = '';
     empty.classList.remove('hidden');
@@ -620,6 +683,26 @@ function renderDashTrend(months) {
     </svg>`;
 
   animateTrendChart(container.querySelector('svg'));
+  renderDashTrendTable(months);
+}
+
+/** The back-face table for the trend card -- exact figures for admins who want the numbers, not just the shape. */
+function renderDashTrendTable(months) {
+  const recent = months.slice(-6);
+  const rows = recent.map((m) => {
+    const [y, mo] = m.ym.split('-');
+    return `<tr><td>${mo}/${y}</td><td>${m.registrations}</td><td>${m.attended}</td></tr>`;
+  }).join('');
+  el('dashTrendTable').innerHTML = `
+    <table class="plain">
+      <thead><tr>
+        <th data-ar="الشهر" data-en="Month">Month</th>
+        <th data-ar="التسجيلات" data-en="Registrations">Registrations</th>
+        <th data-ar="الحضور المُسجَّل" data-en="Attendance recorded">Attendance recorded</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  applyStaticLang();
 }
 
 /** Draws the trend lines in (stroke sweep) and fades the area fills in behind them. */
@@ -691,26 +774,6 @@ function animatePieSegments(container) {
   }));
 }
 
-/** Hovering a legend row highlights its matching arc and dims the rest, and vice versa. */
-function wireChartHoverLinks(wrap) {
-  wrap.querySelectorAll('[data-key]').forEach((node) => {
-    const key = node.getAttribute('data-key');
-    const partnerSelector = node.classList.contains('pie-legend-row')
-      ? `.pie-seg[data-key="${CSS.escape(key)}"]`
-      : `.pie-legend-row[data-key="${CSS.escape(key)}"]`;
-    node.addEventListener('mouseenter', () => {
-      wrap.classList.add('pie-hover-active');
-      node.classList.add('pie-hl');
-      const partner = wrap.querySelector(partnerSelector);
-      if (partner) partner.classList.add('pie-hl');
-    });
-    node.addEventListener('mouseleave', () => {
-      wrap.classList.remove('pie-hover-active');
-      wrap.querySelectorAll('.pie-hl').forEach((n) => n.classList.remove('pie-hl'));
-    });
-  });
-}
-
 function pieLegend(segments, total) {
   return `<div class="pie-legend">${segments.map((seg) => `
     <div class="pie-legend-row" data-key="${seg.key}">
@@ -720,6 +783,16 @@ function pieLegend(segments, total) {
     </div>`).join('')}</div>`;
 }
 
+/** Wires click-to-drill-down on whichever elements (pie arcs and/or legend rows) carry [data-key] within `root`. */
+function wireSegmentClicks(root, buildFilter) {
+  root.querySelectorAll('[data-key]').forEach((node) => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSearch('registrations', buildFilter(node.getAttribute('data-key')));
+    });
+  });
+}
+
 function renderDashOutcomes(outcomes) {
   const total = outcomes.attended + outcomes.absent + outcomes.awaiting;
   const segments = [
@@ -727,36 +800,44 @@ function renderDashOutcomes(outcomes) {
     { key: 'absent', value: outcomes.absent, color: 'var(--danger)', label: at('absent') },
     { key: 'awaiting', value: outcomes.awaiting, color: 'var(--warning)', label: at('awaitingOutcome') },
   ];
-  const wrap = el('dashOutcomesGauges');
-  wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
-  animatePieSegments(wrap);
-  wireChartHoverLinks(wrap);
 
-  wrap.querySelectorAll('[data-key]').forEach((node) => {
-    node.addEventListener('click', () => openSearch('registrations', { outcome: node.getAttribute('data-key') }));
-  });
+  const front = el('dashOutcomesFront');
+  front.innerHTML = pieChartSvg(segments, 190, total);
+  animatePieSegments(front);
+  wireSegmentClicks(front, (key) => ({ outcome: key }));
+
+  const back = el('dashOutcomesGauges');
+  back.innerHTML = pieLegend(segments, total);
+  wireSegmentClicks(back, (key) => ({ outcome: key }));
 }
 
 const DEPT_PALETTE = ['var(--green-700)', 'var(--gold)', 'var(--info)', 'var(--warning)', 'var(--danger)', 'var(--green-500)'];
 
 function renderDashDepartments(rows) {
-  const wrap = el('dashDeptChart');
-  const empty = el('dashDeptEmpty');
+  const front = el('dashDeptFront');
+  const frontEmpty = el('dashDeptEmptyFront');
+  const back = el('dashDeptChart');
+  const backEmpty = el('dashDeptEmpty');
+
   if (!rows.length) {
-    wrap.innerHTML = '';
-    empty.classList.remove('hidden');
+    front.innerHTML = '';
+    back.innerHTML = '';
+    frontEmpty.classList.remove('hidden');
+    backEmpty.classList.remove('hidden');
     return;
   }
-  empty.classList.add('hidden');
+  frontEmpty.classList.add('hidden');
+  backEmpty.classList.add('hidden');
+
   const total = rows.reduce((s, r) => s + r.total, 0);
   const segments = rows.map((r, i) => ({ key: r.department, value: r.total, color: DEPT_PALETTE[i % DEPT_PALETTE.length], label: r.department }));
-  wrap.innerHTML = `<div class="pie-wrap">${pieChartSvg(segments, 170, total)}${pieLegend(segments, total)}</div>`;
-  animatePieSegments(wrap);
-  wireChartHoverLinks(wrap);
 
-  wrap.querySelectorAll('[data-key]').forEach((node) => {
-    node.addEventListener('click', () => openSearch('registrations', { department: node.getAttribute('data-key') }));
-  });
+  front.innerHTML = pieChartSvg(segments, 190, total);
+  animatePieSegments(front);
+  wireSegmentClicks(front, (key) => ({ department: key }));
+
+  back.innerHTML = pieLegend(segments, total);
+  wireSegmentClicks(back, (key) => ({ department: key }));
 }
 
 // ---------------------------------------------------------------------
@@ -1138,6 +1219,28 @@ document.addEventListener('DOMContentLoaded', () => {
   el('kpiUpcoming').addEventListener('click', () => openSearch('trainings', { status: 'open' }));
   el('kpiEmployees').addEventListener('click', () => showSection('employees'));
   el('kpiRegistrations').addEventListener('click', () => openSearch('registrations', {}));
+
+  // Flip cards: the flip icon toggles the card face and must never also
+  // trigger the card's own drill-down click handler.
+  document.querySelectorAll('[data-flip-toggle]').forEach((toggle) => {
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const card = toggle.closest('.flip-card');
+      // A detach/reattach with no other change forces the browser to redo
+      // this node's style computation from scratch. Some engines can
+      // otherwise leave a long-lived node's 3D transform "stuck" at
+      // identity after a pure class toggle -- this guarantees the rotateY
+      // actually takes effect every time, at negligible cost (it's a no-op
+      // visually and sub-millisecond).
+      const parent = card.parentElement;
+      const next = card.nextSibling;
+      parent.removeChild(card);
+      void parent.offsetWidth;
+      parent.insertBefore(card, next);
+      card.classList.toggle('flipped');
+    });
+  });
 
   // Advanced search.
   document.querySelectorAll('#searchTabs button').forEach((btn) => {
